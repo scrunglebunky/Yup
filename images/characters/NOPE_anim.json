@@ -1,0 +1,18 @@
+{
+    "idle":{
+        "frames":[
+            0,
+            1,
+            2
+        ],
+        "FPS":6, 
+        "loop":0, 
+        "return_to":"idle"
+        },
+    "death":{
+        "frames":[3],
+        "FPS":12,
+        "loop":6, 
+        "return_to":"idle"
+        }
+}

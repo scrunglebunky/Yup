@@ -1,0 +1,31 @@
+{
+    "world_name":"default",
+    "ui_type":"default",
+    "song":"meowchill.mp3",
+    "bg":"null",
+    
+    "levels":10,
+
+    "char_distance_x":40, 
+    "char_distance_y":40,
+    "char_min_width":5,
+    "char_min_height":1,
+    "char_max_width":10,
+    "char_max_height":5,
+
+    "spawn_time":0, 
+    "spawn_amount":0,
+    "max_char":0,
+    "form_drop_speed":1,
+
+    "imports":["nope"],
+    "bullets":[],
+    "drop_health": 5,
+    "drop_bullet": 20, 
+    "speed":1,
+
+    "manual_formations":[],
+    "manual_type":0, 
+    "manual_loop":false,
+    "manual_influence":0
+}
