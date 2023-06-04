@@ -14,7 +14,7 @@ class Bullet(pygame.sprite.Sprite):
     count = 0
     max = 2
 
-    def __init__(self,pos:tuple=(0,0),sound:bool=True,speed:int=15):
+    def __init__(self,pos:tuple=(0,0),sound:bool=True,speed:int=15,**kwargs):
         pygame.sprite.Sprite.__init__(self)
         
         self.image = Bullet.image

@@ -34,19 +34,12 @@ sprites = {
 #UNIVERSAL ARGS 
 # may be phased out soon
 data = {
-    "bar":(
-        "h", #if the bar is horizontal or vertical.
-        450, #x position if vertical, y position if horizontal.
-        (20,430), #the limits on both sides for the player to move on, y positions if vertical, x positions if horizontal
-        1, #gravity. 
-        ),
     "score":0,
     "clock_offset":1,
 }
 
 #setting the state
 cur_state = state_play.State(data=data,sprites=sprites,window=window)
-
 while run:
     #filling the screen in case something is offscreen
     window.fill(defaultcolor)

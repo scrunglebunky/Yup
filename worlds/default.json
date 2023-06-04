@@ -16,6 +16,7 @@
     "spawn_time":0, 
     "spawn_amount":0,
     "max_char":0,
+    "dynamic_intensity":false,
     "form_drop_speed":1,
 
     "imports":["nope"],

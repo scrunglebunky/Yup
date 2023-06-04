@@ -7,13 +7,12 @@ class CharTemplate(pygame.sprite.Sprite):
     image = pygame.Surface((30, 30), pygame.SRCALPHA)
     pygame.draw.circle(image, "red", (15, 15), 15)
     
-    def __init__(self,groups=None,player=None,level=0,formation_position=(0,0),offset=(0,0),data={}):
+    def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
         #initializes sprite code
         pygame.sprite.Sprite.__init__(self)
         
         #TAKING ARGUMENTS
-        self.groups = groups
-        self.player = player
+        self.sprites = sprites
         self.level = level
         self.offset = offset
         self.data = data
@@ -125,10 +124,10 @@ class CharTemplate(pygame.sprite.Sprite):
 
 
 
-class Nope():
-    class Data(pygame.sprite.Sprite):
-        def __init__(self):
-            pygame.sprite.Sprite.__init__(self)
+class Nope(CharTemplate):
+    def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
+        CharTemplate.__init__(self,sprites=sprites,level=level,formation_position=formation_position,offset=offset,data=data,**kwargs)
+
 
 loaded = {
     "nope":Nope

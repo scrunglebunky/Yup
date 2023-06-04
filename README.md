@@ -17,6 +17,11 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 6/03/23: added a little bar rectangle for the UI, when the 
+- 6/03/23: programmed backgrounds; layering for scrolling images; resizing;
+- 6/02/23: made individual image loading
+- 6/02/23: made the formation somewhat functional, with a graphical representation of its position
+- 6/02/23: learned that \*\*kwargs is a thing, also working on fixing arguments to be more universal per everything (characters, formations, states, etc)
 - 6/01/23: made a data file called "loadlist" that calls for everything to be preloaded; replaces RevC's large glob of image loading
 - 6/01/23: scrapped the class, made it a function for easier navigation and less confusing-ness; it now just returns a loaded level
 - 6/01/23: Made a class that takes the level data into account
@@ -40,6 +45,7 @@
 
 # TO DO / THOUGHT DUMP
 ## LEVELS
+- [ ] Contain more background info, like speeds, changes in speed, 
 - [x] Loading all JSON files
 - [x] Loading a "world order" file in the levels folder (ignored by the level loader) that says what order the files go into 
 ## MISC 
@@ -56,6 +62,7 @@
 - The gameplay state does not exit and go to game over states, it just reruns \_\_init\_\_. 
 - Characters do not individually run their own collision worries. This would be far too much code to run every frame. Instead, gameplay will individually check and run collision points for sprite classes whenever it is deemed fit. It worked for Shoot the Baby, it will work here.
 # FUTURE OPTIMIZATION
+- [ ] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
 - [ ] States having a string element saying what state to go to next, for MAIN to recognize
 - [ ] "Mod Folders" where the program has to recognize words with "anim_loadlist", "levels","order", etc. to plug into main.
 # BUG REPORTS / ISSUES

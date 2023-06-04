@@ -3,11 +3,17 @@ import random,pygame,math,characters
 #5/30/2023 - FORMATION CODE
 # a lot of this is added from RevC as well. 
 class Formation():
+    data:dict = None
+    sprites:dict = None
+    
+
     def __init__(self,
                  player, #player object
 
                  leveldata:dict, #level data info, for positioning and such
-                 sprites:dict,
+                 sprites:dict, #sprite groups, from main
+
+                 data:dict, #universal data, from main
 
                  level:int = 1, #the total amount of levels passed, usually used for intensities or score
                  level_in_world:int = 1, #the amount of levels completed in the world currently 
@@ -20,6 +26,8 @@ class Formation():
         self.leveldata = leveldata
         self.level = level
         self.level_in_world = level_in_world
+        self.sprites = sprites
+        self.data = data
 
         #POSITIONING OF FORMATION
         self.pos = [100,100] #centered position of formation. 
@@ -32,6 +40,10 @@ class Formation():
         self.total_characters = 0
         self.spawn_list = {}
         self.spawned_list = []
+        
+        #test- spawning A character
+        self.test:characters.CharTemplate = characters.loaded["nope"](sprites=self.sprites,level=self.level,formation_position=self.pos,offset=(0,0),data=self.data,)
+        self.sprites[0].add(self.test);self.sprites[2].add(self.test)
     
     def update(self):
         self.update_movement()
@@ -39,6 +51,10 @@ class Formation():
     def update_movement(self):
         self.duration += 1
         self.pos[1] = math.sin(self.duration * 0.1) * 15 + (self.duration*0.25)
+        self.test.formationUpdate(new_pos = self.pos)
+
+        if self.duration % 150 == 0:
+            self.test.stchg("attack")
 
 
 
