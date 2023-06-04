@@ -50,7 +50,7 @@ class Formation():
 
     def update_movement(self):
         self.duration += 1
-        self.pos[1] = math.sin(self.duration * 0.1) * 15 + (self.duration*0.25)
+        self.pos[1] = math.sin(self.duration * 0.1) * 15 + ((self.duration*0.25) if self.state != "start" else 0)
         self.test.formationUpdate(new_pos = self.pos)
 
         if self.duration % 150 == 0:

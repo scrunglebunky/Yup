@@ -20,10 +20,10 @@ class Background():
         #resetting positioning
         if self.pos[0] > pygame.display.play_dimensions[0] or self.pos[0]*-1 > pygame.display.play_dimensions[0]:
             self.pos[0] = 0 #x position
-            print('reset x')
+            # print('reset x')
         if self.pos[1] > pygame.display.play_dimensions[1] or self.pos[1]*-1 > pygame.display.play_dimensions[1]:
             self.pos[1] = 0 
-            print('reset y')
+            # print('reset y')
         
 
     def draw(self,window:pygame.display):
@@ -69,8 +69,8 @@ class Background():
         if self.pos[0] > 0 and self.pos[1] < 0:#DOWNLEFT
             window.blit(
                 self.image,(
-                    pos[0]-self.size[0],
-                    pos[1]+self.size[1])
+                    self.pos[0]-self.size[0],
+                    self.pos[1]+self.size[1])
                     )
         if self.pos[0] < 0 and self.pos[1] > 0:#UPRIGHT
             window.blit( 
