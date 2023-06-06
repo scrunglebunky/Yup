@@ -1,13 +1,13 @@
 #CODE BY ANDREW CHURCH
-import pygame
+import pygame,anim
 
 #06/23/2023 - WHAT IS A BACKGROUND
 # The background is a class that stores an image and a position
 # This may be a little overkill for an entire class, but it works for organization purposes in my opinion
 class Background():
-    def __init__(self,img:pygame.Surface,resize:tuple,speed:tuple,**kwargs):
+    def __init__(self,img:str,resize:tuple,speed:tuple,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
-        self.image = img
+        self.image = anim.all_loaded_images[img]
         self.image = pygame.transform.scale(self.image,resize)
         self.size = resize
         self.pos = [0,0]

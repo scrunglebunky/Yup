@@ -1,4 +1,4 @@
-import random,pygame,math,characters
+import random,pygame,math,characters,random
 
 #5/30/2023 - FORMATION CODE
 # a lot of this is added from RevC as well. 
@@ -8,53 +8,97 @@ class Formation():
     
 
     def __init__(self,
-                 player, #player object
+                player, #player object
 
-                 leveldata:dict, #level data info, for positioning and such
-                 sprites:dict, #sprite groups, from main
+                world_data:dict, #level data info, for positioning and such
+                sprites:dict, #sprite groups, from main
 
-                 data:dict, #universal data, from main
+                data:dict, #universal data, from main
 
-                 level:int = 1, #the total amount of levels passed, usually used for intensities or score
-                 level_in_world:int = 1, #the amount of levels completed in the world currently 
+                level:int = 1, #the total amount of levels passed, usually used for intensities or score
+                level_in_world:int = 1, #the amount of levels completed in the world currently 
 
+                **kwargs,
                  ):
         
         #VARIABLES BASED OFF ARGUMENTS
         self.state = "start"
         self.player = player
-        self.leveldata = leveldata
+        self.world_data = world_data
         self.level = level
         self.level_in_world = level_in_world
         self.sprites = sprites
         self.data = data
 
         #POSITIONING OF FORMATION
-        self.pos = [100,100] #centered position of formation. 
+        self.pos = [225,100] #centered position of formation. 
         self.speed = 1
         self.direction = random.choice(('l','r'))
         self.duration = 0
         
-        
         #CHARACTERS' SPAWNING
-        self.total_characters = 0
-        self.spawn_list = {}
-        self.spawned_list = []
+        self.spawning_timer = 0 #frame counter in the startup state for how long it takes to spawn a character
+        self.spawning_index = [0,0] #counter for where in self.spawn_list the spawner is currently at, as to not get confused with anything else
+        self.spawn_list = self.world_data["manual_formations"][self.level_in_world] #a list of characters to spawn, and that's it
+        self.spawned_list = [] #a list of spawned characters, the actual objects for the formation to look at and do checks on ; unordered
         
-        #test- spawning A character
-        self.test:characters.CharTemplate = characters.loaded["nope"](sprites=self.sprites,level=self.level,formation_position=self.pos,offset=(0,0),data=self.data,)
-        self.sprites[0].add(self.test);self.sprites[2].add(self.test)
+        # #test- spawning A character
+        # self.test = characters.loaded["nope"](sprites=self.sprites,level=self.level,formation_position=self.pos,offset=(0,0),data=self.data,)
+        # self.sprites[0].add(self.test);self.sprites[2].add(self.test)
     
     def update(self):
         self.update_movement()
+        if self.state == 'start':self.state_start()
+        if self.state == 'idle':self.state_idle()
+        if self.state == 'destroy':self.state_destroy()
+
+
+    def state_start(self):
+        #counts for a set amount of frames and spawns in each character in the formation
+        #think like how space invaders has a set amount of "characters" in a "formation" where they all move, but they all spawn in an order to make it look nice
+        #every time a character is spawned, the timer resets and the index is risen
+        self.spawning_timer += 1
+        if self.spawning_timer >= self.world_data["spawn_time"]:
+            
+            #spawning the character - note the data in spawning_index is what is to be spawned CURRENTLY, not previously
+            cur_char = characters.loaded["nope"](
+                sprites=self.sprites,
+                level=self.level,
+                formation_position=self.pos,
+                offset=(
+                    self.spawning_index[0]*self.world_data["char_distance_x"],
+                    self.spawning_index[1]*self.world_data["char_distance_y"]),
+                data=self.data,)
+            self.spawned_list.append(cur_char)
+            self.sprites[0].add(cur_char);self.sprites[2].add(cur_char)
+            
+            #resetting timer values, raising the value of the spawning_timer's y value
+            self.spawning_timer = 0
+            self.spawning_index[0] += 1
+            #the y value of spawning_timer is the x value of the spawn_list, vice versa.
+            if self.spawning_index[0] > (len(self.spawn_list[self.spawning_index[1]])-1):
+                self.spawning_index[0] = 0;self.spawning_index[1] += 1
+            #checking for being finished
+            if self.spawning_index[1] > (len(self.spawn_list)-1):
+                self.state = "idle"
+                self.spawning_index = (0,0)
+
+
+    def state_idle(self):...
+    
+    def state_destroy(self):...
+
+    def check_for_atk(self):...
+    
+    def attack(self):...
 
     def update_movement(self):
         self.duration += 1
         self.pos[1] = math.sin(self.duration * 0.1) * 15 + ((self.duration*0.25) if self.state != "start" else 0)
-        self.test.formationUpdate(new_pos = self.pos)
 
-        if self.duration % 150 == 0:
-            self.test.stchg("attack")
+
+        for char in self.spawned_list:
+            char.formationUpdate(self.pos)
 
 
 

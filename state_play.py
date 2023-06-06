@@ -36,13 +36,15 @@ class State():
         self.world = world
         self.level = level #the total amount of levels passed, usually used for intensities or score
         self.level_in_world = level_in_world #the amount of levels completed in the world currently 
-        self.leveldata = levels.update_intensities(self.level,levels.fetch_level_info(campaign_world = (self.campaign,self.world)))
+        self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
+        if self.world_data["dynamic_intensity"]:
+            levels.update_intensities(self.level,self.world_data)
 
         #06/01/2023 - loading the formation
         #the formation handles spawning and management of most characters, but the state manages drawing them to the window and updating them
         self.formation = formation.Formation(
             player = self.player,
-            leveldata = self.leveldata,
+            world_data = self.world_data,
             level=self.level,
             data=self.data,
             level_in_world=self.level_in_world, 
@@ -62,11 +64,11 @@ class State():
             (0,0))
 
 
-        #06/03/2023 - TEST - loading in a test background
-        self.background = backgrounds.Background(img=anim.all_loaded_images["placeholder.bmp"], resize = (450,600), speed = (-2,-5))
+        #06/03/2023 - Loading in the background
+        self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
 
 
-        #text spawn
+        # TEST - text spawn
         for i in range(0):
             spd=random.randint(-5,5)
             if spd == 0: spd = 1
@@ -90,7 +92,7 @@ class State():
             value[0].on_collide(1)
 
         #06/01/2023 - TEST - drawing positioning for the formation for test purposes
-        self.window.blit(anim.all_loaded_images["placeholder.bmp"],self.formation.pos)
+        # self.window.blit(anim.all_loaded_images["placeholder.bmp"],self.formation.pos)
        
     def event_handler(self,event):
         self.player.controls(event)

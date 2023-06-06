@@ -2,7 +2,16 @@
     "world_name":"default",
     "ui_type":"default",
     "song":"meowchill.mp3",
-    "bg":"null",
+
+    "bg":"placeholder.bmp",
+    "bg_size":[450,600],
+    "bg_speed":[0,1],
+    "bg_speed_changes":[
+        ["level",5,[0,-1]],
+        ["level",6,[0,1]],
+        ["frame",6000,[3,-5]]
+        ],
+
     
     "levels":10,
 
@@ -13,11 +22,15 @@
     "char_max_width":10,
     "char_max_height":5,
 
-    "spawn_time":0, 
-    "spawn_amount":0,
+    "throwdown_time":0, 
+    "throwdown_amount":0,
+    "spawn_time":12,
     "max_char":0,
     "dynamic_intensity":false,
-    "form_drop_speed":1,
+    "form_drop_speed":0.1,
+    "manual_intensity_changes":[
+        [0,1,1,1]
+    ],
 
     "imports":["nope"],
     "bullets":[],
@@ -25,8 +38,21 @@
     "drop_bullet": 20, 
     "speed":1,
 
-    "manual_formations":[],
-    "manual_type":0, 
+    "manual_formations":[
+        [
+            ["nope","nope","nope"],
+            ["    ","nope","    "]
+        ],
+        [
+            ["nope","nope","nope"],
+            ["nope","nope","nope"]
+        ]
+    ],
+    "manual_type":1, 
     "manual_loop":false,
-    "manual_influence":0
+    "manual_influence":0,
+    "manual_levels":[0,1],
+
+    "boss_level":false,
+    "boss_name":"ufo"
 }

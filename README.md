@@ -17,6 +17,8 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 6/06/23: added character spawning in formations, so it is now able to spawn characters and start coming down at you 
+- 6/05/23: added level documentation docstring for reference, as there's a lot of options ; used level to change dymanic intensities or whatnot ; made the level file decide everything in a bg
 - 6/03/23: added a little bar rectangle for the UI, when the 
 - 6/03/23: programmed backgrounds; layering for scrolling images; resizing;
 - 6/02/23: made individual image loading

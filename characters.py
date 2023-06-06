@@ -22,7 +22,7 @@ class CharTemplate(pygame.sprite.Sprite):
         self.health=1 #Health for characters
         self.scorevalue=100 #Score given to player
         self.idlePos = [(formation_position[0]+self.offset[0]),(formation_position[1]+self.offset[1])] # current position in idle
-        
+        self.dead = (self.health <= 0)
 
         #IMAGE CODE
         self.animation_frame=0
@@ -95,8 +95,11 @@ class CharTemplate(pygame.sprite.Sprite):
     def collision_update(self):
         #most of what this does is check for health
         #collision is a universal term for health, positioning, etc.
-        if self.health < 1:
+        self.dead = (self.health <= 0)
+        if self.dead:
             self.kill(reason="health")
+        
+        
 
     def on_collide(self,
                    collide_type:int #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
