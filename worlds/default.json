@@ -22,10 +22,10 @@
     "char_max_width":10,
     "char_max_height":5,
 
-    "throwdown_time":0, 
-    "throwdown_amount":0,
-    "spawn_time":12,
-    "max_char":0,
+    "throwdown_time":120, 
+    "throwdown_amount":1,
+    "spawn_time":0,
+    "max_char":5,
     "dynamic_intensity":false,
     "form_drop_speed":0.1,
     "manual_intensity_changes":[

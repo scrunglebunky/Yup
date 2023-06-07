@@ -21,7 +21,7 @@ class Formation():
                 **kwargs,
                  ):
         
-        #VARIABLES BASED OFF ARGUMENTS
+        #5/30/2023 - VARIABLES BASED OFF ARGUMENTS
         self.state = "start"
         self.player = player
         self.world_data = world_data
@@ -30,30 +30,50 @@ class Formation():
         self.sprites = sprites
         self.data = data
 
-        #POSITIONING OF FORMATION
+        #5/30/2023 - POSITIONING OF FORMATION
         self.pos = [225,100] #centered position of formation. 
         self.speed = 1
         self.direction = random.choice(('l','r'))
         self.duration = 0
         
-        #CHARACTERS' SPAWNING
+        #5/30/2023 - CHARACTERS' SPAWNING
         self.spawning_timer = 0 #frame counter in the startup state for how long it takes to spawn a character
         self.spawning_index = [0,0] #counter for where in self.spawn_list the spawner is currently at, as to not get confused with anything else
         self.spawn_list = self.world_data["manual_formations"][self.level_in_world] #a list of characters to spawn, and that's it
         self.spawned_list = [] #a list of spawned characters, the actual objects for the formation to look at and do checks on ; unordered
-        
+        self.completed_level = False #checking if the level (formation) is complete and needs to be reset;  run with the timers
+
         # #test- spawning A character
         # self.test = characters.loaded["nope"](sprites=self.sprites,level=self.level,formation_position=self.pos,offset=(0,0),data=self.data,)
         # self.sprites[0].add(self.test);self.sprites[2].add(self.test)
+        
+        #06/06/2023 - Timer for checking things without checking them every frame 
+        self.timer:int = 0
+        self.timer_dead_check:int = 30 #how many frames before checking for a dead character
+        self.timer_dead_copylist = [] #a copy of the character list for kill checking purposes
+        self.timer_reset_rate = 120 #how many frames before the timer resets
     
+        #06/06/23 - calculating center position
+        # Calculate total length of formation, divide by 2, take center screen and subtract by half length
+        # this is why EVERY FORMATION SHOULD HAVE THE SAME LENGTH OF COLUMNS IN EACH ROW NO MATTER WHAT
+        self.pos[0] = (225 - (len(self.spawn_list[1])*self.world_data["char_distance_x"] /2))
+
+
     def update(self):
+        #updating timer
+        self.timer = self.timer + 1 if self.timer < self.timer_reset_rate else 1
+        #updating states
         self.update_movement()
         if self.state == 'start':self.state_start()
         if self.state == 'idle':self.state_idle()
         if self.state == 'destroy':self.state_destroy()
+        #updating misc
+        self.remove_dead()
+        self.check_for_atk()
 
 
     def state_start(self):
+        #06/06/2023 - SPAWNING CHARACTERS
         #counts for a set amount of frames and spawns in each character in the formation
         #think like how space invaders has a set amount of "characters" in a "formation" where they all move, but they all spawn in an order to make it look nice
         #every time a character is spawned, the timer resets and the index is risen
@@ -86,19 +106,51 @@ class Formation():
 
     def state_idle(self):...
     
+
     def state_destroy(self):...
 
-    def check_for_atk(self):...
+
+    def check_for_atk(self):
+        #06/06/2023 - Spawning in characters
+        # Quick thing to note, I realized there was no need to constantly update everything
+        # So it only updates when a character *needs* to be thrown.
+        if (self.timer%self.world_data['throwdown_time']==0):
+            atk_count = 0
+            idle_char = []
+            #06/06/2023 - Creating values
+            for _ in enumerate(self.spawned_list):
+                if _[1].state == 'atk': atk_count += 1
+                elif _[1].state == 'idle': idle_char.append(_[0])
+            #06/06/2023 - Checking for conditions for character throwdown to be complete
+            if atk_count <= self.world_data['max_char'] and len(idle_char) > 0:
+                self.attack(idle_char)
+            
     
-    def attack(self):...
+
+    def attack(self,idle_char:list):
+        for i in range(self.world_data['throwdown_amount']):
+            self.spawned_list[random.choice(idle_char)].state = 'attack'
+
 
     def update_movement(self):
         self.duration += 1
         self.pos[1] = math.sin(self.duration * 0.1) * 15 + ((self.duration*0.25) if self.state != "start" else 0)
-
-
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
+    
+    def remove_dead(self):
+        #06/06/2023 - removing dead characters
+        # The formation copies the list (1), enumerates through the list (2), and deletes all dead items (3)
+        if self.timer % self.timer_dead_check == 0:
+            self.timer_dead_copylist.append(item for item in self.spawned_list) #(1)
+            for _ in enumerate(self.spawned_list,0): #(2)
+                if _[1].dead: 
+                    self.spawned_list.pop(_[0]) #(3)
+                    # print('removed',str(_[0]))
+            self.timer_dead_copylist = []
+            #06/06/2023 - checking for a completed formation   
+            # remember, this is used as a signal/flag externally for the playstate to 
+            self.completed_level = len(self.spawned_list) <= 0
 
 
 

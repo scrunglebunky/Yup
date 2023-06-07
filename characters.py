@@ -1,4 +1,4 @@
-import pygame
+import pygame,anim,random
 
 
 # DEFAULT CHARACTER
@@ -7,7 +7,7 @@ class CharTemplate(pygame.sprite.Sprite):
     image = pygame.Surface((30, 30), pygame.SRCALPHA)
     pygame.draw.circle(image, "red", (15, 15), 15)
     
-    def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
+    def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,default_image = True,**kwargs):
         #initializes sprite code
         pygame.sprite.Sprite.__init__(self)
         
@@ -27,8 +27,9 @@ class CharTemplate(pygame.sprite.Sprite):
         #IMAGE CODE
         self.animation_frame=0
         self.animation_frame_counter=0
-        self.image = CharTemplate.image
-        self.rect = self.image.get_rect()
+        if default_image:
+            self.image = CharTemplate.image
+            self.rect = self.image.get_rect()
     
         #SHOOT CODE    
         self.shoot_times = [] #the maximum amount will be like 10, which would only be achieved after level 100 or so
@@ -95,6 +96,7 @@ class CharTemplate(pygame.sprite.Sprite):
     def collision_update(self):
         #most of what this does is check for health
         #collision is a universal term for health, positioning, etc.
+        #DO NOT CHANGE THIS. THIS WILL MESS UP THE FORMATION
         self.dead = (self.health <= 0)
         if self.dead:
             self.kill(reason="health")
@@ -129,8 +131,39 @@ class CharTemplate(pygame.sprite.Sprite):
 
 class Nope(CharTemplate):
     def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
-        CharTemplate.__init__(self,sprites=sprites,level=level,formation_position=formation_position,offset=offset,data=data,**kwargs)
+        CharTemplate.__init__(self,sprites=sprites,level=level,formation_position=formation_position,offset=offset,data=data,default_image=False,**kwargs)
+        #img code
+        self.sh = anim.Spritesheet("NOPE","idle")
+        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
+        self.rect = self.image.get_rect()
 
+        #06/06/23 - enter state - copied from revC
+        self.enter_dir = random.choice(('l','r')) #where the character is entering FROM
+        self.rect.center = (450,300) if self.enter_dir == 'r' else (0,300)
+        self.parabola = (450,400) if self.enter_dir == 'r' else (25,400)
+
+    def update(self):
+        CharTemplate.update(self)
+        self.image = self.sh.update()
+
+    def state_enter(self):
+        self.rect.x = self.rect.x-2 if self.enter_dir == 'r' else self.rect.x+2
+
+        self.rect.y = (-(1 / 50) * ((self.rect.x + (
+            self.parabola[0] if self.enter_dir == 'l' else (self.parabola[0]*-1) )
+            ) ** 2) + self.parabola[1])
+
+        if abs(225-self.rect.x) <= 100 or abs(100 - self.rect.y) <= 50:
+            self.stchg("idle_search")
+    
+    def state_attack(self):
+        self.rect.y+=5
+        if self.rect.top>=600:
+            self.rect.bottom=0
+            self.frames_in_state = 0
+            self.stchg('return') 
+    
+    
 
 loaded = {
     "nope":Nope

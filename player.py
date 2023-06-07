@@ -49,8 +49,7 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         #SETTING THE IMAGE. I have no issue resetting the image every frame because it's just a callback to an object
-        self.sh.update()
-        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
+        self.image = self.sh.update()
         #collision is just movement
         self.collision()
 
@@ -150,6 +149,7 @@ class Player(pygame.sprite.Sprite):
         #if colliding with an enemy, hurt.
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
             self.sh.change_anim("hurt")
+            print('ouch!')
             self.health -= 1
             self.invincibility_counter = 60
         

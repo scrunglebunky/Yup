@@ -117,7 +117,7 @@ class Spritesheet():
         self.current_anim_frame_len = 0 #length of frame of animation
         self.image_displayed = 0 #the index of self.spritesheet; callback to actual sprite played
 
-    def update(self): #this will be called every frame in the respective sprite
+    def update(self) -> pygame.Surface: #this will be called every frame in the respective sprite
         #print("---\n",self.current_anim,self.image_displayed,self.current_anim_frame,self.current_anim_frame_len,sep="|")
 
         #error checking
@@ -146,6 +146,8 @@ class Spritesheet():
 
         #updating the actual current image being used
         self.image_displayed = self.all_anim[self.current_anim]["frames"][self.current_anim_frame]
+
+        return all_loaded_spritesheets[self.name][1][self.image_displayed]
     
     def change_anim(self,new:str,overwrite:bool=False):
         #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it

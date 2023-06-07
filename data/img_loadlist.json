@@ -2,5 +2,6 @@
 {
     "./":[],
     "./images/characters/":[],
-    "./images/ui/":["placeholder.bmp"]
+    "./images/ui/":["placeholder.bmp"],
+    "./images/bg/":["space.png"]
 }
