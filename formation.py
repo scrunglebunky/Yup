@@ -39,7 +39,7 @@ class Formation():
         #5/30/2023 - CHARACTERS' SPAWNING
         self.spawning_timer = 0 #frame counter in the startup state for how long it takes to spawn a character
         self.spawning_index = [0,0] #counter for where in self.spawn_list the spawner is currently at, as to not get confused with anything else
-        self.spawn_list = self.world_data["manual_formations"][self.level_in_world] #a list of characters to spawn, and that's it
+        self.spawn_list = self.world_data["manual_formations"][self.level_in_world-1] #a list of characters to spawn, and that's it
         self.spawned_list = [] #a list of spawned characters, the actual objects for the formation to look at and do checks on ; unordered
         self.completed_level = False #checking if the level (formation) is complete and needs to be reset;  run with the timers
 
@@ -152,7 +152,12 @@ class Formation():
             # remember, this is used as a signal/flag externally for the playstate to 
             self.completed_level = len(self.spawned_list) <= 0
 
-
+    def empty(self):
+        for i in range(len(self.spawned_list)):
+            self.spawned_list[i].kill()
+        self.spawned_list = []
+        self.state = "complete"
+        self.completed_level = True
 
 # class Formation:
 #     def __init__(

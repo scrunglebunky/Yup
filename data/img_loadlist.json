@@ -3,5 +3,5 @@
     "./":[],
     "./images/characters/":[],
     "./images/ui/":["placeholder.bmp"],
-    "./images/bg/":["space.png"]
+    "./images/bg/":["space.png","splash.png","uibox.png"]
 }

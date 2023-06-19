@@ -14,12 +14,12 @@ loaded_text = {}
 load_list = [".","-","+",0,1,2,3,4,5,6,7,8,9]
 for num in load_list:
     loaded_text[str(num)] = pygame.font.Font("./data/font.ttf",30)
-    loaded_text[str(num)] = loaded_text[str(num)].render(str(num) if num != 1 else (str(num) + " "),False,"black","white")
+    loaded_text[str(num)] = loaded_text[str(num)].render(str(num),False,"white","black")
 
 #5/31/2023 - LOADING NUMBERS   
 # pretty much it opens a file and loads all items inside
 with open("./data/text.txt","r") as file:
-    load_list = eval(file.read())
+    load_list = file.read().split(",")
 for item in load_list:
     loaded_text[str(item)] = pygame.font.Font("./data/font.ttf",30)
     loaded_text[str(item)] = loaded_text[str(item)].render(str(item),False,"white","black")
@@ -28,14 +28,14 @@ for item in load_list:
 #5/30/2023 - DISPLAY_NUMBERS
 # There is separate function for displaying numbers because I'm not gonna store several numbers as their own stupid variables, as that would take up too much RAM
 # What it does here, instead, is split the number into each individual digit and displays them separately 
-def display_numbers(num:int,pos:tuple,window:pygame.display):
-    num = str(num)
-    width = loaded_text["-"].get_width() #made width one process to save a sliver of processor space
+def display_numbers(num:int,pos:tuple,window:pygame.display,reverse:tuple = False):
+    num = str(num) if not reverse else str(num)[::-1]
+    width = loaded_text["8"].get_width() #made width one process to save a sliver of processor space
     for i in range(len(num)):
         window.blit(loaded_text[num[i]],(
-            pos[0]+(width*i),
+            ( (pos[0]+(width*i)) if not reverse else (pos[0]-(width*(i+1)) ) ,
             pos[1]
-            ))
+            )))
 
 
 #5/31/2023 - LOADING NUMBERS   

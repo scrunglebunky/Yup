@@ -15,7 +15,8 @@ class State():
                  campaign:str = "main_story.order",
                  world:int = 1,
                  level:int = 1,
-                 level_in_world:"int" = 1,
+                 level_in_world:int = 1,
+                 repeat:bool = False
                  ):
         self.sprites = sprites
         self.data = data
@@ -24,7 +25,7 @@ class State():
         #Player spawn
         self.bar = ( #the field the player is able to move along
             "h", #if the bar is horizontal or vertical.
-            450, #x position if vertical, y position if horizontal.
+            550, #x position if vertical, y position if horizontal.
             (20,430), #the limits on both sides for the player to move on, y positions if vertical, x positions if horizontal
             1, #gravity. 
             )
@@ -51,7 +52,7 @@ class State():
             sprites=self.sprites)
 
         #06/03/2023 - UI - Making a separate brick to the right with highest graphical priority used as a backgorund for the UI
-        self.UI_art = "placeholder.bmp"
+        self.UI_art = "uibox.png"
         self.UI_rect = pygame.Rect(
             pygame.display.play_dimensions[0],
             0,
@@ -93,6 +94,18 @@ class State():
 
         #06/01/2023 - TEST - drawing positioning for the formation for test purposes
         # self.window.blit(anim.all_loaded_images["placeholder.bmp"],self.formation.pos)
-       
+
+        #06/18/2023 - Displaying the score
+        text.display_numbers(self.data["score"],pos=(pygame.display.dimensions[0],0),window=self.window,reverse=True)
+
+        #06/18/2023 - Starting a new level
+        if self.formation.completed_level:
+            self.level += 1
+            self.level_in_world += 1
+            if self.world_data["dynamic_intensity"]:
+                levels.update_intensities(self.level,self.world_data)
+            self.formation.empty()
+            self.formation.__init__(self.player,self.world_data,self.sprites,self.data,self.level,self.level_in_world)
+   
     def event_handler(self,event):
         self.player.controls(event)

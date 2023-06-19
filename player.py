@@ -52,6 +52,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.sh.update()
         #collision is just movement
         self.collision()
+        self.health_update()
 
 
 
@@ -139,7 +140,7 @@ class Player(pygame.sprite.Sprite):
     def health_update(self):
         #HEALTH checking
         ##invincibility
-        if self.invincibility_counter > 0: self.invincibility_counter -= 1 
+        if self.invincibility_counter >= 0: self.invincibility_counter -= 1 
         ##checking for death
         self.dead = self.health < 1
 
@@ -149,7 +150,6 @@ class Player(pygame.sprite.Sprite):
         #if colliding with an enemy, hurt.
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
             self.sh.change_anim("hurt")
-            print('ouch!')
             self.health -= 1
             self.invincibility_counter = 60
         
