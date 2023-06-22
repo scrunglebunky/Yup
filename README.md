@@ -19,6 +19,7 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 6/22/23: (originally 6/20/23) images can now be resized, the ui bar is its own class in its own file
 - 6/18/23: formations now respawn when the level is completed
 - 6/06/23: changed animations to return surface ; fixed player invincibility bug
 - 6/06/23: formation spawns characters, makes characters attack, and checks for fomration completion

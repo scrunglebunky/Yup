@@ -75,6 +75,5 @@ while run:
 
     data["clock_offset"] = 60/(clock.get_fps() if clock.get_fps() != 0 else 60)
 
-print(dir())
 pygame.quit()
 exit()

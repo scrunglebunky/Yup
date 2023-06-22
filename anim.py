@@ -47,6 +47,8 @@ def generate_sprite(data):
 #06/01/2023 - USING ANIM_LOADLIST TO FIND OUT WHAT TO LOAD
 with open("./data/anim_loadlist.json","r") as raw:
     anim_loadlist = json.load(raw)
+
+
 #06/01/2023 - REVAMP OF OLD CODE
 for directory,filelist in anim_loadlist.items():
     #There is no longer a break if there's no json, as the list contains all the json files needed without any scraping
@@ -63,10 +65,18 @@ for directory,filelist in anim_loadlist.items():
             #5/25/23 - FIXING ANIMATION FPSes"
             for animation in anim_file.keys():
                 anim_file[animation]["FPS"] = 60/anim_file[animation]["FPS"]
+
+
 #06/01/2023 - LOADING NON-ANIMATED IMAGES
 with open("./data/img_loadlist.json","r") as raw:
     img_loadlist = json.load(raw)
 for directory,filelist in img_loadlist.items():
+    #06/22/2023 - RESIZING IMAGES
+    # The last index of the loadlist will be 'resize', with each index being [imagename, [width,height]]
+    if directory == "resize":
+        for filename in filelist:
+            all_loaded_images[str(filename[0])] = pygame.transform.scale(all_loaded_images[str(filename[0])],filename[1])
+        continue
     for filename in filelist:
         all_loaded_images[str(filename)] = pygame.image.load(directory+filename)
               

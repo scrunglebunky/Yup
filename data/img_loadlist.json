@@ -2,6 +2,9 @@
 {
     "./":[],
     "./images/characters/":[],
-    "./images/ui/":["placeholder.bmp"],
-    "./images/bg/":["space.png","splash.png","uibox.png"]
+    "./images/ui/":["placeholder.bmp","logo.png"],
+    "./images/bg/":["space.png","splash.png","uibox.png"],
+    "resize":[
+        ["logo.png",[200,150]]
+    ]
 }

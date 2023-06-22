@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds
+import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,ui_bar
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
 # playstate is what handles gameplay, specifically
@@ -51,19 +51,8 @@ class State():
             level_in_world=self.level_in_world, 
             sprites=self.sprites)
 
-        #06/03/2023 - UI - Making a separate brick to the right with highest graphical priority used as a backgorund for the UI
-        self.UI_art = "uibox.png"
-        self.UI_rect = pygame.Rect(
-            pygame.display.play_dimensions[0],
-            0,
-            (pygame.display.get_window_size()[0]-pygame.display.play_dimensions[0]),
-            pygame.display.get_window_size()[1]
-            )
-        self.UI_img = pygame.Surface(((pygame.display.get_window_size()[0]-pygame.display.play_dimensions[0]),pygame.display.get_window_size()[1] ))
-        self.UI_img.blit(
-            pygame.transform.scale(anim.all_loaded_images[self.UI_art],(self.UI_rect[2],self.UI_rect[3])),
-            (0,0))
-
+        
+        self.ui_bar = ui_bar.UIBar()
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
@@ -83,8 +72,8 @@ class State():
         self.sprites[0].update()
         self.sprites[0].draw(self.window)
         self.formation.update()
-        #UI draw
-        self.window.blit(self.UI_img,self.UI_rect)
+        self.ui_bar.draw(self.window)
+        
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)
