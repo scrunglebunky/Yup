@@ -8,7 +8,7 @@ clock = pygame.time.Clock()
 
 #display stuff
 defaultcolor = (100,50,50)
-screen_dimensions = 800,600
+screen_dimensions = 960,720
 play_dimensions = 450,600
 
 window = pygame.display.set_mode(screen_dimensions)
@@ -19,7 +19,7 @@ pygame.display.set_caption("YUP RevD")
 #UI
 run=True; cur_state = None
 #IMPORTING STATES
-import state_play
+import state_play,ui_border
 states = {
     "play":state_play.State,
     }
@@ -39,12 +39,18 @@ data = {
     "clock_offset":1,
 }
 
+
+#06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
+border = ui_border.Border()
+
+
 #setting the state
 cur_state = state_play.State(data=data,sprites=sprites,window=window)
 while run:
     #filling the screen in case something is offscreen
     window.fill(defaultcolor)
-    clock.tick(FPS)
+    #06/23/2023 - drawing border to window 
+    border.draw(window)
 
     #event handler
     for event in pygame.event.get():
@@ -60,18 +66,15 @@ while run:
     #updating states
     cur_state.update()
 
-
     #displaying tezt
     #5/30/2023 - test display of fps
     text.display_numbers(round(clock.get_fps(),2),(pygame.display.dimensions[0],30),window,reverse=True)
     text.display_numbers(round(data["clock_offset"],2),(pygame.display.dimensions[0],60),window,reverse=True)
     text.display_numbers(round(clock.get_fps()*data["clock_offset"],2),(pygame.display.dimensions[0],90),window,reverse=True)
 
-
-
-
-    #display update
+    #general update
     pygame.display.update()
+    clock.tick(FPS)
 
     data["clock_offset"] = 60/(clock.get_fps() if clock.get_fps() != 0 else 60)
 

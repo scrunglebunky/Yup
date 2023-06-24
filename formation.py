@@ -36,12 +36,42 @@ class Formation():
         self.direction = random.choice(('l','r'))
         self.duration = 0
         
-        #5/30/2023 - CHARACTERS' SPAWNING
+        #05/30/2023 - CHARACTERS' SPAWNING
         self.spawning_timer = 0 #frame counter in the startup state for how long it takes to spawn a character
         self.spawning_index = [0,0] #counter for where in self.spawn_list the spawner is currently at, as to not get confused with anything else
-        self.spawn_list = self.world_data["manual_formations"][self.level_in_world-1] #a list of characters to spawn, and that's it
         self.spawned_list = [] #a list of spawned characters, the actual objects for the formation to look at and do checks on ; unordered
         self.completed_level = False #checking if the level (formation) is complete and needs to be reset;  run with the timers
+
+        #06/22/2023 - FIGURING OUT WHAT'S IN THE FORMATION BASED ON LEVEL DATA
+        self.spawn_list = [["nope"],["nope"]] #default spawn
+
+        #06/22/2023 - MANUAL ORDERED
+        if self.world_data["manual_type"] == 1:
+            spawn_len = len(self.world_data["manual_formations"])
+            loops = (self.level_in_world-1) // spawn_len
+            subtractor = loops * spawn_len
+            #IF LOOPED:
+            self.spawn_list = self.world_data["manual_formations"][(self.level_in_world-1) - subtractor] #a list of characters to spawn, and that's it
+            #IF NOT LOOPED: 
+            if subtractor > 0 and not self.world_data["manual_loop"]:
+                self.spawn_list = self.random_formation()
+
+        #06/23/2023 - RANDOM
+        if self.world_data["manual_type"] == 2:
+            # pick_manual is based off a value called "manual_influence", where if the value is satisfied, it will pick a manual formation instead of a random one
+            pick_manual:bool = (random.randint(1,100) <= self.world_data["manual_influence"])
+            if pick_manual: 
+                self.spawn_list = random.choice(self.world_data["manual_formations"])
+            # however, it usually just picks something random
+            else:
+                self.spawn_list = self.random_formation()
+        
+        else:
+            self.spawn_list = self.random_formation()
+
+            
+
+
 
         # #test- spawning A character
         # self.test = characters.loaded["nope"](sprites=self.sprites,level=self.level,formation_position=self.pos,offset=(0,0),data=self.data,)
@@ -79,18 +109,22 @@ class Formation():
         #every time a character is spawned, the timer resets and the index is risen
         self.spawning_timer += 1
         if self.spawning_timer >= self.world_data["spawn_time"]:
+
+            #06/22/2023 - figuring out what character to spawn
+            to_spawn = self.spawn_list[self.spawning_index[1]][self.spawning_index[0]]
             
-            #spawning the character - note the data in spawning_index is what is to be spawned CURRENTLY, not previously
-            cur_char = characters.loaded["nope"](
-                sprites=self.sprites,
-                level=self.level,
-                formation_position=self.pos,
-                offset=(
-                    self.spawning_index[0]*self.world_data["char_distance_x"],
-                    self.spawning_index[1]*self.world_data["char_distance_y"]),
-                data=self.data,)
-            self.spawned_list.append(cur_char)
-            self.sprites[0].add(cur_char);self.sprites[2].add(cur_char)
+            if to_spawn in characters.loaded.keys():
+                #spawning the character - note the data in spawning_index is what is to be spawned CURRENTLY, not previously
+                cur_char = characters.loaded[to_spawn](
+                    sprites=self.sprites,
+                    level=self.level,
+                    formation_position=self.pos,
+                    offset=(
+                        self.spawning_index[0]*self.world_data["char_distance_x"],
+                        self.spawning_index[1]*self.world_data["char_distance_y"]),
+                    data=self.data,)
+                self.spawned_list.append(cur_char)
+                self.sprites[0].add(cur_char);self.sprites[2].add(cur_char)
             
             #resetting timer values, raising the value of the spawning_timer's y value
             self.spawning_timer = 0
@@ -158,6 +192,30 @@ class Formation():
         self.spawned_list = []
         self.state = "complete"
         self.completed_level = True
+
+    def random_formation(self) -> list:
+        #06/23/23 - GENERATING A RANDOM FORMATION FOR LOOPS, OR JUST TYPES IN GENERAL
+        # return [["nope"],["nope"]] #TEMPORARY - CHANGE loaded_characters
+        spawn_list = []
+        # generating sizes 
+        rows = random.randint(self.world_data["char_min_height"],self.world_data["char_max_height"])
+        columns = random.randint(self.world_data["char_min_width"],self.world_data["char_max_width"])
+        # generating spawnsheet
+        for row in range(rows):
+            # adding a new row
+            spawn_list.append([])
+            # adding individual columns
+            for column in range(columns):
+                spawn_list[row].append(
+                    random.choice(
+                        self.world_data["imports"]
+                        )
+                    )
+        return spawn_list
+
+
+
+
 
 # class Formation:
 #     def __init__(

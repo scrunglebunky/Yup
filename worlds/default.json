@@ -41,6 +41,7 @@
     "manual_formations":[
         [
             ["nope","nope","nope"],
+            ["    ","nope","    "],
             ["    ","nope","    "]
         ],
         [
@@ -48,9 +49,9 @@
             ["nope","nope","nope"]
         ]
     ],
-    "manual_type":1, 
+    "manual_type":2, 
     "manual_loop":false,
-    "manual_influence":0,
+    "manual_influence":50,
     "manual_levels":[0,1],
 
     "boss_level":false,

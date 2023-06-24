@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,ui_bar
+import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
 # playstate is what handles gameplay, specifically
@@ -20,7 +20,13 @@ class State():
                  ):
         self.sprites = sprites
         self.data = data
-        self.window = window
+        self.fullwindow = window
+
+        #06/23/2023 - SETTING THE GAMEPLAY WINDOW
+        # YUP has a touhou-like border surrounding the entire game as it works
+        # Because of this, gameplay will have its own entire tiny display to work with 
+        # It still saves the original pygame window, but this is just to draw the display to.abs
+        self.window = pygame.Surface((450,600)).convert_alpha()
 
         #Player spawn
         self.bar = ( #the field the player is able to move along
@@ -51,9 +57,6 @@ class State():
             level_in_world=self.level_in_world, 
             sprites=self.sprites)
 
-        
-        self.ui_bar = ui_bar.UIBar()
-
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
 
@@ -72,8 +75,8 @@ class State():
         self.sprites[0].update()
         self.sprites[0].draw(self.window)
         self.formation.update()
-        self.ui_bar.draw(self.window)
-        
+        #06/23/2023 - Drawing gameplay window to full window
+        self.fullwindow.blit(self.window,(50,50))
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)

@@ -19,6 +19,10 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 6/23/23: state_play's window now works as a separate surface that can be drawn to the window on its own, allowing for borders to now work.
+- 6/23/23: Formations can now randomly generate as well as manually generate, chances and specific details for formation modes now work
+- 6/22/23: Made it so manual formations will now loop 
+- 6/22/23: Made formations actually spawn the correct characters
 - 6/22/23: (originally 6/20/23) images can now be resized, the ui bar is its own class in its own file
 - 6/18/23: formations now respawn when the level is completed
 - 6/06/23: changed animations to return surface ; fixed player invincibility bug
@@ -71,7 +75,7 @@
 - [x] Getting hurt if collided, which goes with the universal "on_collide" function in characters
 - [x] Playing animations with jumping, hitting the wall, getting hit
 ## GAMEPLAY STATE / LEVELS
-- [ ] Loop formations or create new ones if there are no more formations left
+- [x] Loop formations or create new ones if there are no more formations left
 - [x] Recognize a completed level and start a new one
 - [ ] Recognize a completed world and start a new one
 - Levels are loaded by the gameplay state. 
