@@ -1,5 +1,5 @@
 #Code by Andrew Church
-import pygame,anim,math,bullets
+import pygame,anim,math,bullets,audio
 
 # "bar":(
 #         "h", #if the bar is horizontal or vertical.
@@ -149,6 +149,7 @@ class Player(pygame.sprite.Sprite):
                    ):
         #if colliding with an enemy, hurt.
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
+            audio.play_sound("ouch.mp3",)
             self.sh.change_anim("hurt")
             self.health -= 1
             self.invincibility_counter = 60

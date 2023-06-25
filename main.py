@@ -4,11 +4,9 @@ import pygame,os,text,random
 FPS=60
 clock = pygame.time.Clock()
 
-
-
 #display stuff
 defaultcolor = (100,50,50)
-screen_dimensions = 960,720
+screen_dimensions = 800,720
 play_dimensions = 450,600
 
 window = pygame.display.set_mode(screen_dimensions)

@@ -86,7 +86,7 @@ class Formation():
         #06/06/23 - calculating center position
         # Calculate total length of formation, divide by 2, take center screen and subtract by half length
         # this is why EVERY FORMATION SHOULD HAVE THE SAME LENGTH OF COLUMNS IN EACH ROW NO MATTER WHAT
-        self.pos[0] = (225 - (len(self.spawn_list[1])*self.world_data["char_distance_x"] /2))
+        self.pos[0] = ((pygame.display.play_dimensions[0]/2) - (len(self.spawn_list[1])*self.world_data["char_distance_x"] /2))
 
 
     def update(self):

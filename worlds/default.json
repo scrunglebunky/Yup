@@ -18,7 +18,7 @@
     "char_distance_x":40, 
     "char_distance_y":40,
     "char_min_width":5,
-    "char_min_height":1,
+    "char_min_height":2,
     "char_max_width":10,
     "char_max_height":5,
 

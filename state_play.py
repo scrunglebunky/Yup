@@ -26,7 +26,7 @@ class State():
         # YUP has a touhou-like border surrounding the entire game as it works
         # Because of this, gameplay will have its own entire tiny display to work with 
         # It still saves the original pygame window, but this is just to draw the display to.abs
-        self.window = pygame.Surface((450,600)).convert_alpha()
+        self.window = pygame.Surface(pygame.display.play_dimensions).convert_alpha()
 
         #Player spawn
         self.bar = ( #the field the player is able to move along
@@ -77,6 +77,7 @@ class State():
         self.formation.update()
         #06/23/2023 - Drawing gameplay window to full window
         self.fullwindow.blit(self.window,(50,50))
+        text.display_numbers(self.data["score"],(pygame.display.dimensions[0],360),self.fullwindow, reverse=True)
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)
