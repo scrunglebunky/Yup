@@ -11,10 +11,7 @@ all_loaded_images = {}
 
     
 #5/8/23 - DEFINING THING TO LOAD ALL IMAGES
-def generate_sprite(data):
-    spritesheet=[]
-    raw=pygame.image.load(data["NAME"]+".png")
-    def get_image(sheet,
+def get_image(sheet,
                   wh:tuple,
                   xy:tuple,
                   scale:float=1.0,
@@ -24,11 +21,15 @@ def generate_sprite(data):
         #outputting parts of the image onto the surface
         output.blit(sheet,(0,0),(xy[0],xy[1],wh[0],wh[1]))
         #scaling
-        output = pygame.transform.scale(output,(wh[0]*scale,wh[1]*scale))
+        output = pygame.transform.scale(output,(wh[0]*scale,wh[1]*scale)).convert()
         #"greenscreen"ing
         output.set_colorkey(colorkey)
         #output
         return output
+
+def generate_sprite(data):
+    spritesheet=[]
+    raw=pygame.image.load(data["NAME"]+".png").convert()
     #LOADING ALL SPRITE IMAGES
     for row in range(data["ROWS/COLUMNS"][0]):
         #it's easier for me, screw off.
@@ -41,7 +42,7 @@ def generate_sprite(data):
                         data["TILE_SIZE"][1]*row),
                     scale=data["scale"],
                     colorkey=data["colorkey"],
-                    ))
+                    ).convert())
     return spritesheet
 
 #06/01/2023 - USING ANIM_LOADLIST TO FIND OUT WHAT TO LOAD
@@ -78,7 +79,10 @@ for directory,filelist in img_loadlist.items():
             all_loaded_images[str(filename[0])] = pygame.transform.scale(all_loaded_images[str(filename[0])],filename[1])
         continue
     for filename in filelist:
-        all_loaded_images[str(filename)] = pygame.image.load(directory+filename)
+        if "ui" in directory:
+            all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert_alpha()
+        else:
+            all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert()
               
 
 

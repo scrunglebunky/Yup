@@ -7,11 +7,14 @@ sounds = {}
 DISABLED = False
 
 type_channels = {}
+PATH_songs:str = "./songs/"
+PATH_sounds:str = "./sounds/"
+directory:str = "./data/audio_loadlist.json"
 
 #06/24/2023 - LOADING ALL SONGS
 # the game will load all of the audio files and play them as needed
 # there are some bugs that cause the sounds not to be able to play, or even load, so I will make a boolean that can disable all sounds in general
-def load_all_songs(directory:str = "./data/audio_loadlist.json",PATH_songs:str = "./songs/", PATH_sounds:str = "./sounds/"):
+def load_all_songs():
     # opening file 
     with open(directory,"r") as raw:
         load_list = json.load(raw)
@@ -28,6 +31,7 @@ def load_all_songs(directory:str = "./data/audio_loadlist.json",PATH_songs:str =
     for song in load_list["songs"]:
         try:
             pygame.mixer.Sound(file = (str(PATH_songs) + str(song)))
+            songs.append(song)
         except:
             DISABLED = True
             return
@@ -41,7 +45,12 @@ def play_sound(name,category:str = None,channel:int = None):
         else:
             sounds[name].play()
         
-    
+def play_song(name):
+    if not DISABLED and name in songs: 
+        pygame.mixer.music.load(PATH_songs+name)
+        pygame.mixer.music.play(loops=-1)
+
+
 
 load_all_songs()
 

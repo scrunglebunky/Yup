@@ -1,9 +1,11 @@
 {
     "songs":[
-
+        "cabbage.mp3",
+        "meowchill.mp3"
     ],
     "sounds":[
         "honk.wav",
-        "ouch.mp3"
+        "ouch.mp3",
+        "quack.mp3"
     ]
 }

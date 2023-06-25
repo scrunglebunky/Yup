@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds
+import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
 # playstate is what handles gameplay, specifically
@@ -60,13 +60,15 @@ class State():
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
 
-
         # TEST - text spawn
         for i in range(0):
             spd=random.randint(-5,5)
             if spd == 0: spd = 1
             txt=text.Text(text=random.choice(["owo","uwu","hewwo","cwinge","howy fuck"]),vertex=(random.randint(0,450),random.randint(0,600)),pos=(random.randint(0,450),random.randint(0,600)),pattern="sine",duration=3600,modifier=random.randint(1,100),modifier2=(random.randint(1,25)/random.randint(1,100)),speed=spd)
             sprites[0].add(txt)
+
+        #06/24/2023 - Playing the song
+        audio.play_song(self.world_data["song"])
 
     def update(self):
         #Updating sprites
@@ -76,8 +78,8 @@ class State():
         self.sprites[0].draw(self.window)
         self.formation.update()
         #06/23/2023 - Drawing gameplay window to full window
-        self.fullwindow.blit(self.window,(50,50))
-        text.display_numbers(self.data["score"],(pygame.display.dimensions[0],360),self.fullwindow, reverse=True)
+        self.fullwindow.blit(self.window,pygame.display.play_pos)
+        text.display_numbers(self.data["score"],(pygame.display.dimensions[0],240),self.fullwindow, reverse=True)
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)
@@ -89,7 +91,7 @@ class State():
         # self.window.blit(anim.all_loaded_images["placeholder.bmp"],self.formation.pos)
 
         #06/18/2023 - Displaying the score
-        text.display_numbers(self.data["score"],pos=(pygame.display.dimensions[0],0),window=self.window,reverse=True)
+        # text.display_numbers(self.data["score"],pos=(pygame.display.dimensions[0],0),window=self.window,reverse=True)
 
         #06/18/2023 - Starting a new level
         if self.formation.completed_level:

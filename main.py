@@ -6,12 +6,14 @@ clock = pygame.time.Clock()
 
 #display stuff
 defaultcolor = (100,50,50)
-screen_dimensions = 800,720
+screen_dimensions = 720,720
 play_dimensions = 450,600
+play_pos = 50,50
 
 window = pygame.display.set_mode(screen_dimensions)
 pygame.display.play_dimensions = play_dimensions #oh cool, I can make a self variable in the pygame.display. hot.
 pygame.display.dimensions = screen_dimensions #see previous line, connect dots
+pygame.display.play_pos = play_pos
 pygame.display.set_caption("YUP RevD")
 
 #UI
@@ -66,9 +68,9 @@ while run:
 
     #displaying tezt
     #5/30/2023 - test display of fps
-    text.display_numbers(round(clock.get_fps(),2),(pygame.display.dimensions[0],30),window,reverse=True)
-    text.display_numbers(round(data["clock_offset"],2),(pygame.display.dimensions[0],60),window,reverse=True)
-    text.display_numbers(round(clock.get_fps()*data["clock_offset"],2),(pygame.display.dimensions[0],90),window,reverse=True)
+    text.display_numbers(round(clock.get_fps(),2),(pygame.display.dimensions[0],320),window,reverse=True)
+    text.display_numbers(round(data["clock_offset"],2),(pygame.display.dimensions[0],350),window,reverse=True)
+    text.display_numbers(round(clock.get_fps()*data["clock_offset"],2),(pygame.display.dimensions[0],380),window,reverse=True)
 
     #general update
     pygame.display.update()

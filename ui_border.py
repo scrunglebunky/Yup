@@ -17,13 +17,40 @@ class Border():
         self.UI_img = pygame.Surface(pygame.display.dimensions)
         self.UI_img.blit(pygame.transform.scale(anim.all_loaded_images[self.UI_art],(self.UI_rect[2],self.UI_rect[3])),(0,0))
 
-        #06/22/2023 - POSITIONING FOR LOGO
-        # the logo is big and needs positioning 
-        self.logo = anim.all_loaded_images['logo.png']
-        self.logo_coord = (
-            ((self.UI_rect.width*0.75) - (self.logo.get_width()/2)),
-            pygame.display.dimensions[1]*0.15 - (self.logo.get_height()/2)
-        )
+
+        #06/24/2023 - ADDING EXTRA EMBLEMS
+        self.emblems = [ 
+            ( #LOGO EMBLEM
+                'logo.png',
+                (
+                    pygame.display.dimensions[0] - ( pygame.display.dimensions[0] - (pygame.display.play_dimensions[0] + pygame.display.play_pos[0])),
+                    pygame.display.dimensions[1]*0.15 - (anim.all_loaded_images['logo.png'].get_height()/2)
+                )
+                
+            ),
+            ( #SCORE EMBLEM
+                "score.png", 
+                (
+                    pygame.display.play_dimensions[0] + pygame.display.play_pos[0] + 25,
+                    240
+                )
+            ),
+            ( #DEBUG EMBLEM
+                "debug.png", 
+                (
+                    pygame.display.play_dimensions[0] + pygame.display.play_pos[0] + 25,
+                    320
+                )
+            ),
+            ( #DEBUG EMBLEM
+                "lives.png", 
+                (
+                    10,
+                    pygame.display.dimensions[1] - anim.all_loaded_images['lives.png'].get_height() - 10
+                )
+            )
+
+        ]
 
         #06/22/2023 - Animation booleans / setting spritesheet info
         self.anim_bg:bool = anim_bg
@@ -32,7 +59,8 @@ class Border():
 
     def draw(self,window:pygame.Surface):
         window.blit(self.UI_img,self.UI_rect)
-        window.blit(self.logo,self.logo_coord)
+        for emblem in self.emblems:
+            window.blit(anim.all_loaded_images[emblem[0]],emblem[1])
 
     def update(self):
         if not self.animated: return 

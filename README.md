@@ -19,6 +19,8 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 6/24/23: FIXED THE FPS ISSUE
+- 6/24/23: sounds load and play now ; loading failsafe in place
 - 6/23/23: state_play's window now works as a separate surface that can be drawn to the window on its own, allowing for borders to now work.
 - 6/23/23: Formations can now randomly generate as well as manually generate, chances and specific details for formation modes now work
 - 6/22/23: Made it so manual formations will now loop 
