@@ -9,7 +9,7 @@ class Bullet(pygame.sprite.Sprite):
     image = pygame.Surface((10, 10), pygame.SRCALPHA)
     pygame.draw.circle(image, "black", (5, 5), 5)
     pygame.draw.circle(image, "white", (5, 5), 4)
-    screen_rect = pygame.Rect(0, 0, 450, 600)
+    screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
     max = 2
@@ -59,7 +59,12 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.kill(self)
         Bullet.count -= 1
         
-
+class HurtBullet(pygame.sprite.Sprite):
+    #DEFAULT IMAGE - rendered by pygame draw function
+    image = pygame.Surface((10, 10), pygame.SRCALPHA)
+    pygame.draw.circle(image, "#AA0000", (5, 5), 5)
+    pygame.draw.circle(image, "red", (5, 5), 4)
+    screen_rect = pygame.Rect(0, 0, 450, 600)
 
 
 

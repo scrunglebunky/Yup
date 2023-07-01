@@ -139,8 +139,8 @@ class Nope(CharTemplate):
 
         #06/06/23 - enter state - copied from revC
         self.enter_dir = random.choice(('l','r')) #where the character is entering FROM
-        self.rect.center = (450,300) if self.enter_dir == 'r' else (0,300)
-        self.parabola = (450,400) if self.enter_dir == 'r' else (25,400)
+        self.rect.center = (pygame.display.play_dimensions[0],pygame.display.play_dimensions[1]/2) if self.enter_dir == 'r' else (0,pygame.display.play_dimensions[1]/2)
+        self.parabola = (pygame.display.play_dimensions[0],pygame.display.play_dimensions[1]*0.75) if self.enter_dir == 'r' else (25,pygame.display.play_dimensions[1]*0.75)
 
     def update(self):
         CharTemplate.update(self)
@@ -158,7 +158,7 @@ class Nope(CharTemplate):
     
     def state_attack(self):
         self.rect.y+=5
-        if self.rect.top>=600:
+        if self.rect.top>=pygame.display.play_dimensions[1]:
             self.rect.bottom=0
             self.frames_in_state = 0
             self.stchg('return') 

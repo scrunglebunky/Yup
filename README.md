@@ -19,6 +19,9 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 
+- 6/30/23: made the configuration file usable
+- 6/30/23: made the screen and play dimensions resizeable, changed original resolution to 600x800 but scaled down
 - 6/24/23: FIXED THE FPS ISSUE
 - 6/24/23: sounds load and play now ; loading failsafe in place
 - 6/23/23: state_play's window now works as a separate surface that can be drawn to the window on its own, allowing for borders to now work.
@@ -57,33 +60,36 @@
 - 4/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] implement changes in intensity
 - [x] sending characters into attack mode
 - [x] starting a new level when the formation is empty
-## BACKGROUNDS
-- [ ] figure out what makes bg lag so bad
-- [ ] actually implement background changes in speed.
-## LEVELS
+## CHARACTERS
+- [ ] NOPE
+- [ ] FIHS
+- [ ] BOBM
+- [ ] STIKMNA
+- [ ] ZAPP
+- [ ] SPIKE
+- [x] figure out what makes bg lag so bad
+- [ ] actually implement background changes in speed
 - [x] Contain more background info, like speeds, changes in speed, 
 - [x] Loading all JSON files
 - [x] Loading a "world order" file in the levels folder (ignored by the level loader) that says what order the files go into 
-## MISC 
 - [x] Add gameplay elements from MAIN to State_Game_Play
 - [x] Make the gameplay level acknowledge the playing field over the pygame window
-## THE PLAYER
-- [ ] Add lives and kill   
+- [x] Add lives
+- [ ] Let the player die 
 - [x] Barriers upon movement based on bar argument
 - [x] Shooting with the space bar
 - [x] Shooting bullet limit
 - [x] Getting hurt if collided, which goes with the universal "on_collide" function in characters
 - [x] Playing animations with jumping, hitting the wall, getting hit
-## GAMEPLAY STATE / LEVELS
 - [x] Loop formations or create new ones if there are no more formations left
 - [x] Recognize a completed level and start a new one
 - [ ] Recognize a completed world and start a new one
 - Levels are loaded by the gameplay state. 
 - The gameplay state does not exit and go to game over states, it just reruns \_\_init\_\_. 
 - Characters do not individually run their own collision worries. This would be far too much code to run every frame. Instead, gameplay will individually check and run collision points for sprite classes whenever it is deemed fit. It worked for Shoot the Baby, it will work here.
-## FUTURE OPTIMIZATION
 - [ ] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
 - [ ] States having a string element saying what state to go to next, for MAIN to recognize
 - [ ] "Mod Folders" where the program has to recognize words with "anim_loadlist", "levels","order", etc. to plug into main.

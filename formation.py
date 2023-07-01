@@ -129,6 +129,7 @@ class Formation():
             #resetting timer values, raising the value of the spawning_timer's y value
             self.spawning_timer = 0
             self.spawning_index[0] += 1
+            
             #the y value of spawning_timer is the x value of the spawn_list, vice versa.
             if self.spawning_index[0] > (len(self.spawn_list[self.spawning_index[1]])-1):
                 self.spawning_index[0] = 0;self.spawning_index[1] += 1
@@ -136,6 +137,7 @@ class Formation():
             if self.spawning_index[1] > (len(self.spawn_list)-1):
                 self.state = "idle"
                 self.spawning_index = (0,0)
+                self.duration = 0 
 
 
     def state_idle(self):...

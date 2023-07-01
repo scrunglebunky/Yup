@@ -4,7 +4,7 @@
     "song":"meowchill.mp3",
 
     "bg":"placeholder.bmp",
-    "bg_size":[450,600],
+    "bg_size":[600,800],
     "bg_speed":[0,1],
     "bg_speed_changes":[
         ["level",5,[0,-1]],
@@ -15,17 +15,17 @@
     
     "levels":10,
 
-    "char_distance_x":40, 
-    "char_distance_y":40,
+    "char_distance_x":45, 
+    "char_distance_y":45,
     "char_min_width":5,
     "char_min_height":2,
     "char_max_width":10,
     "char_max_height":5,
 
-    "throwdown_time":120, 
+    "throwdown_time":32, 
     "throwdown_amount":1,
-    "spawn_time":0,
-    "max_char":5,
+    "spawn_time":10,
+    "max_char":25,
     "dynamic_intensity":false,
     "form_drop_speed":0.1,
     "manual_intensity_changes":[

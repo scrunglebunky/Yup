@@ -31,8 +31,8 @@ class State():
         #Player spawn
         self.bar = ( #the field the player is able to move along
             "h", #if the bar is horizontal or vertical.
-            550, #x position if vertical, y position if horizontal.
-            (20,430), #the limits on both sides for the player to move on, y positions if vertical, x positions if horizontal
+            pygame.display.play_dimensions[1]*0.90, #x position if vertical, y position if horizontal.
+            (20,pygame.display.play_dimensions[0]-20), #the limits on both sides for the player to move on, y positions if vertical, x positions if horizontal
             1, #gravity. 
             )
         self.player = player.Player(bar=self.bar,sprite_groups=self.sprites)
@@ -44,6 +44,7 @@ class State():
         self.level = level #the total amount of levels passed, usually used for intensities or score
         self.level_in_world = level_in_world #the amount of levels completed in the world currently 
         self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
+        #updating based on intensity
         if self.world_data["dynamic_intensity"]:
             levels.update_intensities(self.level,self.world_data)
 
@@ -78,8 +79,7 @@ class State():
         self.sprites[0].draw(self.window)
         self.formation.update()
         #06/23/2023 - Drawing gameplay window to full window
-        self.fullwindow.blit(self.window,pygame.display.play_pos)
-        text.display_numbers(self.data["score"],(pygame.display.dimensions[0],240),self.fullwindow, reverse=True)
+        self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)

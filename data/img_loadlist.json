@@ -2,9 +2,10 @@
 {
     "./":[],
     "./images/characters/":[],
-    "./images/ui/":["placeholder.bmp","logo.png","score.png","debug.png","lives.png"],
+    "./images/ui/":["placeholder.bmp","logo.png","score.png","debug.png","lives.png","life.png","weapon.png"],
     "./images/bg/":["space.png","splash.png","uibox.png"],
     "resize":[
-        ["logo.png",[200,150]]
+        ["logo.png",[200,150]],
+        ["life.png",[38,38]]
     ]
 }
