@@ -130,11 +130,16 @@ class CharTemplate(pygame.sprite.Sprite):
 
 
 class Nope(CharTemplate):
+
+    image = pygame.Surface((30, 30), pygame.SRCALPHA)
+    pygame.draw.rect(image,"red",pygame.Rect(0,0,30,30))
+
+
     def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
         CharTemplate.__init__(self,sprites=sprites,level=level,formation_position=formation_position,offset=offset,data=data,default_image=False,**kwargs)
         #img code
-        self.sh = anim.Spritesheet("NOPE","idle")
-        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
+        # self.sh = anim.Spritesheet("NOPE","idle")
+        self.image = Nope.image
         self.rect = self.image.get_rect()
 
         #06/06/23 - enter state - copied from revC
@@ -142,9 +147,16 @@ class Nope(CharTemplate):
         self.rect.center = (pygame.display.play_dimensions[0],pygame.display.play_dimensions[1]/2) if self.enter_dir == 'r' else (0,pygame.display.play_dimensions[1]/2)
         self.parabola = (pygame.display.play_dimensions[0],pygame.display.play_dimensions[1]*0.75) if self.enter_dir == 'r' else (25,pygame.display.play_dimensions[1]*0.75)
 
+        #07/09/2023 - the way the character will move in attack state
+        self.atk_patterns = [] 
+        self.spd = 0
+
     def update(self):
         CharTemplate.update(self)
-        self.image = self.sh.update()
+        # self.image = Nope.image
+        self.image = Nope.image
+        if self.state == 'attack':
+            self.image = pygame.transform.rotate(Nope.image,3*self.spd)
 
     def state_enter(self):
         self.rect.x = self.rect.x-2 if self.enter_dir == 'r' else self.rect.x+2
@@ -157,14 +169,50 @@ class Nope(CharTemplate):
             self.stchg("idle_search")
     
     def state_attack(self):
+        if self.frames_in_state == 1:
+            #07/09/2023 - FIRST FRAME IN STATE - SETTING POSITIONS
+            self.atk_patterns = [random.randint(10,pygame.display.play_dimensions[0]-10) for i in range(20)]
+
+        # moving down
         self.rect.y+=5
+
+        # moving left and right based on atk_patterns
+        if len(self.atk_patterns) > 0:
+            if abs(self.rect.center[0] - self.atk_patterns[0]) > 20:
+                self.spd = (0.05 * (self.atk_patterns[0] - self.rect.center[0]))
+                self.spd = -5 if self.spd < -5 else 5 if self.spd > 5 else self.spd
+                self.rect.x += self.spd
+
+
+            else:
+                self.spd = 0 
+                self.atk_patterns.pop(0)
+
+
+
+        # exit code
         if self.rect.top>=pygame.display.play_dimensions[1]:
             self.rect.bottom=0
             self.frames_in_state = 0
             self.stchg('return') 
     
-    
+
+class Spike(CharTemplate):
+    image = pygame.Surface((30, 30), pygame.SRCALPHA)
+    pygame.draw.rect(image,"orange",pygame.Rect(0,0,30,30))
+    def __init__(self,sprites:dict,level:int,formation_position:tuple,offset:tuple,data:dict,**kwargs):
+        #default
+        CharTemplate.__init__(self,sprites=sprites,level=level,formation_position=formation_position,offset=offset,data=data,default_image=False,**kwargs)
+        #setting images
+        self.image = Spike.image
+        self.rect = self.image.get_rect()
+
+        
+
+
 
 loaded = {
-    "nope":Nope
+    "nope":Nope,
+    "spike":Spike,
+    
     }

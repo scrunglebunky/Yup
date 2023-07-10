@@ -3,51 +3,20 @@ import pygame,os,text,random,json
 
 FPS=60
 clock = pygame.time.Clock()
+run=True; cur_state = None
 
-
-#06/30/2023 - LOADING IN THE CONFIGURATION FILE
-# The config.json file is a dictionary containing info about how the game works
-# This file is needed, though there is a default dictionary held here 
-default_settings = {
-    "fullscreen":["switch",False],
-
-    "mute":["switch",False],
-    "music_vol":["knob",0.5,0.05],
-    "sound_vol":["knob",0.5,0.05],
-
-    "screen_width":["knob",900,5],
-    "screen_height":["knob",675,5],
-    "gameplay_width":["knob",450,5],
-    "gameplay_height":["knob",600,5]
-}
-# loading in the file
-with open("./data/config.json","r") as set_raw:
-    settings = json.load(set_raw)
-del set_raw
-
-
-#DEBUG DISPLAY stuff
-screen_sizes,screen_size = ((400,300),(800,600),(900,675),(1200,900),(1600,1200),) , 2
-rescale_sizes,rescale_size = ((225,300),(450,600),(600,800),(900,1200),) , 1
-play_poses,play_pos = ((0,0),(20,20),(50,50),(100,100),) , 1
-defaultcolor = "#AAAAAA"
+#07/04/2023 - importing settings to use the universal file
+import options
+settings = options.settings
 
 #setting window values
+defaultcolor = "#AAAAAA"
 pygame.display.play_dimensions = 600,800 #oh cool, I can make a self variable in the pygame.display. hot.
 pygame.display.dimensions = settings["screen_width"][1],settings["screen_height"][1] #see previous line, connect dots
 window = pygame.display.set_mode(pygame.display.dimensions)
-pygame.display.play_pos = play_poses[play_pos]
+pygame.display.play_pos = 20,20
 pygame.display.play_dimensions_resize = settings["gameplay_width"][1],settings["gameplay_height"][1]
 pygame.display.set_caption("YUP RevD")
-
-#UI
-run=True; cur_state = None
-#IMPORTING STATES
-import state_play,ui_border
-states = {
-    "play":state_play.State,
-    }
-
 
 #GAME STUFF
 sprites = {
@@ -56,20 +25,33 @@ sprites = {
     2:pygame.sprite.Group(), #ENEMY SPRITES
 }
 
-#UNIVERSAL ARGS 
-# may be phased out soon
+#07/04/2023 - UNIVERSAL ARGS PROBLEM
+# I wanted these gone a while ago but its the only way to make integers into pointers
 data = {
     "score":0,
     "clock_offset":1,
 }
 
+#06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
+import state_play,ui_border
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
 
 
+
+
+#07/02/2023 - ADDING SPECIFIC STATES
+# Since states are classes, each time you make a new one a new object will be created
+# However, there is no need to have several state classes open at once
+# Because of this, it's just gonna start up every state as an object instead of a class
+states = {}
+states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
+
+
+
 #setting the state
-cur_state = state_play.State(data=data,sprites=sprites,window=window)
+cur_state = states["play"]
 while run:
     #filling the screen in case something is offscreen
     window.fill(defaultcolor)

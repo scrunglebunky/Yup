@@ -35,6 +35,7 @@ class State():
             (20,pygame.display.play_dimensions[0]-20), #the limits on both sides for the player to move on, y positions if vertical, x positions if horizontal
             1, #gravity. 
             )
+            
         self.player = player.Player(bar=self.bar,sprite_groups=self.sprites)
         sprites[0].add(self.player); sprites[1].add(self.player)
 
@@ -82,7 +83,7 @@ class State():
         self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
         #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False)
+        collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             key.on_collide(2)
             value[0].on_collide(1)

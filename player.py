@@ -11,6 +11,10 @@ import pygame,anim,math,bullets,audio
 
 
 class Player(pygame.sprite.Sprite):
+
+    image = pygame.Surface((30, 30), pygame.SRCALPHA)
+    pygame.draw.rect(image,"white",pygame.Rect(0,0,30,30))
+
     def __init__(self,bar,sprite_groups):
         pygame.sprite.Sprite.__init__(self)
 
@@ -19,13 +23,9 @@ class Player(pygame.sprite.Sprite):
         self.sprite_groups = sprite_groups
 
         #IMAGE AND POSITIONING
-        #note to self - MASKS REMOVED
-        #I do like masks, but it seems they should only be used for the pygame collision item
-        #When used here, their position resets to (0,0) and has to be controlled separately from rects, which is too much work and makes no sense
-        #If I was *not* using Pygame, I would personally have everything controlled as empty rectangles, with images drawn to them on their own
-        #This would fix most mask issues and would make it so the images are not tied to the image
-        self.sh = anim.Spritesheet("YUP","idle")
-        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
+        # self.sh = anim.Spritesheet("YUP","idle")
+        # self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
+        self.image = Player.image
         self.rect = self.image.get_rect()
         self.rect.center = (300,self.bar[1])
 
@@ -49,7 +49,15 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         #SETTING THE IMAGE. I have no issue resetting the image every frame because it's just a callback to an object
-        self.image = self.sh.update()
+        self.image = Player.image
+        # self.sh.update()
+
+        #07/09/2023 - rotating the image based on movement
+        if self.momentum != 0:
+            self.image = pygame.transform.rotate(Player.image,self.momentum*-2)
+        if self.movement[0] > 0:
+            self.image = pygame.transform.rotate(Player.image,self.movement[0]*11)
+
         #collision is just movement
         self.collision()
         self.health_update()
@@ -84,7 +92,7 @@ class Player(pygame.sprite.Sprite):
                 bullet=bullets.Bullet(self.rect.center)
                 self.sprite_groups[0].add(bullet)
                 self.sprite_groups[1].add(bullet)
-                if not bullet.kill_on_spawn: self.sh.change_anim("shoot")
+                # if not bullet.kill_on_spawn: self.sh.change_anim("shoot")
 
 
         #RELEASING movement
@@ -119,7 +127,7 @@ class Player(pygame.sprite.Sprite):
             if self.movement[0] >= 60:
                 self.movement[0] = 0
                 self.rect.center = (self.rect.center[0],self.bar[1])
-                self.sh.change_anim("land")
+                # self.sh.change_anim("land")
         
         #jumping down - IDENTICAL to jumping up, so it is condensed to be less readable
         if self.movement[1] > 0:
@@ -128,13 +136,13 @@ class Player(pygame.sprite.Sprite):
             if self.movement[1] >= 60:
                 self.movement[1] = 0
                 self.rect.center = (self.rect.center[0],self.bar[1])
-                self.sh.change_anim("land")
+                # self.sh.change_anim("land")
 
 
         #Actually making the player move, bouncing the character off the bars if needed
         if (self.rect.center[0] + self.momentum) < self.bar[2][0] or (self.rect.center[0] + self.momentum) > self.bar[2][1]: 
             self.momentum = 0
-            self.sh.change_anim("squish")
+            # self.sh.change_anim("squish")
         self.rect.x += self.momentum
 
     def health_update(self):
@@ -150,7 +158,7 @@ class Player(pygame.sprite.Sprite):
         #if colliding with an enemy, hurt.
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
             audio.play_sound("ouch.mp3",)
-            self.sh.change_anim("hurt")
+            # self.sh.change_anim("hurt")
             self.health -= 1
             self.invincibility_counter = 60
         

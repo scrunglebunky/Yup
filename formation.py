@@ -51,13 +51,15 @@ class Formation():
             loops = (self.level_in_world-1) // spawn_len
             subtractor = loops * spawn_len
             #IF LOOPED:
-            self.spawn_list = self.world_data["manual_formations"][(self.level_in_world-1) - subtractor] #a list of characters to spawn, and that's it
+            if self.world_data["manual_loop"] or subtractor < 0:
+                self.spawn_list = self.world_data["manual_formations"][(self.level_in_world-1) - subtractor] #a list of characters to spawn, and that's it
+                print('wahoo')
             #IF NOT LOOPED: 
-            if subtractor > 0 and not self.world_data["manual_loop"]:
+            elif subtractor > 0 and not self.world_data["manual_loop"]:
                 self.spawn_list = self.random_formation()
 
         #06/23/2023 - RANDOM
-        if self.world_data["manual_type"] == 2:
+        elif self.world_data["manual_type"] == 2:
             # pick_manual is based off a value called "manual_influence", where if the value is satisfied, it will pick a manual formation instead of a random one
             pick_manual:bool = (random.randint(1,100) <= self.world_data["manual_influence"])
             if pick_manual: 
@@ -68,6 +70,7 @@ class Formation():
         
         else:
             self.spawn_list = self.random_formation()
+
 
             
 
@@ -165,7 +168,7 @@ class Formation():
 
     def attack(self,idle_char:list):
         for i in range(self.world_data['throwdown_amount']):
-            self.spawned_list[random.choice(idle_char)].state = 'attack'
+            self.spawned_list[random.choice(idle_char)].stchg('attack')
 
 
     def update_movement(self):
