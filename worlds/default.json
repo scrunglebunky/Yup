@@ -5,12 +5,13 @@
 
     "bg":"placeholder.bmp",
     "bg_size":[600,800],
-    "bg_speed":[0,1],
+    "bg_speed":[0,0.5],
     "bg_speed_changes":[
         ["level",5,[0,-1]],
         ["level",6,[0,1]],
         ["frame",6000,[3,-5]]
         ],
+    "bg_player_move":0.1,
 
     
     "levels":10,

@@ -12,6 +12,7 @@ import os,json,random
 - bg_size: resizing of bg, none defaults to the playfield area
 - bg_speed: movement of the background, in x,y format
 - bg_speed_changes: a list of movements in speed based on level ; [type_of_time,time,speed]; types of time: 'level','frames'
+- bg_player_move: if the bg should make slight movements in the player
 
 - levels: how long the world lasts
 
@@ -63,37 +64,37 @@ for _ in os.listdir("./worlds/"):
             worlds[str(_)] = json.load(raw)
 
         
-#6/1/2023 - LEVEL CLASS
-# The level class is going to simply ask what loaded file to pull from, and assign a class to it for easier usage 
-# With this, it can assign default values from the default.json file
-# It is also able to update the intensities for each level
-class Level():
-    def __init__(self,
-                 level=1, #used to calculate difficulties
-                 campaign_world:tuple = ("main_story.order",0), #What gets fed in during gameplay to figure out what level file is being used
-                 world_force:str = None #takes priority over campaign_world, used in level select
-                 ):
-        #6/1/2023 - WHAT LEVEL TO PULL FROM 
-        # Again, it checks for the forced world first, but if it is None, it pulls from campaign_world
-        # There is also error checking. 
-        # The world files do not need to contain all of the data seen in default
-        # So, in turn, this will copy the default file and merge it with the new content
-        self.alldata = worlds["default.json"]
-        try:
-            if world_force is not None:
-                self.alldata.update(worlds[world_force])
-            else: 
-                self.alldata.update(worlds[campaigns[campaign_world[0]][1]])
-        except KeyError:
-            self.alldata = worlds["default.json"]
+# #6/1/2023 - LEVEL CLASS
+# # The level class is going to simply ask what loaded file to pull from, and assign a class to it for easier usage 
+# # With this, it can assign default values from the default.json file
+# # It is also able to update the intensities for each level
+# class Level():
+#     def __init__(self,
+#                  level=1, #used to calculate difficulties
+#                  campaign_world:tuple = ("main_story.order",0), #What gets fed in during gameplay to figure out what level file is being used
+#                  world_force:str = None #takes priority over campaign_world, used in level select
+#                  ):
+#         #6/1/2023 - WHAT LEVEL TO PULL FROM 
+#         # Again, it checks for the forced world first, but if it is None, it pulls from campaign_world
+#         # There is also error checking. 
+#         # The world files do not need to contain all of the data seen in default
+#         # So, in turn, this will copy the default file and merge it with the new content
+#         self.alldata = worlds["default.json"]
+#         try:
+#             if world_force is not None:
+#                 self.alldata.update(worlds[world_force])
+#             else: 
+#                 self.alldata.update(worlds[campaigns[campaign_world[0]][1]])
+#         except KeyError:
+#             self.alldata = worlds["default.json"]
 
-        self.update_intensities(level=level)
+#         self.update_intensities(level=level)
 
-    def update_intensities(self,level):
-        self.alldata["spawn_time"]=random.randint((60-level),60)
-        self.alldata["spawn_amount"] = int((1+(0.1*level))//1)
-        self.alldata["max_char"] = random.randint(5,int(5+(0.1*level)//1))
-        # print(str(level),":",str(self.spawn_time),",",str(self.spawn_amount),",",str(self.maxChar))
+#     def update_intensities(self,level):
+#         self.alldata["spawn_time"]=random.randint((60-level),60)
+#         self.alldata["spawn_amount"] = int((1+(0.1*level))//1)
+#         self.alldata["max_char"] = random.randint(5,int(5+(0.1*level)//1))
+#         # print(str(level),":",str(self.spawn_time),",",str(self.spawn_amount),",",str(self.maxChar))
 
 
 #6/1/2023 - LEVEL FUNCTIONS

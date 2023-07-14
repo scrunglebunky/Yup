@@ -50,6 +50,12 @@ def play_song(name):
         pygame.mixer.music.load(PATH_songs+name)
         pygame.mixer.music.play(loops=-1)
 
+def change_volumes(ostvol:float = None, soundvol:float = None):
+    if ostvol != None:
+        pygame.mixer.music.set_volume(ostvol)
+    if soundvol != None:
+        for sound in sounds.values():
+            sound.set_volume(soundvol)
 
 
 load_all_songs()

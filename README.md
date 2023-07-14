@@ -19,7 +19,7 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
-- 
+- 7/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally
 - 6/30/23: made the configuration file usable
 - 6/30/23: made the screen and play dimensions resizeable, changed original resolution to 600x800 but scaled down
 - 6/24/23: FIXED THE FPS ISSUE

@@ -2,10 +2,13 @@
 {
     "./":[],
     "./images/characters/":[],
-    "./images/ui/":["placeholder.bmp","logo.png","score.png","debug.png","lives.png","life.png","weapon.png"],
-    "./images/bg/":["space.png","splash.png","uibox.png"],
+    "./images/ui/":["placeholder.bmp","logo.png","score.png","debug.png","lives.png","life.png","weapon.png","cursor.png","config_menu.png","on.png","off.png"],
+    "./images/bg/":["space.png","splash.png","uibox.png","test.png"],
     "resize":[
+        ["config_menu.png",[400,150]],
         ["logo.png",[200,150]],
-        ["life.png",[38,38]]
+        ["life.png",[38,38]],
+        ["on.png",[50,25]],
+        ["off.png",[50,25]]
     ]
 }

@@ -1,7 +1,7 @@
 {
-    "world_name":"SPAAAACE",
+    "world_name":"test",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"space.png"
+    "bg":"test.png"
 
 }

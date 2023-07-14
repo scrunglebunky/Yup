@@ -61,6 +61,7 @@ class State():
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
+        self.background.player_multiplier = self.world_data["bg_player_move"]
 
         # TEST - text spawn
         for i in range(0):
@@ -75,6 +76,7 @@ class State():
     def update(self):
         #Updating sprites
         self.background.update()
+        if self.world_data["bg_player_move"] != 0: self.background.update_offset(pos=self.player.rect.center[0])
         self.background.draw(self.window)
         self.sprites[0].update()
         self.sprites[0].draw(self.window)

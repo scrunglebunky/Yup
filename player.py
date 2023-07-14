@@ -37,7 +37,7 @@ class Player(pygame.sprite.Sprite):
             False, #moving right
         ]
         #how fast the character moves
-        self.speed = 5
+        self.speed = 7
         self.momentum = 0
 
         #HEALTH
