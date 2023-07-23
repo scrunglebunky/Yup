@@ -10,7 +10,7 @@ from options import settings
 
 #setting window values - THE OPTIONS IMPORT DOES HALF OF THE JOB ALREADY - THIS IS THE REST
 defaultcolor = "#AAAAAA"
-window = pygame.display.get_surface()
+window = pygame.display.get_surface() 
 pygame.display.play_pos = 20,20
 pygame.display.play_dimensions = 600,800 #oh cool, I can make a self variable in the pygame.display. hot.
 pygame.display.set_caption("YUP RevD")
@@ -31,7 +31,7 @@ data = {
 }
 
 #06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import state_play,ui_border,options
+import state_play,ui_border,options,state_pause
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
@@ -44,14 +44,33 @@ border = ui_border.Border()
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna start up every state as an object instead of a class
 states = {}
-state = "options"
+state = "pause"
 states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
 states["options"] = options.State(window=window)
+states["pause"] = state_pause.State(window=window,play_state=states["play"])
 
+#07/23/2023 - SWITCHING STATES
+# States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
+# States now have a method called "on_start" that will remedy this, which will be called in a function here
+# All states need to have a value called "next state", too, which will make it able to tell if the state is finished or not
+def state_switch(
+    cur_state #the current state used
+    ):
+    next_state = cur_state.next_state
+    if type(next_state) == str and next_state.lower() in states.keys():
+        cur_state.next_state = None #resetting next state
+        cur_state = states[next_state.lower()] #switching state
+        cur_state.on_start() #telling state it's been started
+    return cur_state
+    
+
+
+for i in range(100):states["play"].update()
 
 #setting the state
 cur_state = states[state]
 while run:
+
     #filling the screen in case something is offscreen
     window.fill(defaultcolor)
 
@@ -80,6 +99,7 @@ while run:
             #DEBUG - max FPS
             if event.key == pygame.K_1:
                 FPS = 0 if FPS == 60 else 60
+                
 
             
                 
@@ -88,6 +108,8 @@ while run:
 
     #updating states
     cur_state.update()
+    # checking if the state has to be changed
+    cur_state = state_switch(cur_state)
 
     #general update
     pygame.display.update()

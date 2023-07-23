@@ -63,13 +63,6 @@
 - [ ] implement changes in intensity
 - [x] sending characters into attack mode
 - [x] starting a new level when the formation is empty
-## CHARACTERS
-- [ ] NOPE
-- [ ] FIHS
-- [ ] BOBM
-- [ ] STIKMNA
-- [ ] ZAPP
-- [ ] SPIKE
 - [x] figure out what makes bg lag so bad
 - [ ] actually implement background changes in speed
 - [x] Contain more background info, like speeds, changes in speed, 
@@ -93,7 +86,11 @@
 - [ ] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
 - [ ] States having a string element saying what state to go to next, for MAIN to recognize
 - [ ] "Mod Folders" where the program has to recognize words with "anim_loadlist", "levels","order", etc. to plug into main.
-
+## SEPARATE -- NEW CHARACTER WORLD MAP
+- There will now be five classes for each formation made, for the characters to now each fly in together
+- - A (turret), B (generic), C (kamikazee). D (special), E (optional) (special2)
+- Instead of spawning each character in individually to a set pace, the characters will each rush in in their own pattern, together.
+- 
 
 
 # BUG REPORTS / ISSUES

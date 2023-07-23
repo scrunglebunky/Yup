@@ -18,6 +18,8 @@ class State():
                  level_in_world:int = 1,
                  repeat:bool = False
                  ):
+
+        self.next_state = None #Needed to determine if a state is complete
         self.sprites = sprites
         self.data = data
         self.fullwindow = window
@@ -72,6 +74,8 @@ class State():
 
         #06/24/2023 - Playing the song
         audio.play_song(self.world_data["song"])
+    
+    def on_start(self):... #__init__ v2, pretty much.
 
     def update(self):
         #Updating sprites
@@ -107,3 +111,9 @@ class State():
    
     def event_handler(self,event):
         self.player.controls(event)
+        #changing what comes next
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                self.next_state = "options"
+            if event.key == pygame.K_ESCAPE:
+                self.next_state = "pause"

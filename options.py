@@ -57,6 +57,8 @@ text.loaded_text["PRESS P TO APPLY"] = text.loaded_text["PRESS P TO APPLY"].rend
 class State():    
 
     def __init__(self,window:pygame.Surface):
+        self.next_state = None #Needed to determine if a state is complete
+
         self.window=window
         self.pos = 0
         self.keys = tuple(settings.keys())
@@ -65,6 +67,8 @@ class State():
         self.disp_pos = pygame.display.play_pos[0]+50,pygame.display.play_pos[1]+150 
         self.apgr_pos = (100,500)
         self.logo_pos = (50,25)
+
+    def on_start(self):... #__init__ v2, pretty much.
 
     def update(self):
         self.display_options()
