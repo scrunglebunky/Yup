@@ -72,11 +72,16 @@ class State():
             txt=text.Text(text=random.choice(["owo","uwu","hewwo","cwinge","howy fuck"]),vertex=(random.randint(0,450),random.randint(0,600)),pos=(random.randint(0,450),random.randint(0,600)),pattern="sine",duration=3600,modifier=random.randint(1,100),modifier2=(random.randint(1,25)/random.randint(1,100)),speed=spd)
             sprites[0].add(txt)
 
+        
+    
+    def on_start(self,**kwargs):#__init__ v2, pretty much.
         #06/24/2023 - Playing the song
         audio.play_song(self.world_data["song"])
-    
-    def on_start(self):... #__init__ v2, pretty much.
 
+    def on_end(self,**kwargs): #un-init, kind of
+        pygame.mixer.music.stop()
+
+    
     def update(self):
         #Updating sprites
         self.background.update()

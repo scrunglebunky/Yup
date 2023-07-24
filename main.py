@@ -58,14 +58,16 @@ def state_switch(
     ):
     next_state = cur_state.next_state
     if type(next_state) == str and next_state.lower() in states.keys():
-        cur_state.next_state = None #resetting next state
+        cur_state.on_end(); cur_state.next_state = None #resetting next state
         cur_state = states[next_state.lower()] #switching state
         cur_state.on_start() #telling state it's been started
+    elif type(next_state) == tuple and (type(next_state[0]) == str and next_state[0].lower() in states.keys()):
+        cur_state.on_end(); cur_state.next_state = None
+        cur_state = states[next_state[0].lower()]
+        cur_state.on_start(return_state = next_state[1])
     return cur_state
     
 
-
-for i in range(100):states["play"].update()
 
 #setting the state
 cur_state = states[state]

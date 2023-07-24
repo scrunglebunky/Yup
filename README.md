@@ -60,6 +60,7 @@
 - 4/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [x] A second value that can be added to the state, specifically for options to know what to return to. 
 - [ ] implement changes in intensity
 - [x] sending characters into attack mode
 - [x] starting a new level when the formation is empty

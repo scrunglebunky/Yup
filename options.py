@@ -58,6 +58,7 @@ class State():
 
     def __init__(self,window:pygame.Surface):
         self.next_state = None #Needed to determine if a state is complete
+        self.return_state = "title" #so the state knows what specifically to return to upon exit - specific to options
 
         self.window=window
         self.pos = 0
@@ -68,7 +69,11 @@ class State():
         self.apgr_pos = (100,500)
         self.logo_pos = (50,25)
 
-    def on_start(self):... #__init__ v2, pretty much.
+    def on_start(self,return_state:str="title",**kwargs): #__init__ v2, pretty much.
+        self.return_state = return_state
+
+    def on_end(self,**kwargs):... #un-init, kind of
+    
 
     def update(self):
         self.display_options()
@@ -120,6 +125,9 @@ class State():
                     mod_value[1] = round(mod_value[1],len(str(mod_value[2])))
             if event.key == pygame.K_p:
                 apply_settings()
+            #exitting
+            if event.key == pygame.K_ESCAPE:
+                self.next_state = self.return_state
 
     
 

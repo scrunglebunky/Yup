@@ -9,7 +9,8 @@ class State():
         self.logo_pos:list = [0,0] #[frames_in,y_pos] 
         self.bgpos = pygame.display.play_pos[0] + 35 , pygame.display.play_pos[1] + 38
 
-    def on_start(self):... #__init__ v2, pretty much.
+    def on_start(self,**kwargs):... #__init__ v2, pretty much.
+    def on_end(self,**kwargs):... #un-init, kind of
 
     def update(self):
         #displaying of all the pause graphics and such - likely heavily unoptimized.
@@ -22,7 +23,7 @@ class State():
         #changing what comes next
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
-                self.next_state = "options"
+                self.next_state = "options","pause"
             if event.key == pygame.K_q:
                 self.next_state = "play"
             if event.key == pygame.K_ESCAPE:
