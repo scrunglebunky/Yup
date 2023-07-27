@@ -119,6 +119,6 @@ class State():
         #changing what comes next
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
-                self.next_state = "options"
+                self.next_state = "options","play"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"

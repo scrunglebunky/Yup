@@ -19,6 +19,8 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 7/23/23: added a pause menu
+- 7/??/23: added an options screen
 - 7/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally
 - 6/30/23: made the configuration file usable
 - 6/30/23: made the screen and play dimensions resizeable, changed original resolution to 600x800 but scaled down
@@ -60,6 +62,7 @@
 - 4/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 
 - [ ] implement changes in intensity
 - [x] sending characters into attack mode

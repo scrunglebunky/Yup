@@ -51,6 +51,38 @@ def display_text(text:str,pos:tuple,window:pygame.display):
 #5/30/2023 - TEXT SPRITE
 # The text sprite is ripped from Rev C and edited.
 # It's pretty much just an text sprite that flies around and whatnot
+
+
+def load_text(
+    text: str = "WOW!",
+    pattern: str = "static",  # pattern, random.choice( [ "static", "linear", "sine", "squared" ] )
+    duration: str = -1,  # how many frames the item should last for. -1 equals infinity
+    size: int = None,  # resizable ; if None, no resize
+    font: str = "./data/font.ttf",  # the font ; could also be SetFont
+    fg: str = "white",  # foreground color
+    bg: str = "black",  # background color
+    pos: tuple = (0, 0),  # where item is placed, or the vertex of the function
+    vertex: tuple = (0, 0),  # used for sine and squared
+    modifier: int = 1,  # slope, sine vertical stretch, etc
+    modifier2: int = 1,  # sine horizontal stretch, idk what else
+    speed: int = 1,  # self explanatory - vertical movement
+    ):
+        # Setting the image, if it is loaded
+        if text in loaded_text.keys():
+            self.image = loaded_text[text]
+        # setting the image if it is not loaded
+        else:
+            loaded_text[text] = pygame.font.Font(font, 20).render(
+                str(text), True, fg, bg
+            )
+            image = loaded_text[text]
+        # resizing image
+        if size is not None:
+            image = pygame.transform.scale(
+                image, ((size // 2) * len(text), size)
+            )
+        return image
+
 class Text(pygame.sprite.Sprite):
     possible_patterns = ["static", "linear", "sine", "squared", "static sine"]
     screen_rect = pygame.Rect(0, 0, 450, 600)

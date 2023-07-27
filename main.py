@@ -31,7 +31,7 @@ data = {
 }
 
 #06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import state_play,ui_border,options,state_pause
+import state_play,ui_border,options,state_pause,state_title
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
@@ -44,33 +44,37 @@ border = ui_border.Border()
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna start up every state as an object instead of a class
 states = {}
-state = "pause"
+state = "title"
 states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
-states["options"] = options.State(window=window)
+states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
+states["title"] = state_title.State(window=window,)
 
 #07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
 # States now have a method called "on_start" that will remedy this, which will be called in a function here
 # All states need to have a value called "next state", too, which will make it able to tell if the state is finished or not
 def state_switch(
-    cur_state #the current state used
+    cur_state,state #the current state used
     ):
-    next_state = cur_state.next_state
-    if type(next_state) == str and next_state.lower() in states.keys():
+    if cur_state.next_state is not None:
+        state = cur_state.next_state
+    else: return cur_state,state
+    if type(state) == str and state.lower() in states.keys():
         cur_state.on_end(); cur_state.next_state = None #resetting next state
-        cur_state = states[next_state.lower()] #switching state
+        cur_state = states[state.lower()] #switching state
         cur_state.on_start() #telling state it's been started
-    elif type(next_state) == tuple and (type(next_state[0]) == str and next_state[0].lower() in states.keys()):
+    elif type(state) == tuple and (type(state[0]) == str and state[0].lower() in states.keys()):
         cur_state.on_end(); cur_state.next_state = None
-        cur_state = states[next_state[0].lower()]
-        cur_state.on_start(return_state = next_state[1])
-    return cur_state
+        cur_state = states[state[0].lower()]
+        cur_state.on_start(return_state = state[1])
+    return cur_state,state
     
 
 
 #setting the state
-cur_state = states[state]
+cur_state = states[state] ; cur_state.on_start()
+
 while run:
 
     #filling the screen in case something is offscreen
@@ -111,7 +115,8 @@ while run:
     #updating states
     cur_state.update()
     # checking if the state has to be changed
-    cur_state = state_switch(cur_state)
+    cur_state,state = state_switch(cur_state,state)
+    # print(state)
 
     #general update
     pygame.display.update()

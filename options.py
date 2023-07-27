@@ -27,8 +27,15 @@ with open("./data/config.json","r") as set_raw:
     settings.update(json.load(set_raw)) #this then merges all settings with the default settings
 del set_raw
 
+pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
+pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
+pygame.display.set_mode(pygame.display.dimensions, pygame.FULLSCREEN|pygame.SCALED if settings["fullscreen"][1] else pygame.SCALED|pygame.RESIZABLE)
+
+#07/13/2023 - finishing the rest of the imports now that the settings are complete
+import anim,ui_border
+
 #07/13/2023 - This actually applies the settings 
-def apply_settings():
+def apply_settings(border:ui_border.Border = None):
     #display
     pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
     pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
@@ -36,10 +43,9 @@ def apply_settings():
     #sounds
     audio.change_volumes(ostvol = settings["music_vol"][1] , soundvol = settings["sound_vol"][1])
     if settings["mute"][1]: audio.change_volumes(ostvol = 0 , soundvol = 0)
+    #fixing ui bar
+    if border is not None: border.__init__()
 apply_settings()
-
-#07/13/2023 - finishing the rest of the imports now that the settings are complete
-import anim
 
 
 #SETTINGS (KNOB) INDEX MEANINGS:
@@ -56,7 +62,7 @@ text.loaded_text["PRESS P TO APPLY"] = text.loaded_text["PRESS P TO APPLY"].rend
 
 class State():    
 
-    def __init__(self,window:pygame.Surface):
+    def __init__(self,window:pygame.Surface,border:ui_border.Border):
         self.next_state = None #Needed to determine if a state is complete
         self.return_state = "title" #so the state knows what specifically to return to upon exit - specific to options
 
@@ -68,6 +74,8 @@ class State():
         self.disp_pos = pygame.display.play_pos[0]+50,pygame.display.play_pos[1]+150 
         self.apgr_pos = (100,500)
         self.logo_pos = (50,25)
+
+        self.border = border
 
     def on_start(self,return_state:str="title",**kwargs): #__init__ v2, pretty much.
         self.return_state = return_state
@@ -124,7 +132,7 @@ class State():
                     mod_value[1] -= mod_value[2]
                     mod_value[1] = round(mod_value[1],len(str(mod_value[2])))
             if event.key == pygame.K_p:
-                apply_settings()
+                apply_settings(border = self.border )
             #exitting
             if event.key == pygame.K_ESCAPE:
                 self.next_state = self.return_state
