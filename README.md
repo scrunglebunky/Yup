@@ -4,18 +4,6 @@
 - Everything within the game is an attempt to stay modular, with each part being its own file, class, or function for me to use in other projects.
 - This is the fourth iteration of the game. In the third one, I got too obsessed with optimization and changing everything up.
 - This is my last attempt: a refresher that ensures that I make a simple, intuitive game that I do not overthink about.
-## YUP LORE
-- Yup is a species of YUPparian, a race of creature that rapidly evolved into different subspecies based off their environment. 
-- Some turned red, some grew spikes, and some just turned into fish. 
-- YUP is one of the last five (no lore importance) of the purebreeds of her species, and grows intolerant with her species as nothing is done to conserve the dying group.
-- It all comes to a head at one point when YUP loses her *HAM AND TURKEY SANDWICH*, causing her to blast off in a fit of rage to try and find it.
-- She has to blast through militant troops of each planet to uncover her food! Will she find it, or will she uncover something else?
-## MISCELLANEOUS YUP INFORMATION
-- Yup's species is a space ship, like the creatures in Fantasy Zone; she has an entirely humanoid body, roughly 2 heads tall in proportions, that retracts into her head in a cartoony manner.
-- This entire storyline is not meant to be taken seriously or to get too deep; it's stupid; it's YUP.
-- Mustard is dry. 08206
-## WORLD ORDER
-
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
