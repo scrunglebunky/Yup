@@ -19,6 +19,9 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 7/31/23: started working on title screen
+- 7/31/23: made high score graphics that are able to be used in the game
+- 7/31/23: revamped text values into sprites that can be now handled separately
 - 7/23/23: added a pause menu
 - 7/??/23: added an options screen
 - 7/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally

@@ -55,144 +55,24 @@ def display_text(text:str,pos:tuple,window:pygame.display):
 
 def load_text(
     text: str = "WOW!",
-    pattern: str = "static",  # pattern, random.choice( [ "static", "linear", "sine", "squared" ] )
-    duration: str = -1,  # how many frames the item should last for. -1 equals infinity
-    size: int = None,  # resizable ; if None, no resize
+    size: int = 20,  # resizable ; if None, no resize
+    resize: tuple = None, #if resize
     font: str = "./data/font.ttf",  # the font ; could also be SetFont
     fg: str = "white",  # foreground color
     bg: str = "black",  # background color
-    pos: tuple = (0, 0),  # where item is placed, or the vertex of the function
-    vertex: tuple = (0, 0),  # used for sine and squared
-    modifier: int = 1,  # slope, sine vertical stretch, etc
-    modifier2: int = 1,  # sine horizontal stretch, idk what else
-    speed: int = 1,  # self explanatory - vertical movement
     ):
         # Setting the image, if it is loaded
         if text in loaded_text.keys():
             self.image = loaded_text[text]
         # setting the image if it is not loaded
         else:
-            loaded_text[text] = pygame.font.Font(font, 20).render(
+            loaded_text[text] = pygame.font.Font(font, size).render(
                 str(text), True, fg, bg
             )
             image = loaded_text[text]
         # resizing image
-        if size is not None:
+        if resize is not None:
             image = pygame.transform.scale(
-                image, ((size // 2) * len(text), size)
+                image, (resize[0], resize[1])
             )
         return image
-
-class Text(pygame.sprite.Sprite):
-    possible_patterns = ["static", "linear", "sine", "squared", "static sine"]
-    screen_rect = pygame.Rect(0, 0, 450, 600)
-
-    def __init__(
-        self,
-        text: str = "WOW!",
-        pattern: str = "static",  # pattern, random.choice( [ "static", "linear", "sine", "squared" ] )
-        duration: str = -1,  # how many frames the item should last for. -1 equals infinity
-        size: int = None,  # resizable ; if None, no resize
-        font: str = "./data/font.ttf",  # the font ; could also be SetFont
-        fg: str = "white",  # foreground color
-        bg: str = "black",  # background color
-        pos: tuple = (0, 0),  # where item is placed, or the vertex of the function
-        vertex: tuple = (0, 0),  # used for sine and squared
-        modifier: int = 1,  # slope, sine vertical stretch, etc
-        modifier2: int = 1,  # sine horizontal stretch, idk what else
-        speed: int = 1,  # self explanatory - vertical movement
-    ):
-        pygame.sprite.Sprite.__init__(self)
-
-        # FIXING PATTERN
-        self.pattern = (
-            "static"
-            if pattern not in Text.possible_patterns or pattern == "static"
-            else pattern
-        )
-
-        # IMAGE REGISTRATION
-        if text in loaded_text.keys():
-            # if the image is loaded
-            self.image = loaded_text[text]
-        else:
-            # if the image is not loaded
-            print("TEXT NOT PRESENT, ADDING...")
-            loaded_text[text] = pygame.font.Font(font, 20).render(
-                str(text), True, fg, bg
-            )
-            self.image = loaded_text[text]
-        # resizing image
-        if size is not None:
-            self.image = pygame.transform.scale(
-                self.image, ((size // 2) * len(text), size)
-            )
-        self.rect = self.image.get_rect()
-
-        # positioning image
-        self.rect.center = pos
-
-        # turning around if wrong way
-        if (pos[0] < 0 and speed < 0) or (pos[0] > 450 and speed > 0):
-            speed *= -1
-        # making class items
-        self.pos, self.vertex = pos, vertex
-        self.modifier, self.modifier2 = modifier, modifier2
-        self.speed = speed
-
-        # counting up
-        self.counter = 0 if duration >= 0 else -2
-        self.duration = duration
-
-    def update(self):
-
-        #main update
-        self.counter += 1
-
-        #kill code
-        if (self.counter >= 60 and not self.on_screen()) or (
-            (self.duration != -1) and (self.counter >= self.duration)
-        ):
-            # print("ded")
-            self.kill()
-
-
-        # no movement
-        if self.pattern == "static":
-            return
-        
-        # sine in-place
-        elif self.pattern == "static sine":
-            # print(self.counter)
-            self.rect.center = (
-                self.rect.center[0],
-                # based off counter since this one doesn't move the x position
-                (
-                    self.modifier
-                    * math.sin((self.modifier2 * (self.counter)) + self.vertex[0])
-                )
-                + self.vertex[1],
-            )
-
-        # sine moving
-        elif self.pattern == "sine":
-            self.rect.center = (
-                self.rect.center[0] + self.speed,
-                # based off x position since this one moves the x position
-                (
-                    self.modifier
-                    * math.sin(
-                        (self.modifier2 * (self.rect.center[0])) + self.vertex[0]
-                    )
-                )
-                + self.vertex[1],
-            )
-
-        elif self.pattern == "slope":
-            pass
-
-        else:
-            self.kill()
-
-    def on_screen(self):
-        return self.rect.colliderect(Text.screen_rect)

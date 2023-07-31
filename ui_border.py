@@ -1,6 +1,7 @@
 #CODE BY ANDREW CHURCH
-import pygame,anim,text,random
-
+import pygame,anim,text,random,emblems
+from anim import all_loaded_images as img
+from emblems import Emblem as Em
 
 #06/22/2023 - UI BAR CLASS
 # The UI bar is something used by playstate to display things such as the score, background image, and logo.
@@ -37,44 +38,32 @@ class Border():
 
         #06/30/2023 - filling dynamic image sizes for the emblems
         #06/24/2023 - Adding EMBLEMS, which are just different UI symbols to add
-        Border.emblems = [ 
-            ( #LOGO EMBLEM
-                'logo.png',
-                (
+        Border.emblems = [
+            Em(
+                im = img["logo.png"],
+                coord = (
                     pygame.display.dimensions[0] - ( pygame.display.dimensions[0] - (pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0])),
-                    pygame.display.dimensions[1]*0.15 - (anim.all_loaded_images['logo.png'].get_height()/2)
-                )
-                
-            ),
-            ( #SCORE EMBLEM
-                "score.png", 
-                (
+                    pygame.display.dimensions[1]*0.15 - (anim.all_loaded_images['logo.png'].get_height()/2))), #LOGO
+            Em(
+                im=img["score.png"],
+                coord = (
                     pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0] + 25,
-                    pygame.display.dimensions[1]*0.4
-                )
-            ),
-            ( #DEBUG EMBLEM
-                "debug.png", 
-                (
+                    pygame.display.dimensions[1]*0.4)), #SCORE
+            Em(
+                im=img["debug.png"],
+                coord=(
                     pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0] + 25,
-                    pygame.display.dimensions[1]*0.53
-                )
-            ),
-            ( #LIVES EMBLEM
-                "lives.png", 
-                (
+                    pygame.display.dimensions[1]*0.53)), #DEBUG
+            Em(
+                im=img["lives.png"],
+                coord=(
                     pygame.display.dimensions[0]*0.016,
-                    pygame.display.dimensions[1] - anim.all_loaded_images['lives.png'].get_height() - 10
-                )
-            ),
-            ( #WEAPON EMBLEM
-                "weapon.png",
-                (
+                    pygame.display.dimensions[1] - anim.all_loaded_images['lives.png'].get_height() - 10)), #LIVES
+            Em(
+                im=img["weapon.png"],
+                coord=(
                     pygame.display.dimensions[0] - anim.all_loaded_images['weapon.png'].get_width() - 10,
-                    pygame.display.dimensions[1] - anim.all_loaded_images['weapon.png'].get_height() - 10,
-
-                )
-            )
+                    pygame.display.dimensions[1] - anim.all_loaded_images['weapon.png'].get_height() - 10,)), #WEAPON
         ]
 
         #06/25/2023 - giving corresponding images for num_coords
@@ -92,7 +81,7 @@ class Border():
         # main graphics
         window.blit(self.UI_img,self.UI_rect)
         for emblem in Border.emblems:
-            window.blit(anim.all_loaded_images[emblem[0]],emblem[1])
+            window.blit(emblem.image,emblem.rect)
 
         
     def draw_specific(self,window:pygame.Surface,lives:int,nums:tuple):
@@ -107,7 +96,7 @@ class Border():
                 reverse=Border.num_coords[i][2])
 
         # displaying lives
-        self.display_lives(window=window, location = ( 95, Border.emblems[3][1][1], ) , lives = lives)
+        self.display_lives(window=window, location = ( 95, Border.emblems[3].orig_coord[1], ) , lives = lives)
     
 
     def display_lives(self,window:pygame.Surface,location:tuple = (0,0),lives:int = 3):
