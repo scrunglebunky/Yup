@@ -35,7 +35,7 @@ data = {
 import state_play,ui_border,options,state_pause,state_title
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
-border = ui_border.Border()
+border = ui_border.Border(sprites=sprites)
 
 
 
@@ -108,9 +108,6 @@ while run:
                 FPS = 0 if FPS == 60 else 60
                 
 
-            
-                
-
         cur_state.event_handler(event=event)
 
     #updating states
@@ -118,6 +115,7 @@ while run:
     # checking if the state has to be changed
     cur_state,state = state_switch(cur_state,state)
     # print(state)
+    border.update()
 
     #general update
     pygame.display.update()

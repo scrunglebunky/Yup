@@ -1,5 +1,5 @@
 #Code by Andrew Church
-import pygame,text,math
+import pygame,text,math,random
 
 #07/30/2023 - ADDING EMBLEM SPRITES
 # These are going to be little sprites that are able to just show a normal ass surface with the ability to move from place to place
@@ -13,18 +13,18 @@ class Emblem(pygame.sprite.Sprite):
 
         self.pattern = None #None = Not playing, then anything else is an animation playing
         self.pattern_f = 0 #frames in a pattern
-        self.pattern_offset = (0,0) #what pattern affects
+        self.pattern_offset = [0,0] #what pattern affects
 
-    def update():
-        if self.pattern is not None:
-            self.pattern_f += 1
-        
-        self.rect.x += self.pattern_offset[0]
-        self.rect.y += self.pattern_offset[1]
+    def update(self):
+        if self.pattern is not None: self.pattern_f += 1; self.play_pattern()
+        self.rect.topleft = self.orig_coord[0]+self.pattern_offset[0],self.orig_coord[1]+self.pattern_offset[1]
     
     def play_pattern(self):
         if self.pattern == "sine":
             self.pattern_offset[1] = math.sin(self.pattern_f/10)*10
+        if self.pattern == "jagged":
+            self.pattern_offset[0] = random.randint(-2,2)
+            self.pattern_offset[1] = random.randint(-2,2)
     
     def reset_coord(self):
         self.rect.topleft = self.orig_coord

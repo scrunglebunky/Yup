@@ -19,8 +19,9 @@ class Border():
     num_coords = ()
 
     def __init__(self,
-        anim_bg:bool = False,
-        anim_logo:bool = False,
+        sprites:dict,
+        anim_bg:bool = True,
+        anim_logo:bool = True,
         UI_art:str = "uibox.png",
         ):
 
@@ -33,7 +34,10 @@ class Border():
         #06/22/2023 - Animation booleans / setting spritesheet info
         self.anim_bg:bool = anim_bg
         self.anim_logo:bool = anim_logo
-        self.animated = self.anim_bg and self.anim_logo
+        self.animated = self.anim_bg or self.anim_logo
+
+        #07/31/2023 - Sprites, as emblems are now sprites
+        self.sprites = sprites
 
 
         #06/30/2023 - filling dynamic image sizes for the emblems
@@ -65,6 +69,8 @@ class Border():
                     pygame.display.dimensions[0] - anim.all_loaded_images['weapon.png'].get_width() - 10,
                     pygame.display.dimensions[1] - anim.all_loaded_images['weapon.png'].get_height() - 10,)), #WEAPON
         ]
+        for emblem in Border.emblems:
+            self.sprites[3].add(emblem)
 
         #06/25/2023 - giving corresponding images for num_coords
         Border.num_coords = (
@@ -73,6 +79,8 @@ class Border():
             (pygame.display.dimensions[0],pygame.display.dimensions[1]*0.58,True), #clock offset to be 60fps
             (pygame.display.dimensions[0],pygame.display.dimensions[1]*0.63,True), #offset fps 
         )
+
+        Border.emblems[0].pattern = "jagged"
         
 
     
@@ -80,8 +88,9 @@ class Border():
     def draw(self,window:pygame.Surface):
         # main graphics
         window.blit(self.UI_img,self.UI_rect)
-        for emblem in Border.emblems:
-            window.blit(emblem.image,emblem.rect)
+        self.sprites[3].draw(window)
+
+        
 
         
     def draw_specific(self,window:pygame.Surface,lives:int,nums:tuple):
@@ -104,4 +113,6 @@ class Border():
             window.blit(anim.all_loaded_images["life.png"],(location[0] + i*38,location[1]))
 
     def update(self):
-        if not self.animated: return 
+        if not self.animated:return 
+        self.sprites[3].update()
+        print(Border.emblems[0].rect.topleft)
