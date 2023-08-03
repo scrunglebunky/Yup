@@ -10,6 +10,8 @@ class Emblem(pygame.sprite.Sprite):
         self.image = im
         self.rect = pygame.Rect(coord[0],coord[1],1,1)
         self.orig_coord = coord
+        self.coord = coord
+        self.destination = None
 
         self.pattern = None #None = Not playing, then anything else is an animation playing
         self.pattern_f = 0 #frames in a pattern
@@ -26,6 +28,15 @@ class Emblem(pygame.sprite.Sprite):
             self.pattern_offset[0] = random.randint(-2,2)
             self.pattern_offset[1] = random.randint(-2,2)
     
+    #instantly changing the position
+    def change_pos(self,pos:tuple,isCenter:bool=False):
+        if isCenter:
+            self.rect.center = pos
+            self.coord = self.rect.topleft
+        else:
+            self.coord = pos
+
+
     def reset_coord(self):
         self.rect.topleft = self.orig_coord
         

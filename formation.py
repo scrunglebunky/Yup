@@ -53,7 +53,6 @@ class Formation():
             #IF LOOPED:
             if self.world_data["manual_loop"] or subtractor < 0:
                 self.spawn_list = self.world_data["manual_formations"][(self.level_in_world-1) - subtractor] #a list of characters to spawn, and that's it
-                print('wahoo')
             #IF NOT LOOPED: 
             elif subtractor > 0 and not self.world_data["manual_loop"]:
                 self.spawn_list = self.random_formation()

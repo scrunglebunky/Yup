@@ -61,7 +61,7 @@ def generate_graphic(score,name) -> pygame.Surface:
     #generating the number
     num = text.load_text(score,size=20,resize=(100,25),fg="white",bg="black")
     #generating the name graphic
-    name = text.load_text(name,size=20,resize=(125,25),fg="white",bg="red")
+    name = text.load_text(name,size=20,resize=(125,25),fg="black",bg="white")
     #plastering them together
     full = pygame.Surface((250,25), pygame.SRCALPHA, 32)
     full.blit(name,(0,0)) ; full.blit(num,(150,0))

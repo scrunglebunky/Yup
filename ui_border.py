@@ -115,4 +115,3 @@ class Border():
     def update(self):
         if not self.animated:return 
         self.sprites[3].update()
-        print(Border.emblems[0].rect.topleft)
