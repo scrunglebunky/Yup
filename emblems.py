@@ -8,7 +8,7 @@ class Emblem(pygame.sprite.Sprite):
     def __init__(self,im:pygame.Surface,coord:tuple):
         pygame.sprite.Sprite.__init__(self)
         self.image = im
-        self.rect = pygame.Rect(coord[0],coord[1],1,1)
+        self.rect = self.image.get_rect()
         self.orig_coord = coord
         self.coord = coord
         self.destination = None
@@ -19,7 +19,7 @@ class Emblem(pygame.sprite.Sprite):
 
     def update(self):
         if self.pattern is not None: self.pattern_f += 1; self.play_pattern()
-        self.rect.topleft = self.orig_coord[0]+self.pattern_offset[0],self.orig_coord[1]+self.pattern_offset[1]
+        self.rect.topleft = self.coord[0]+self.pattern_offset[0],self.coord[1]+self.pattern_offset[1]
     
     def play_pattern(self):
         if self.pattern == "sine":
@@ -38,5 +38,5 @@ class Emblem(pygame.sprite.Sprite):
 
 
     def reset_coord(self):
-        self.rect.topleft = self.orig_coord
+        self.coord = self.orig_coord
         

@@ -5,12 +5,13 @@ FPS=60
 clock = pygame.time.Clock()
 run=True; cur_state = None
 
-#07/04/2023 - importing settings to use the universal file\
+#07/04/2023 - IMPORTING SETTINGS SETS THE SCREEN
 from options import settings
 
 #setting window values - THE OPTIONS IMPORT DOES HALF OF THE JOB ALREADY - THIS IS THE REST
 defaultcolor = "#AAAAAA"
 window = pygame.display.get_surface() 
+pygame.display.rect = pygame.display.get_surface().get_rect()
 pygame.display.play_pos = 20,20
 pygame.display.play_dimensions = 600,800 #oh cool, I can make a self variable in the pygame.display. hot.
 pygame.display.set_caption("YUP RevD")
@@ -49,7 +50,7 @@ state = "title"
 states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
-states["title"] = state_title.State(window=window,sprites=sprites)
+states["title"] = state_title.State(window=window,sprites=sprites,border=border)
 
 #07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
