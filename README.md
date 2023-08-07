@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 8/07/23: Finished title screen - of course it can be fixed a little more but still
 - 7/31/23: started working on title screen
 - 7/31/23: made high score graphics that are able to be used in the game
 - 7/31/23: revamped text values into sprites that can be now handled separately
@@ -53,7 +54,7 @@
 - 4/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
-- [ ] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
+- [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 
 - [ ] implement changes in intensity
 - [x] sending characters into attack mode
@@ -79,7 +80,7 @@
 - The gameplay state does not exit and go to game over states, it just reruns \_\_init\_\_. 
 - Characters do not individually run their own collision worries. This would be far too much code to run every frame. Instead, gameplay will individually check and run collision points for sprite classes whenever it is deemed fit. It worked for Shoot the Baby, it will work here.
 - [ ] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
-- [ ] States having a string element saying what state to go to next, for MAIN to recognize
+- [x] States having a string element saying what state to go to next, for MAIN to recognize
 - [ ] "Mod Folders" where the program has to recognize words with "anim_loadlist", "levels","order", etc. to plug into main.
 ## SEPARATE -- NEW CHARACTER WORLD MAP
 - There will now be five classes for each formation made, for the characters to now each fly in together
