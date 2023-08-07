@@ -5,7 +5,7 @@ import pygame,text,math,random
 # These are going to be little sprites that are able to just show a normal ass surface with the ability to move from place to place
 # This is mostly going to be used for the border, along with the level icons and scores and stuff.
 class Emblem(pygame.sprite.Sprite):
-    def __init__(self,im:pygame.Surface,coord:tuple):
+    def __init__(self,im:pygame.Surface,coord:tuple,isCenter:bool=False):
         pygame.sprite.Sprite.__init__(self)
         self.image = im
         self.rect = self.image.get_rect()
@@ -16,6 +16,9 @@ class Emblem(pygame.sprite.Sprite):
         self.pattern = None #None = Not playing, then anything else is an animation playing
         self.pattern_f = 0 #frames in a pattern
         self.pattern_offset = [0,0] #what pattern affects
+
+        if isCenter:
+            self.change_pos(coord,isCenter=True)
 
     def update(self):
         if self.pattern is not None: self.pattern_f += 1; self.play_pattern()

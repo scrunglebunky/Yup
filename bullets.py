@@ -14,7 +14,7 @@ class Bullet(pygame.sprite.Sprite):
     count = 0
     max = 2
 
-    def __init__(self,pos:tuple=(0,0),sound:str="quack.mp3",speed:int=15,is_default:bool = True, **kwargs):
+    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True, **kwargs):
         pygame.sprite.Sprite.__init__(self)
         
         self.image = Bullet.image

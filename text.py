@@ -38,15 +38,6 @@ def display_numbers(num:int,pos:tuple,window:pygame.display,reverse:tuple = Fals
             )))
 
 
-#5/31/2023 - LOADING NUMBERS   
-# pretty much it opens a file     
-def display_text(text:str,pos:tuple,window:pygame.display):
-    if text not in loaded_text.keys():
-        loaded_text[str(text)] = pygame.font.Font("./data/font.ttf",30)
-        loaded_text[str(text)] = loaded_text[str(text)].render(str(text),False,"black","white")
-    else:
-        window.blit(loaded_text[str(text)],pos)
-
 
 #5/30/2023 - TEXT SPRITE
 # The text sprite is ripped from Rev C and edited.

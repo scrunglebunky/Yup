@@ -25,6 +25,6 @@ class State():
             if event.key == pygame.K_p:
                 self.next_state = "options","pause"
             if event.key == pygame.K_q:
-                self.next_state = "play"
+                self.next_state = "title"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "play"
