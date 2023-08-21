@@ -54,6 +54,7 @@
 - 4/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
 - [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 
 - [ ] implement changes in intensity

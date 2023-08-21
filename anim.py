@@ -118,7 +118,8 @@ class Spritesheet():
     def __init__(self,
                  name:str,
                  current_anim:str = None,
-                 all_loaded_spritesheets:dict = all_loaded_spritesheets
+                 all_loaded_spritesheets:dict = all_loaded_spritesheets,
+                 resize:tuple=None
                  ): #DO NOT CONTAIN EXTENSION IN PATH
 
         
@@ -129,8 +130,12 @@ class Spritesheet():
         self.current_anim_loop = 0 #amount of loops
         self.current_anim_frame = 0 #frame of animation; NOTE THIS IS THE INDEX OF THE all_anim["frames"] TUPLE, NOT SPRITESHEETS
         self.current_anim_frame_len = 0 #length of frame of animation
-        self.image_displayed = 0 #the index of self.spritesheet; callback to actual sprite played
+        self.image_displayed = 0 #the index of self.spritesheet; callback to actual sprite played\\
+        self.resize = resize
         self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+        if self.resize is not None: self.image = pygame.transform.scale(self.image,self.resize)
+        self.changed = False #a way to tell if the image was changed, so the image isn't being reset every frame
+        self.looped = False #a checker for emblem to tell if an asset should be deleted
 
     def update(self) -> pygame.Surface: #this will be called every frame in the respective sprite
         #print("---\n",self.current_anim,self.image_displayed,self.current_anim_frame,self.current_anim_frame_len,sep="|")
@@ -146,6 +151,7 @@ class Spritesheet():
             # print('updated frame')
             self.current_anim_frame+=1
             self.current_anim_frame_len=0
+            self.changed = True
             
         #updating animation being played
         if self.current_anim_frame >= len(self.all_anim[self.current_anim]["frames"]):
@@ -158,11 +164,17 @@ class Spritesheet():
                 # print('animation loop completed')
                 self.current_anim_loop = 0
                 self.current_anim = self.all_anim[self.current_anim]["return_to"]
+            self.looped = True
 
-        #updating the actual current image being used
+        #updating the actual current image being used, as a numerical frame
         self.image_displayed = self.all_anim[self.current_anim]["frames"][self.current_anim_frame]
 
-        self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+        if self.changed:
+            self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+            if self.resize is not None: self.image = pygame.transform.scale(self.image,self.resize)
+            self.changed = False #resetting
+
+                
     
     def change_anim(self,new:str,overwrite:bool=False):
         #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it

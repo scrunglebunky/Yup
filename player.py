@@ -157,9 +157,12 @@ class Player(pygame.sprite.Sprite):
                    ):
         #if colliding with an enemy, hurt.
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
+            self.hurt()
+
+    def hurt(self,amount:int=1):
             audio.play_sound("ouch.mp3",)
             # self.sh.change_anim("hurt")
-            self.health -= 1
+            self.health -= amount
             self.invincibility_counter = 60
         
     def reset_movement(self):

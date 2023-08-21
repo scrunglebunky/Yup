@@ -121,3 +121,5 @@ def generate_sprite(path:str,
 #         columns = 999,
 #         output_name = "./images/characters/"+folder,
 #         column_cap = False)
+
+generate_sprite(path="./kaboom",columns=999,output_name="kaboom",column_cap=False)

@@ -1,4 +1,5 @@
 import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio
+from emblems import Emblem as Em
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
 # playstate is what handles gameplay, specifically
@@ -122,3 +123,12 @@ class State():
                 self.next_state = "options","play"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"
+            if event.key == pygame.K_0:
+                self.player.hurt()
+            if event.key == pygame.K_b:
+                self.sprites[0].add(
+                    Em(
+                        im=None,
+                        coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
+                        isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
+                ))

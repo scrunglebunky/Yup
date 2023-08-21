@@ -9,7 +9,8 @@
         "SPIKE",
         "STICKMAN",
         "YUP",
-        "ZAPP"
+        "ZAPP",
+        "kaboom"
     ],
     "./images/ui/":[]
 }
