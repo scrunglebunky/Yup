@@ -1,14 +1,1 @@
-{
-    "fullscreen":["switch",false],
-
-    "mute":["switch",false],
-    "music_vol":["knob",0.5,0.05],
-    "sound_vol":["knob",0.5,0.05],
-
-    "screen_width":["knob",900,5],
-    "screen_height":["knob",675,5],
-    "gameplay_width":["knob",450,5],
-    "gameplay_height":["knob",600,5],
-
-    "moving_backgrounds":["switch",true]
-}
+{"fullscreen": ["switch", false], "mute": ["switch", true], "music_vol": ["knob", 0.5, 0.05], "sound_vol": ["knob", 1.0, 0.05], "screen_width": ["knob", 900, 5], "screen_height": ["knob", 675, 5], "gameplay_width": ["knob", 450, 5], "gameplay_height": ["knob", 600, 5], "moving_backgrounds": ["switch", true]}

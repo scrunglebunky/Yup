@@ -33,6 +33,7 @@ class State():
         for emblem in self.border.emblems: #RESETTING BORDER EMBLEMS
             emblem.change_pos((-999,-999))
         State.emblems_perm["pressenter"].change_pos((pygame.display.rect.center[0],pygame.display.rect.height*0.75),isCenter=True) # positioning for press enter
+        State.emblems["highscores"].image = score.scoreboard
 
     def on_end(self):
         for emblem in self.border.emblems: #RESETTING BORDER EMBLEMS

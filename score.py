@@ -67,14 +67,20 @@ def generate_graphic(score,name) -> pygame.Surface:
     full.blit(name,(0,0)) ; full.blit(num,(150,0))
     #end
     return full
-#generating graphics for all characters
-scores_graphics = []
-for score in scores:
-    scores_graphics.append(generate_graphic(score[1],score[0]))
+
+#generating graphics for all players, though this has to be redone eventually
+def regenerate_graphics():
+    scores_graphics = []
+    for score in scores:
+        scores_graphics.append(generate_graphic(score[1],score[0]))
+    return scores_graphics
+scores_graphics = regenerate_graphics()
+
 #generating a full scoreboard image
-def generate_scoreboard(scores_graphics:list = scores_graphics) -> pygame.Surface:
+def generate_scoreboard(scores_graphics:list = scores_graphics, do_regenerate_graphics:bool=True) -> pygame.Surface:
     full = pygame.Surface((400,600),pygame.SRCALPHA,32)
     full.blit(img["high_scores.png"],(0,0))
+    if do_regenerate_graphics: scores_graphics = regenerate_graphics()
     for i in range(len(scores_graphics)):
         full.blit(scores_graphics[9-i],(75,150+40*i))
     return full

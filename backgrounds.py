@@ -5,13 +5,15 @@ import pygame,anim,options
 # The background is a class that stores an image and a position
 # This may be a little overkill for an entire class, but it works for organization purposes in my opinion
 class Background():
-    def __init__(self,img:str,resize:tuple,speed:tuple,**kwargs):
+    def __init__(self,img:str,resize:tuple,speed:tuple,border_type:int=0,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
         self.image = anim.all_loaded_images[img]
         self.image = pygame.transform.scale(self.image,resize)
         self.size = resize
         self.pos = [0,0]
         self.speed = speed
+        self.border_type = border_type #0 = based off gameplay loop ; 1 = based off full window
+        self.border = pygame.display.play_dimensions if self.border_type == 0 else pygame.display.dimensions if border_type == 1 else (0,0)
 
         #player positioning stuff
         self.player_offset = 0
@@ -23,10 +25,10 @@ class Background():
         self.pos[0] += self.speed[0] #x pos
         self.pos[1] += self.speed[1] #y pos
         #resetting positioning
-        if self.pos[0] > pygame.display.play_dimensions[0] or self.pos[0]*-1 > pygame.display.play_dimensions[0]:
+        if self.pos[0] > self.border[0] or self.pos[0]*-1 > self.border[0]:
             self.pos[0] = 0 #x position
             # print('reset x')
-        if self.pos[1] > pygame.display.play_dimensions[1] or self.pos[1]*-1 > pygame.display.play_dimensions[1]:
+        if self.pos[1] > self.border[1] or self.pos[1]*-1 > self.border[1]:
             self.pos[1] = 0 
             # print('reset y')
         

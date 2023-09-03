@@ -90,18 +90,22 @@ class Formation():
         # this is why EVERY FORMATION SHOULD HAVE THE SAME LENGTH OF COLUMNS IN EACH ROW NO MATTER WHAT
         self.pos[0] = ((pygame.display.play_dimensions[0]/2) - (len(self.spawn_list[1])*self.world_data["char_distance_x"] /2))
 
+        #08/21/2023 - Leave animation
+        # If a game over is encountered, the formation flies off the screen
+        self.leave_y_momentum = 0
+
 
     def update(self):
         #updating timer
         self.timer = self.timer + 1 if self.timer < self.timer_reset_rate else 1
         #updating states
-        self.update_movement()
         if self.state == 'start':self.state_start()
         if self.state == 'idle':self.state_idle()
         if self.state == 'destroy':self.state_destroy()
+        if self.state == 'leave':self.state_leave()
         #updating misc
         self.remove_dead()
-        self.check_for_atk()
+        
 
 
     def state_start(self):
@@ -142,10 +146,23 @@ class Formation():
                 self.duration = 0 
 
 
-    def state_idle(self):...
-    
+    def state_idle(self):
+        self.check_for_atk()
+        self.update_movement()
 
     def state_destroy(self):...
+
+    def state_leave(self):
+        self.leave_y_momentum -= 0.25
+        self.pos[1] += self.leave_y_momentum
+        if self.pos[1] <= -1000:
+            self.state = "destroy"
+        for char in self.spawned_list:
+            char.formationUpdate(self.pos)
+
+    def start_state_leave(self):
+        self.leave_y_momentum = 7
+        self.state = 'leave'
 
 
     def check_for_atk(self):

@@ -51,16 +51,17 @@ def load_text(
     font: str = "./data/font.ttf",  # the font ; could also be SetFont
     fg: str = "white",  # foreground color
     bg: str = "black",  # background color
+    add_to_loaded:bool = True #if the text should be added to the loaded_text thing to be used later
     ):
         # Setting the image, if it is loaded
         if text in loaded_text.keys():
-            self.image = loaded_text[text]
+            image = loaded_text[text]
         # setting the image if it is not loaded
         else:
-            loaded_text[text] = pygame.font.Font(font, size).render(
+            image = pygame.font.Font(font, size).render(
                 str(text), True, fg, bg
             )
-            image = loaded_text[text]
+            if add_to_loaded: loaded_text[text] = image
         # resizing image
         if resize is not None:
             image = pygame.transform.scale(

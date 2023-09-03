@@ -44,7 +44,10 @@ def apply_settings(border:ui_border.Border = None):
     audio.change_volumes(ostvol = settings["music_vol"][1] , soundvol = settings["sound_vol"][1])
     if settings["mute"][1]: audio.change_volumes(ostvol = 0 , soundvol = 0)
     #fixing ui bar
-    if border is not None: border.__init__()
+    if border is not None: border.__init__(sprites=border.sprites)
+    #writing data
+    with open("./data/config.json","w") as data:
+        data.write(json.dumps(settings))
 apply_settings()
 
 

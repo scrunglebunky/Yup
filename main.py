@@ -23,6 +23,7 @@ sprites = {
     1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
     2:pygame.sprite.Group(), #ENEMY SPRITES
     3:pygame.sprite.Group(), #EMBLEMS
+    4:pygame.sprite.Group(), #STATE-SPECIFIC
 }
 
 #07/04/2023 - UNIVERSAL ARGS PROBLEM
@@ -33,7 +34,7 @@ data = {
 }
 
 #06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import state_play,ui_border,options,state_pause,state_title
+import state_play,ui_border,options,state_pause,state_title,state_gameover
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border(sprites=sprites)
@@ -44,13 +45,14 @@ border = ui_border.Border(sprites=sprites)
 #07/02/2023 - ADDING SPECIFIC STATES
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
-# Because of this, it's just gonna start up every state as an object instead of a class
+# Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title"
+state = "play"
 states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
 states["title"] = state_title.State(window=window,sprites=sprites,border=border)
+states["gameover"] = state_gameover.State(window=window,sprites=sprites,play_state=states["play"])
 
 #07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
@@ -73,7 +75,6 @@ def state_switch(
     return cur_state,state
     
 
-
 #setting the state
 cur_state = states[state] ; cur_state.on_start()
 
@@ -85,25 +86,22 @@ while run:
     #06/23/2023 - drawing border to window 
     border.draw(window)
     #06/x/2023 - adding numbers to be drawn to the border
-    if state == "play":
-        border.draw_specific(
-            window = window, 
-            lives = cur_state.player.health, 
-            nums = [
-                data["score"],
-                round(clock.get_fps(),2),
-                round(data["clock_offset"],2),
-                round(clock.get_fps()*data["clock_offset"],2),
-                ]
-            ) 
+    border.draw_specific(
+        window = window, 
+        lives = states["play"].player.health, 
+        nums = [
+            data["score"],
+            round(clock.get_fps(),2),
+            round(data["clock_offset"],2),
+            round(clock.get_fps()*data["clock_offset"],2),
+            ]
+        ) 
 
     #event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_f:
-                pygame.display.toggle_fullscreen()
             #DEBUG - max FPS
             if event.key == pygame.K_1:
                 FPS = 0 if FPS == 60 else 60

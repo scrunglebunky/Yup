@@ -17,7 +17,7 @@ class State():
                  world:int = 1,
                  level:int = 1,
                  level_in_world:int = 1,
-                 repeat:bool = False
+                 is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  ):
 
         self.next_state = None #Needed to determine if a state is complete
@@ -29,7 +29,8 @@ class State():
         # YUP has a touhou-like border surrounding the entire game as it works
         # Because of this, gameplay will have its own entire tiny display to work with 
         # It still saves the original pygame window, but this is just to draw the display to.abs
-        self.window = pygame.Surface(pygame.display.play_dimensions).convert_alpha()
+        if not is_restart: #it only makes this the first time
+            self.window = pygame.Surface(pygame.display.play_dimensions).convert_alpha()
 
         #Player spawn
         self.bar = ( #the field the player is able to move along
@@ -83,7 +84,7 @@ class State():
         pygame.mixer.music.stop()
 
     
-    def update(self):
+    def update(self, draw=True):
         #Updating sprites
         self.background.update()
         if self.world_data["bg_player_move"] != 0: self.background.update_offset(pos=self.player.rect.center[0])
@@ -92,7 +93,7 @@ class State():
         self.sprites[0].draw(self.window)
         self.formation.update()
         #06/23/2023 - Drawing gameplay window to full window
-        self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False,collided=pygame.sprite.collide_mask)
@@ -100,12 +101,7 @@ class State():
             key.on_collide(2)
             value[0].on_collide(1)
 
-        #06/01/2023 - TEST - drawing positioning for the formation for test purposes
-        # self.window.blit(anim.all_loaded_images["placeholder.bmp"],self.formation.pos)
-
-        #06/18/2023 - Displaying the score
-        # text.display_numbers(self.data["score"],pos=(pygame.display.dimensions[0],0),window=self.window,reverse=True)
-
+        
         #06/18/2023 - Starting a new level
         if self.formation.completed_level:
             self.level += 1
@@ -114,6 +110,10 @@ class State():
                 levels.update_intensities(self.level,self.world_data)
             self.formation.empty()
             self.formation.__init__(self.player,self.world_data,self.sprites,self.data,self.level,self.level_in_world)
+
+        #08/21/2023 - Game Over - opening a new state if the player is dead
+        if self.player.health <= 0:
+            self.next_state = "gameover"
    
     def event_handler(self,event):
         self.player.controls(event)
@@ -132,3 +132,6 @@ class State():
                         coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
                         isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
                 ))
+    
+
+        

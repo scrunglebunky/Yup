@@ -160,10 +160,12 @@ class Player(pygame.sprite.Sprite):
             self.hurt()
 
     def hurt(self,amount:int=1):
-            audio.play_sound("ouch.mp3",)
-            # self.sh.change_anim("hurt")
-            self.health -= amount
-            self.invincibility_counter = 60
+        # self.sh.change_anim("hurt")
+        self.health -= amount
+        self.invincibility_counter = 60
+        audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
+        if self.health <= 0: self.kill()
+
         
     def reset_movement(self):
         pass
