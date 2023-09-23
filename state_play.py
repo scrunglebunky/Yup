@@ -6,24 +6,29 @@ from emblems import Emblem as Em
 # therefore, this state holds quite a lot of information!
 
 class State():
-    data:dict = None
-    sprites:dict = None
+    sprites = { #sprites are now state-specific hahaha
+            0:pygame.sprite.Group(), #ALL SPRITES
+            1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
+            2:pygame.sprite.Group(), #ENEMY SPRITES
+            3:pygame.sprite.Group(), #BULLET SPRITES
+        }
 
     def __init__(self,
-                 data:dict,
-                 sprites:dict,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 1,
-                 level:int = 1,
+                 world:int = 0,
+                 level:int = 0,
                  level_in_world:int = 1,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  ):
 
         self.next_state = None #Needed to determine if a state is complete
-        self.sprites = sprites
-        self.data = data
         self.fullwindow = window
+
+
+        #resetting the sprite groups
+        for group in self.sprites.values():
+            group.empty()
 
         #06/23/2023 - SETTING THE GAMEPLAY WINDOW
         # YUP has a touhou-like border surrounding the entire game as it works
@@ -40,8 +45,8 @@ class State():
             1, #gravity. 
             )
             
-        self.player = player.Player(bar=self.bar,sprite_groups=self.sprites)
-        sprites[0].add(self.player); sprites[1].add(self.player)
+        self.player = player.Player(bar=self.bar,sprite_groups=State.sprites)
+        State.sprites[0].add(self.player); State.sprites[1].add(self.player)
 
         #06/01/2023 - Loading in level data
         self.campaign = campaign
@@ -59,13 +64,11 @@ class State():
             player = self.player,
             world_data = self.world_data,
             level=self.level,
-            data=self.data,
             level_in_world=self.level_in_world, 
-            sprites=self.sprites)
+            sprites=State.sprites,)
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
-        self.background.player_multiplier = self.world_data["bg_player_move"]
 
         # TEST - text spawn
         for i in range(0):
@@ -73,6 +76,12 @@ class State():
             if spd == 0: spd = 1
             txt=text.Text(text=random.choice(["owo","uwu","hewwo","cwinge","howy fuck"]),vertex=(random.randint(0,450),random.randint(0,600)),pos=(random.randint(0,450),random.randint(0,600)),pattern="sine",duration=3600,modifier=random.randint(1,100),modifier2=(random.randint(1,25)/random.randint(1,100)),speed=spd)
             sprites[0].add(txt)
+
+        #relating to advance sprite
+        self.in_advance:bool = False #if true, will not update much besides the background and player
+
+        
+
 
         
     
@@ -87,34 +96,64 @@ class State():
     def update(self, draw=True):
         #Updating sprites
         self.background.update()
-        if self.world_data["bg_player_move"] != 0: self.background.update_offset(pos=self.player.rect.center[0])
         self.background.draw(self.window)
-        self.sprites[0].update()
-        self.sprites[0].draw(self.window)
+        State.sprites[0].update()
+        State.sprites[0].draw(self.window)
         self.formation.update()
         #06/23/2023 - Drawing gameplay window to full window
         if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
+        #ending function early if advancing
+        if self.in_advance: return 
+
         #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist=pygame.sprite.groupcollide(State.sprites[1],State.sprites[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist2=pygame.sprite.groupcollide(State.sprites[2],State.sprites[3],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             key.on_collide(2)
             value[0].on_collide(1)
+        for key,value in collidelist2.items():
+            key.on_collide(3)
+            value[0].on_collide(2)
 
         
         #06/18/2023 - Starting a new level
-        if self.formation.completed_level:
-            self.level += 1
-            self.level_in_world += 1
-            if self.world_data["dynamic_intensity"]:
-                levels.update_intensities(self.level,self.world_data)
-            self.formation.empty()
-            self.formation.__init__(self.player,self.world_data,self.sprites,self.data,self.level,self.level_in_world)
-
+        if self.formation.cleared:
+            if self.level_in_world+1 > self.world_data["levels"]:
+                self.next_state = "advance"
+                return
+            else:
+                self.level += 1
+                self.level_in_world += 1
+                if self.world_data["dynamic_intensity"]:
+                    levels.update_intensities(self.level,self.world_data)
+                self.formation.empty()
+                #checking to start the advance state
+            self.formation.__init__(
+                world_data = self.world_data,
+                level=self.level,
+                level_in_world=self.level_in_world, 
+                sprites=State.sprites,
+                player=self.player,)
+            print('up-dayy-tedd')
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
             self.next_state = "gameover"
-   
+
+
+    def new_world(self):
+
+        self.world += 1
+        self.level_in_world = 0
+        self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
+        #updating based on intensity
+        if self.world_data["dynamic_intensity"]:
+            levels.update_intensities(self.level,self.world_data)
+        #changing bg
+        self.background.change(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
+
+
+
     def event_handler(self,event):
         self.player.controls(event)
         #changing what comes next
@@ -125,13 +164,12 @@ class State():
                 self.next_state = "pause"
             if event.key == pygame.K_0:
                 self.player.hurt()
+            if event.key == pygame.K_2:
+                self.formation.cleared = True
             if event.key == pygame.K_b:
-                self.sprites[0].add(
+                State.sprites[0].add(
                     Em(
                         im=None,
                         coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
                         isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
                 ))
-    
-
-        

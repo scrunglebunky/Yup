@@ -60,7 +60,14 @@ for directory,filelist in anim_loadlist.items():
         all_loaded_spritesheets[filename] = (current_file,generate_sprite(current_file))
         #loading animation files if existent
         if current_file["ANIM"] is not None:
-            with open("./images/characters/"+str(current_file["ANIM"]),"r") as raw:
+            with open("./images/characters/anim/"+str(current_file["ANIM"]),"r") as raw:
+                anim_file = json.load(raw)
+                all_loaded_spritesheets[filename][0]["anim"] = anim_file
+            #5/25/23 - FIXING ANIMATION FPSes"
+            for animation in anim_file.keys():
+                anim_file[animation]["FPS"] = 60/anim_file[animation]["FPS"]
+        else:
+            with open("./images/characters/anim/default.json","r") as raw:
                 anim_file = json.load(raw)
                 all_loaded_spritesheets[filename][0]["anim"] = anim_file
             #5/25/23 - FIXING ANIMATION FPSes"
@@ -179,6 +186,8 @@ class Spritesheet():
     def change_anim(self,new:str,overwrite:bool=False):
         #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it
         if "interrupt" in self.all_anim[self.current_anim].keys() and not self.all_anim[self.current_anim]["interrupt"] and not overwrite:return
+        #checking for if the animation even exists
+        if self.current_anim not in self.all_anim.keys():return
         #resets all frames, changes current animation
         self.current_anim = new
         self.current_anim_frame = 0

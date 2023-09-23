@@ -5,9 +5,10 @@ from text import loaded_text as txt
 class State():
     emblems = {}
     emblems_perm = {}
-    def __init__(self,window:pygame.Surface,sprites:dict,border): #Remember init is run only once, ever.
+    sprites=pygame.sprite.Group()
+
+    def __init__(self,window:pygame.Surface,border): #Remember init is run only once, ever.
         self.window=window
-        self.sprites=sprites
         self.border=border
         self.next_state = None
 
@@ -22,9 +23,9 @@ class State():
             "pressenter":Em(im=txt["INSERT A COIN (OR PRESS ENTER)"],coord=(-999,-999),isCenter=True)
         }
         for emblem in State.emblems.values():
-            self.sprites[3].add(emblem)
+            State.sprites.add(emblem)
         for emblem in State.emblems_perm.values():
-            self.sprites[3].add(emblem)
+            State.sprites.add(emblem)
     
     
     def on_start(self):
@@ -50,7 +51,6 @@ class State():
         # The UI elements are missing; gone, and most of what is happening is just random icon shennanigans
         # A few things will flash by, like the high score menu, some gameplay snippets, and the lore
         # This stuff will all cycle by from left to right, in the same sinewave motion
-        # CHANGE THE WAY TEXT.PY WORKS FIRST. DO IT NOW. RIGHT NOW. WHEN YOU WAKE UP.
         self.frames += 1
         if self.frames >= 480:
             if self.id <= (len(self.elements)-1):
@@ -62,7 +62,8 @@ class State():
             State.emblems[self.elements[self.id]].change_pos(pygame.display.rect.center,isCenter=True)
             self.frames = 0
         #08/02/2023 - drawing graphical stuff
-        self.sprites[3].draw(self.window)
+        State.sprites.update()
+        State.sprites.draw(self.window)
 
     def event_handler(self,event):
         if event.type == pygame.KEYDOWN:

@@ -7,10 +7,11 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 9/21/23: redid characters, almost finished with redoing the formation, redid characters spawning system, redid levels, patched bugs, levels can advance now, fixed high scores
+- 9/05/23: Finished all of game over, sprite groups fixed, etc. 
+- 9/01/23: Almost finished the game over screen, I just have to fix bugs relating to **emptying scores**, **sprite groups**, and **backgrounds**
 - 8/07/23: Finished title screen - of course it can be fixed a little more but still
-- 7/31/23: started working on title screen
-- 7/31/23: made high score graphics that are able to be used in the game
-- 7/31/23: revamped text values into sprites that can be now handled separately
+- 7/31/23: started working on title screen, made high score graphics that are able to be used in the game, revamped text values into sprites that can be now handled separately
 - 7/23/23: added a pause menu
 - 7/??/23: added an options screen
 - 7/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally

@@ -8,8 +8,11 @@
         "lives.png","life.png","weapon.png","cursor.png",
         "config_menu.png","on.png","off.png","paused.png","pauseborder.png",
         "high_scores.png","hiscore.png","hiscore_name.png",
-        "gameover.png","gameover_score.png","gameover_level.png","gameover_rank.png","gameover_return.png"],
-    "./images/bg/":["space.png","splash.png","uibox.png","test.png","game_over_bg.png"],
+        "gameover.png","gameover_score.png","gameover_level.png","gameover_rank.png","gameover_return.png",
+        "levelcomplete.png"],
+    "./images/bg/":[
+        "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
+        "world1.png","world2.png"],
     "resize":[
         ["config_menu.png",[400,150]],
         ["logo.png",[200,150]],
@@ -25,6 +28,7 @@
         ["gameover_rank.png",[200,100]],
         ["gameover_return.png",[400,200]],
         ["hiscore.png",[300,225]],
-        ["hiscore_name.png",[200,100]]
+        ["hiscore_name.png",[200,100]],
+        ["levelcomplete.png",[450,225]]
     ]
 }

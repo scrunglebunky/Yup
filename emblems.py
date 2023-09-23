@@ -8,7 +8,8 @@ class Emblem(pygame.sprite.Sprite):
     def __init__(self,
     im:pygame.Surface,coord:tuple,isCenter:bool=False,
     animated:bool=False,animation_name:float="kaboom",animation:float="idle",animation_resize:tuple=None,animation_killonloop:bool=False,
-    numerical:bool=False,number=0,number_resize:tuple=None,number_fontsize:int=20,number_extra=["white","black"]
+    numerical:bool=False,number=0,number_resize:tuple=None,number_fontsize:int=20,number_extra=["white","black"],
+    pattern:str=None
     ):
         pygame.sprite.Sprite.__init__(self)
         
@@ -16,7 +17,7 @@ class Emblem(pygame.sprite.Sprite):
         self.coord = coord
         self.destination = None
 
-        self.pattern = None #None = Not playing, then anything else is an animation playing
+        self.pattern = pattern #None = Not playing, then anything else is an animation playing
         self.pattern_f = 0 #frames in a pattern
         self.pattern_offset = [0,0] #what pattern affects
 

@@ -1,5 +1,5 @@
 {
-    "NAME": "./images/characters/kaboom",
+    "NAME": "./images/characters/img/kaboom",
     "ANIM": "kaboom_anim.json",
     "PATH": "./kaboom",
     "SHEET_SIZE": [

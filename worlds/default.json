@@ -3,7 +3,7 @@
     "ui_type":"default",
     "song":"meowchill.mp3",
 
-    "bg":"placeholder.bmp",
+    "bg":"test.png",
     "bg_size":[600,800],
     "bg_speed":[0,2],
     "bg_speed_changes":[
@@ -11,17 +11,12 @@
         ["level",6,[0,1]],
         ["frame",6000,[3,-5]]
         ],
-    "bg_player_move":0.1,
 
     
     "levels":10,
 
     "char_distance_x":45, 
     "char_distance_y":45,
-    "char_min_width":5,
-    "char_min_height":2,
-    "char_max_width":10,
-    "char_max_height":5,
 
     "throwdown_time":32, 
     "throwdown_amount":1,
@@ -33,7 +28,6 @@
         [0,1,1,1]
     ],
 
-    "imports":["nope","spike"],
     "bullets":[],
     "drop_health": 5,
     "drop_bullet": 20, 
@@ -41,15 +35,29 @@
 
     "manual_formations":[
         [
-            ["nope","nope","nope"],
-            ["spike","spike","spike"],
-            ["    ","      ","    "]
+            "AAAAAAAAAA",
+            "BBBBBBBBBB",
+            "CCCCCCCCCC"
+        ],
+        [
+            "AAAAABBBBB",
+            "BBBBBAAAAA",
+            "ABCABCABCA"
         ]
     ],
-    "manual_type":1, 
-    "manual_loop":true,
-    "manual_influence":0,
-    "manual_levels":[0,1],
+    "random":true,
+    "manual_ordered":true,
+    "manual_order":[0,1],
+
+    "skins":{
+        "A":"nope_A",
+        "B":"nope_B",
+        "C":"nope_C",
+        "D":"nope_D"
+    },
+    "overwrite":{
+        "D":"nope"
+    },
 
     "boss_level":false,
     "boss_name":"ufo"

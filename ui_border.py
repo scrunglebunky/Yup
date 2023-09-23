@@ -17,9 +17,9 @@ class Border():
     # This will be a tuple filled with coordinates
     # Main will then feed in another tuple filled with specific number assets to feed into these positions
     num_coords = ()
+    sprites = pygame.sprite.Group() #all sprites used in the state
 
     def __init__(self,
-        sprites:dict,
         anim_bg:bool = True,
         anim_logo:bool = True,
         UI_art:str = "uibox.png",
@@ -35,9 +35,6 @@ class Border():
         self.anim_bg:bool = anim_bg
         self.anim_logo:bool = anim_logo
         self.animated = self.anim_bg or self.anim_logo
-
-        #07/31/2023 - Sprites, as emblems are now sprites
-        self.sprites = sprites
 
 
         #06/30/2023 - filling dynamic image sizes for the emblems
@@ -70,7 +67,7 @@ class Border():
                     pygame.display.dimensions[1] - anim.all_loaded_images['weapon.png'].get_height() - 10,)), #WEAPON
         ]
         for emblem in Border.emblems:
-            self.sprites[3].add(emblem)
+            Border.sprites.add(emblem)
 
         #06/25/2023 - giving corresponding images for num_coords
         Border.num_coords = (
@@ -88,7 +85,7 @@ class Border():
     def draw(self,window:pygame.Surface):
         # main graphics
         window.blit(self.UI_img,self.UI_rect)
-        self.sprites[3].draw(window)
+        Border.sprites.draw(window)
 
         
 
@@ -114,4 +111,4 @@ class Border():
 
     def update(self):
         if not self.animated:return 
-        self.sprites[3].update()
+        Border.sprites.update()

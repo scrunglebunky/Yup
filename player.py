@@ -23,21 +23,22 @@ class Player(pygame.sprite.Sprite):
         self.sprite_groups = sprite_groups
 
         #IMAGE AND POSITIONING
-        # self.sh = anim.Spritesheet("YUP","idle")
-        # self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
-        self.image = Player.image
+        self.sh = anim.Spritesheet("YUP","idle")
+        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
         self.rect = self.image.get_rect()
         self.rect.center = (300,self.bar[1])
 
         #MOVEMENT CODE
         self.movement = [
-            0, #frames in up jumping movement, 30 frame limit
-            0, #frames in down jumping movement, 30 frame limit
+            0, #y velocity
             False, #moving left
             False, #moving right
+            False, #jumping
+            False, #crouching
         ]
         #how fast the character moves
         self.speed = 7
+        self.crouch_speed = 3
         self.momentum = 0
 
         #HEALTH
@@ -45,22 +46,38 @@ class Player(pygame.sprite.Sprite):
         self.invincibility_counter = 0 
         self.dead = self.health < 1
 
+        #EXTRA
+        self.autoshoot = False
+
 
 
     def update(self):
         #SETTING THE IMAGE. I have no issue resetting the image every frame because it's just a callback to an object
-        self.image = Player.image
-        # self.sh.update()
+        try:
+            self.sh.update()
+            self.image = self.sh.image
+        except: 
+            self.image = Player.image
+        
 
         #07/09/2023 - rotating the image based on movement
-        if self.momentum != 0:
-            self.image = pygame.transform.rotate(Player.image,self.momentum*-2)
-        if self.movement[0] > 0:
-            self.image = pygame.transform.rotate(Player.image,self.movement[0]*11)
+        try:
+            if self.momentum != 0 and not self.movement[4]:
+                self.image = pygame.transform.rotate(self.image,self.momentum*-2)
+        except:...
 
         #collision is just movement
         self.collision()
         self.health_update()
+
+
+        #debug
+        if self.autoshoot:
+            bullet=bullets.Bullet(self.rect.center)
+            bullets.Bullet.count-=1
+            self.sprite_groups[0].add(bullet)
+            self.sprite_groups[3].add(bullet)
+
 
 
 
@@ -69,80 +86,81 @@ class Player(pygame.sprite.Sprite):
         if event.type == pygame.KEYDOWN:
             #ENGAGING the movement
             if event.key == pygame.K_LEFT:
-                self.movement[2] = True
+                self.movement[1] = True
             if event.key == pygame.K_RIGHT:
-                self.movement[3] = True
+                self.movement[2] = True
 
 
             #STARTING THE JUMPS
-            if event.key == pygame.K_UP and self.movement[0] == 0:
-                if self.movement[1] > 0: 
-                    self.movement[1] = 60
-                else:
-                    self.movement[0] = 1
-
-            if event.key == pygame.K_DOWN and self.movement[1] == 0:
-                if self.movement[0] > 0: 
-                    self.movement[0] = 60
-                else:
-                    self.movement[1] = 1
+            if event.key == pygame.K_UP and not self.movement[3]:
+                self.movement[0]=-6
+                self.movement[3]=True
+                self.change_anim("jump")
+            if event.key == pygame.K_DOWN and self.movement[3]:
+                self.movement[0]=25
+            elif event.key == pygame.K_DOWN:
+                #crouching
+                self.change_anim("crouch")
+                self.movement[4] = True
+                
 
             #SHOOTING
-            if event.key == pygame.K_x or event.key == pygame.K_z:
+            if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
                 bullet=bullets.Bullet(self.rect.center)
                 self.sprite_groups[0].add(bullet)
-                self.sprite_groups[1].add(bullet)
-                # if not bullet.kill_on_spawn: self.sh.change_anim("shoot")
+                self.sprite_groups[3].add(bullet)
+                if not bullet.kill_on_spawn: self.change_anim("shoot")
+
+            #AUTOSHOOT
+            if event.key == pygame.K_a:
+                self.autoshoot = not self.autoshoot
 
 
         #RELEASING movement
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
-                self.movement[2] = False
+                self.movement[1] = False
             if event.key == pygame.K_RIGHT:
-                self.movement[3] = False
+                self.movement[2] = False
+            if event.key == pygame.K_DOWN:
+                self.movement[4] = False
+                self.change_anim('idle')
         
     def collision(self):
     
         #most collision will now be done in the state, instead of by invidual characters
         #this is so there's not a huge loop of characters colliding
         #it removes a *shred* of universality, but it's fine
-        if self.movement[2]:
-            self.momentum = self.speed*-1  
-        elif self.movement[3]: 
-            self.momentum = self.speed 
+        if self.movement[1]:
+            self.momentum = self.speed*-1 if not self.movement[4] else self.crouch_speed*-1
+        elif self.movement[2]: 
+            self.momentum = self.speed if not self.movement[4] else self.crouch_speed
 
         self.momentum *= 0.85 if (self.momentum > 1 or self.momentum < -1) else 0
 
         #jumping code
-        #if the frames for jumping is not 0 (active)
-        if self.movement[0] > 0:
-            self.movement[0] += 1
-            #positioning
-            self.rect.center = (
-                self.rect.center[0],
-                (1/9)*(((self.movement[0])-30)**2) + self.bar[1]-100
-            )
-            #resetting positioning
-            if self.movement[0] >= 60:
+        #doing y momentum stuffystuff
+        if self.movement[3]:
+            self.rect.y += self.movement[0]
+            self.movement[0] += .2
+            if self.rect.center[1]>self.bar[1]:
+                #finishing the jump, including stopping values
+                self.rect.center = (self.rect.center[0],self.bar[1])
+                self.movement[3] = False
                 self.movement[0] = 0
-                self.rect.center = (self.rect.center[0],self.bar[1])
-                # self.sh.change_anim("land")
+                self.change_anim("land")
+                #AUTO CROUCH
+                if pygame.key.get_pressed()[pygame.K_DOWN]:
+                    #crouching
+                    self.change_anim("crouch")
+                    self.movement[4] = True
         
-        #jumping down - IDENTICAL to jumping up, so it is condensed to be less readable
-        if self.movement[1] > 0:
-            self.movement[1] += 1
-            self.rect.center = (self.rect.center[0],(-1/18)*(((self.movement[1])-30)**2) + self.bar[1]+50)
-            if self.movement[1] >= 60:
-                self.movement[1] = 0
-                self.rect.center = (self.rect.center[0],self.bar[1])
-                # self.sh.change_anim("land")
 
 
         #Actually making the player move, bouncing the character off the bars if needed
         if (self.rect.center[0] + self.momentum) < self.bar[2][0] or (self.rect.center[0] + self.momentum) > self.bar[2][1]: 
             self.momentum = 0
-            # self.sh.change_anim("squish")
+            self.change_anim("squish")
         self.rect.x += self.momentum
 
     def health_update(self):
@@ -160,7 +178,7 @@ class Player(pygame.sprite.Sprite):
             self.hurt()
 
     def hurt(self,amount:int=1):
-        # self.sh.change_anim("hurt")
+        self.change_anim("hurt")
         self.health -= amount
         self.invincibility_counter = 60
         audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
@@ -168,6 +186,16 @@ class Player(pygame.sprite.Sprite):
 
         
     def reset_movement(self):
-        pass
+        self.movement = [
+            0, #frames in up jumping movement, 30 frame limit
+            0, #frames in down jumping movement, 30 frame limit
+            False, #moving left
+            False, #moving right
+        ]
     def display_health(self):
         pass
+
+    def change_anim(self, anim:str):
+        if "sh" in dir(self):
+            self.sh.change_anim(anim)
+            

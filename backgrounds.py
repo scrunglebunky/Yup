@@ -5,20 +5,14 @@ import pygame,anim,options
 # The background is a class that stores an image and a position
 # This may be a little overkill for an entire class, but it works for organization purposes in my opinion
 class Background():
-    def __init__(self,img:str,resize:tuple,speed:tuple,border_type:int=0,**kwargs):
+    def __init__(self,img:str,resize:list,speed:list,border_size:tuple=pygame.display.play_dimensions,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
         self.image = anim.all_loaded_images[img]
         self.image = pygame.transform.scale(self.image,resize)
-        self.size = resize
+        self.size = resize.copy()
         self.pos = [0,0]
-        self.speed = speed
-        self.border_type = border_type #0 = based off gameplay loop ; 1 = based off full window
-        self.border = pygame.display.play_dimensions if self.border_type == 0 else pygame.display.dimensions if border_type == 1 else (0,0)
-
-        #player positioning stuff
-        self.player_offset = 0
-        self.player_center = round(pygame.display.play_dimensions[0]/2)
-        self.player_multiplier = 1
+        self.speed = speed.copy()
+        self.border = border_size
 
     def update(self):
         #updates positioning and such
@@ -32,17 +26,22 @@ class Background():
             self.pos[1] = 0 
             # print('reset y')
         
-    def update_offset(self,pos:int):
-        self.player_offset = pos - self.player_center
 
     def draw(self,window:pygame.display):
-        #temp_pos is to use the player positioning to make the backgrounds move with you
-        temp_pos = (self.pos[0] + self.player_offset*self.player_multiplier , self.pos[1])
         #drawing the image to the window
-        window.blit(self.image,temp_pos)
+        window.blit(self.image,self.pos)
         #activating duplicates
-        if temp_pos != [0,0]:
-            self.duplicates(window,pos=temp_pos)
+        if self.pos != [0,0]:
+            self.duplicates(window,pos=self.pos)
+
+    def change(self,img,resize,speed,border_size:tuple=pygame.display.play_dimensions):
+        # It stores an image, a position tuple, and a speed tuple
+        self.image = anim.all_loaded_images[img]
+        self.image = pygame.transform.scale(self.image,resize)
+        self.size = resize.copy()
+        self.pos = [0,0]
+        self.speed = speed.copy()
+        self.border = border_size
 
 
     def duplicates(self,window:pygame.display,pos:tuple=None):

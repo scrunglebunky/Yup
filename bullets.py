@@ -1,5 +1,5 @@
 #Program by Andrew Church 5/26/23
-import pygame,audio
+import pygame,audio,tools
 
 # 5/26/23 - This is the default bullet.
 # It is rather similar to the previous version's bullet, but that's because of how simple it is
@@ -65,7 +65,32 @@ class HurtBullet(pygame.sprite.Sprite):
     pygame.draw.circle(image, "#AA0000", (5, 5), 5)
     pygame.draw.circle(image, "red", (5, 5), 4)
     screen_rect = pygame.Rect(0, 0, 450, 600)
-
+    def __init__(self,pos:tuple,target:tuple,speed:int=2,image:pygame.Surface = None):
+        pygame.sprite.Sprite.__init__(self)
+        #setting number values
+        self.pos = pos
+        self.target = target
+        self.move = tools.MovingPoint(pos,target,speed=speed)
+        self.health = 1
+        #setting image
+        if image is not None:
+            ...
+        else:
+            self.image = HurtBullet.image
+            self.rect = self.image.get_rect()
+        self.rect.center = self.move.position
+        
+    def update(self):
+        self.move.update()
+        self.rect.center = self.move.position
+        if not Bullet.on_screen(self) or self.health <= 0: 
+            self.kill()
+    
+    def on_collide(self,collide_type):
+        #5/26/23 - This is usually explained elsewhere
+        #collision with enemy types
+        if collide_type == 1:
+            self.health -= 1
 
 
 

@@ -1,12 +1,11 @@
 #PROGRAM BY ANDREW CHURCH - test
-import pygame,os,text,random,json
-
-FPS=60
-clock = pygame.time.Clock()
-run=True; cur_state = None
-
-#07/04/2023 - IMPORTING SETTINGS SETS THE SCREEN
+import pygame,os,text,random,json 
 from options import settings
+import tools
+
+
+clock = tools.Clock(pygame.time.Clock())
+run=True; cur_state = None
 
 #setting window values - THE OPTIONS IMPORT DOES HALF OF THE JOB ALREADY - THIS IS THE REST
 defaultcolor = "#AAAAAA"
@@ -18,26 +17,13 @@ pygame.display.set_caption("YUP RevD")
 
 
 #GAME STUFF
-sprites = {
-    0:pygame.sprite.Group(), #ALL SPRITES
-    1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
-    2:pygame.sprite.Group(), #ENEMY SPRITES
-    3:pygame.sprite.Group(), #EMBLEMS
-    4:pygame.sprite.Group(), #STATE-SPECIFIC
-}
-
-#07/04/2023 - UNIVERSAL ARGS PROBLEM
-# I wanted these gone a while ago but its the only way to make integers into pointers
-data = {
-    "score":0,
-    "clock_offset":1,
-}
+universal_sprite_group = pygame.sprite.Group() #This used to be a dictionary used everywhere but all groups have now been moved to their own respective states
 
 #06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import state_play,ui_border,options,state_pause,state_title,state_gameover
+import state_play,ui_border,options,state_pause,state_title,state_gameover,state_advance,score
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
-border = ui_border.Border(sprites=sprites)
+border = ui_border.Border()
 
 
 
@@ -48,11 +34,12 @@ border = ui_border.Border(sprites=sprites)
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
 state = "play"
-states["play"] = state_play.State(data=data,sprites=sprites,window=window,campaign="main_story.order")
+states["play"] = state_play.State(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
-states["title"] = state_title.State(window=window,sprites=sprites,border=border)
-states["gameover"] = state_gameover.State(window=window,sprites=sprites,play_state=states["play"])
+states["title"] = state_title.State(window=window,border=border)
+states["gameover"] = state_gameover.State(window=window,play_state=states["play"])
+states["advance"] = state_advance.State(window=window,play_state=states["play"])
 
 #07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
@@ -88,12 +75,12 @@ while run:
     #06/x/2023 - adding numbers to be drawn to the border
     border.draw_specific(
         window = window, 
-        lives = states["play"].player.health, 
+        lives = states["play"].player.health,
         nums = [
-            data["score"],
-            round(clock.get_fps(),2),
-            round(data["clock_offset"],2),
-            round(clock.get_fps()*data["clock_offset"],2),
+            score.score,
+            round(clock.clock.get_fps(),2),
+            round(clock.offset,2),
+            round(clock.clock.get_fps()*clock.offset,2),
             ]
         ) 
 
@@ -104,7 +91,7 @@ while run:
         if event.type == pygame.KEYDOWN:
             #DEBUG - max FPS
             if event.key == pygame.K_1:
-                FPS = 0 if FPS == 60 else 60
+                clock.FPS = 0 if clock.FPS == 60 else 60
                 
 
         cur_state.event_handler(event=event)
@@ -118,9 +105,8 @@ while run:
 
     #general update
     pygame.display.update()
-    clock.tick(FPS)
+    clock.tick()
 
-    data["clock_offset"] = 60/(clock.get_fps() if clock.get_fps() != 0 else 60)
 
  
 

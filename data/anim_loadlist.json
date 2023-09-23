@@ -2,14 +2,8 @@
 {
     "./":[],
     "./images/characters/":[
-        "ANGLER",
-        "BOBM",
-        "FIHS",
-        "NOPE",
-        "SPIKE",
-        "STICKMAN",
+        "nope_A","nope_B","nope_C","nope_D",
         "YUP",
-        "ZAPP",
         "kaboom"
     ],
     "./images/ui/":[]
