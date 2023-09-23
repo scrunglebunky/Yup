@@ -34,8 +34,8 @@ class Formation():
         self.timer = { #timers used 
             "time":0, #current timer, will check every so and so frames
             "duration":0, #how long the state has been alive for. used for positioning
-            "spawn":15, #how often it takes for something to spawn
-            "reset":120, #when the timer resets
+            "spawn":60, #how often it takes for something to spawn
+            "reset":720, #when the timer resets
             "dead":30, #how often dead characters are checked
             "atk":100, #how often an enemy will attack 
         }
@@ -67,19 +67,25 @@ class Formation():
                 else:
                     self.spawn_organized[to_add] = [(row,column)]
         
-        for row in range(len(self.spawn_list)):
-            for column in range(len(self.spawn_list[row])):
-                print("|",(row,column),self.spawn_list[row][column],end='')
-            print('\n')
+        # for row in range(len(self.spawn_list)):
+        #     for column in range(len(self.spawn_list[row])):
+        #         print("|",(row,column),self.spawn_list[row][column],end='')
+        #     print('\n')
         
-        for row in range(len(self.spawn_list)):
-            for column in range(len(self.spawn_list[row])):
-                print("|",(row,column),self.spawn_offsets[row][column],end='')
-            print('\n')
+        # for row in range(len(self.spawn_list)):
+        #     for column in range(len(self.spawn_list[row])):
+        #         print("|",(row,column),self.spawn_offsets[row][column],end='')
+        #     print('\n')
             
             
-        for k,v in self.spawn_organized.items():
-            print(k,v)
+        # for k,v in self.spawn_organized.items():
+        #     print(k,v)
+        
+        # ITERATION VALUES
+        self.spawning_keys = tuple(self.spawn_organized.keys())
+        self.spawning_key = 0  #the key of spawn_organized
+        self.spawning_value = 0 #the index of spawn_organized
+
 
         #########################################
 
@@ -102,28 +108,54 @@ class Formation():
         self.states[self.state]()
         #timer updates
         self.timer["duration"] += 1
-        self.timer["time"] = self.timer["time"] + 1 if self.timer["time"] < self.timer["time"] else 0 
+        self.timer["time"] = self.timer["time"] + 1 if self.timer["time"] < self.timer["reset"] else 0 
         #clear check
         self.cleared = (len(self.spawned_list) <= 0)
     
     def state_start(self):
-        #spawning all characters at once for the time being
-        for row in range(len(self.spawn_list)):
-            for column in range(len(self.spawn_list[row])):
-                #spawning all the characters
-                type_to_spawn = self.spawn_list[row][column]
-                char = (characters.loaded[type_to_spawn](
-                    (
-                        column*self.world_data["char_distance_x"],
-                        row*self.world_data["char_distance_y"]),
-                    self.pos,
-                    difficulty=1,
-                    sprites=self.sprites,
-                    player=self.player))
-                self.spawned_list.append(char)
-                self.sprites[0].add(char);self.sprites[2].add(char)
-        #setting state to idle for now
-        self.state = "idle"
+        # #spawning all characters at once for the time being
+        # for row in range(len(self.spawn_list)):
+        #     for column in range(len(self.spawn_list[row])):
+        #         #spawning all the characters
+        #         type_to_spawn = self.spawn_list[row][column]
+        #         char = (characters.loaded[type_to_spawn](
+        #             self.spawn_offsets[row][column],
+        #             self.pos,
+        #             difficulty=1,
+        #             sprites=self.sprites,
+        #             player=self.player))
+        #         self.spawned_list.append(char)
+        #         self.sprites[0].add(char);self.sprites[2].add(char)
+        #changing around spawn order
+        if self.timer['time'] % self.timer['spawn'] == 0:
+            #saving values as to what exactly i'm keeping track of
+            type_to_spawn = self.spawning_keys[self.spawning_key]
+            spawned_id = self.spawn_organized[self.spawning_keys[self.spawning_key]][self.spawning_value]
+            offset = self.spawn_offsets[spawned_id[0]][spawned_id[1]]
+            #creating enemy
+            char = characters.loaded[type_to_spawn](
+                offset=offset,pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player
+            )
+            #adding enemy to groups
+            self.spawned_list.append(char)
+            self.sprites[0].add(char);self.sprites[2].add(char)
+
+            #new column
+            self.spawning_value += 1
+            self.timer['spawn'] = 5 #keeping the timer quick
+            #new row
+            if self.spawning_value >= len(self.spawn_organized[self.spawning_keys[self.spawning_key]]):
+                self.spawning_value = 0 
+                self.spawning_key += 1
+                self.timer['spawn'] = 180 #a pause between spawning
+            #finished
+            if self.spawning_key >= len(self.spawning_keys):
+                self.state = 'idle'
+                self.timer['duration'] = 0 #keeping the formation from teleporting down and killing you. it will only do that in idle
+        
+        
+        self.update_movement()#keepin 'em moving
+
 
     def state_idle(self): #resting state, attacking, etc.
         #running a bunch of predefined methods
@@ -172,7 +204,7 @@ class Formation():
             self.spawned_list[random.choice(idle_count)].change_state('attack')
         
     def update_movement(self): #updating where the idle position is
-        self.pos[1] = math.sin(self.timer["duration"] * 0.1) * 15 + ((self.timer["duration"]*0.25) if self.state != "start" else 0)
+        self.pos[1] = (math.sin(self.timer["duration"] * 0.1) * 15) + ((self.timer["duration"]*0.25) if self.state != "start" else 0)
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
 

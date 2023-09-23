@@ -11,7 +11,7 @@
         "frames":[
             4,4,3,5,6
         ],
-        "FPS":12, 
+        "FPS":24, 
         "loop":0, 
         "return_to":"idle"
         },
