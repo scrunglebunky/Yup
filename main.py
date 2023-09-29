@@ -1,4 +1,4 @@
-#PROGRAM BY ANDREW CHURCH - test
+#PROGRAM BY ANDREW CHURCH
 import pygame,os,text,random,json 
 from options import settings
 import tools
