@@ -29,7 +29,7 @@ del set_raw
 
 pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
 pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
-pygame.display.set_mode(pygame.display.dimensions, pygame.FULLSCREEN|pygame.SCALED if settings["fullscreen"][1] else pygame.SCALED|pygame.RESIZABLE)
+pygame.display.set_mode(pygame.display.dimensions, pygame.SCALED)
 
 #07/13/2023 - finishing the rest of the imports now that the settings are complete
 import anim,ui_border
@@ -39,7 +39,8 @@ def apply_settings(border:ui_border.Border = None):
     #display
     pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
     pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
-    pygame.display.set_mode(pygame.display.dimensions, pygame.FULLSCREEN|pygame.SCALED if settings["fullscreen"][1] else pygame.SCALED|pygame.RESIZABLE)
+    print(pygame.display.dimensions)
+    pygame.display.set_mode(pygame.display.dimensions, pygame.SCALED)
     #sounds
     audio.change_volumes(ostvol = settings["music_vol"][1] , soundvol = settings["sound_vol"][1])
     if settings["mute"][1]: audio.change_volumes(ostvol = 0 , soundvol = 0)

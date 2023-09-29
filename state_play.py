@@ -25,6 +25,8 @@ class State():
         self.next_state = None #Needed to determine if a state is complete
         self.fullwindow = window
 
+        self.debug = {0:[],1:[]}
+
 
         #resetting the sprite groups
         for group in self.sprites.values():
@@ -81,9 +83,7 @@ class State():
         self.in_advance:bool = False #if true, will not update much besides the background and player
 
         
-
-
-        
+   
     
     def on_start(self,**kwargs):#__init__ v2, pretty much.
         #06/24/2023 - Playing the song
@@ -91,15 +91,22 @@ class State():
 
     def on_end(self,**kwargs): #un-init, kind of
         pygame.mixer.music.stop()
+        print(self.debug.values())
 
     
     def update(self, draw=True):
+
         #Updating sprites
         self.background.update()
         self.background.draw(self.window)
         State.sprites[0].update()
         State.sprites[0].draw(self.window)
         self.formation.update()
+
+        #print debug positions
+        for pos in self.debug[0]:
+            self.window.blit(pygame.transform.scale(anim.all_loaded_images["placeholder.bmp"],(10,10)),pos)
+
         #06/23/2023 - Drawing gameplay window to full window
         if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
@@ -135,14 +142,15 @@ class State():
                 level_in_world=self.level_in_world, 
                 sprites=State.sprites,
                 player=self.player,)
-            print('up-dayy-tedd')
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
             self.next_state = "gameover"
 
 
-    def new_world(self):
+        
 
+
+    def new_world(self):
         self.world += 1
         self.level_in_world = 0
         self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
@@ -173,3 +181,13 @@ class State():
                         coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
                         isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
                 ))
+            if event.key == pygame.K_4:
+                self.debug[0].pop(len(self.debug[0])-1)
+                self.debug[1].pop(len(self.debug[1])-1)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pos = tuple(pygame.mouse.get_pos())
+            pos = [pos[0]-pygame.display.play_pos[0],pos[1]-pygame.display.play_pos[0]]
+            pos2 = [pygame.display.play_dimensions_resize[0]-pos[0],pos[1]]
+            self.debug[0].append(pos)
+            self.debug[1].append(pos2)
+            print(pos,pos2)

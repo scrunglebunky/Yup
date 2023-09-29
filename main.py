@@ -28,7 +28,7 @@ border = ui_border.Border()
 
 
 
-#07/02/2023 - ADDING SPECIFIC STATES
+#0 7/02/2023 - ADDING SPECIFIC STATES
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class

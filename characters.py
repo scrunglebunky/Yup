@@ -1,11 +1,17 @@
-import pygame,anim,random,score,bullets
+import pygame,anim,random,score,bullets,tools
 
 class Template(pygame.sprite.Sprite):
     #default image if unchanged
     image = pygame.Surface((30, 30), pygame.SRCALPHA)
     pygame.draw.circle(image, "red", (15, 15), 15)
 
-    def __init__(self,offset:tuple=(0,0),pos:tuple=(0,0),difficulty:int=0,**kwargs):
+    def __init__(self,
+        offset:tuple=(0,0),
+        pos:tuple=(0,0),
+        difficulty:int=0,
+        entrance_points:dict=None,
+        entrance_speed:float=1.0,
+        entrance_shoot:list=[],):
         pygame.sprite.Sprite.__init__(self)
 
         self.idle={ #information about the idle state
@@ -34,6 +40,16 @@ class Template(pygame.sprite.Sprite):
         self.image = Template.image
         self.rect = self.image.get_rect()
         self.rect.center = self.idle["full"]
+        #entrance
+        self.entrance_points = entrance_points 
+        if self.entrance_points is not None:
+            self.enter_vector = tools.MovingPoints(
+                self.entrance_points[0],
+                self.entrance_points,
+                speed=entrance_speed,
+                final_pos=self.idle['full'])
+        else:
+            self.enter_vector = None
 
     def update(self): #this should be run the same no matter what
         #updating state
@@ -56,13 +72,19 @@ class Template(pygame.sprite.Sprite):
         self.timers['in_state'] += 1
 
     ##########STATE FUNCTIONS################
-    def state_enter(self):
-        self.info["state"] = 'idle'
-    def state_idle(self):
+    def state_enter(self,start=False):
+        if self.enter_vector is None:
+            self.info["state"] = 'idle'
+        else:
+            self.enter_vector.update()
+            self.rect.center = self.enter_vector.pos
+            if self.enter_vector.finished:
+                self.info['state'] = 'idle'
+    def state_idle(self,start=False):
         self.rect.center = self.idle["full"]
-    def state_attack(self):
+    def state_attack(self,start=False):
         self.info["state"] = 'idle'
-    def state_return(self):
+    def state_return(self,start=False):
         self.info["state"] = 'idle'
 
 
@@ -74,6 +96,7 @@ class Template(pygame.sprite.Sprite):
     def change_state(self,state):
         self.timers['in_state'] = 0 
         self.info['state'] = state
+        self.states[self.info['state']](start=True) #the start value initializes a variable that has to be started up first
 
     def kill(self,reason=None) -> int:
         if reason == "health":
@@ -103,42 +126,82 @@ class Template(pygame.sprite.Sprite):
 
 
 class A(Template): #geurilla warfare
-    def __init__(self,offset:tuple,pos:tuple,difficulty:int,skin='nope_A',**kwargs):
-        Template.__init__(self,offset,pos,difficulty)
+    def __init__(self,skin='nope_A',**kwargs):
+        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
+        
+        #too complex
+        # self.atk={}
+        # sways = 2+self.info['difficulty']
+        # self.atk['speed'] = self.info['difficulty']+5
+        # self.atk['sway_x'] = [random.randint(0,pygame.display.play_dimensions[0]) for i in range(sways)] #i mean hey, it's always the same per-character, so you can guess it now!
+        # turnVal = True if self.rect.center[0] < self.atk['sway_x'][0] else False  #False - going left, turning to right ; True - going right, turning to left
+        # self.atk['points'] = []
+        # dist = pygame.display.play_dimensions[1] // sways
+        # points = [dist*i for i in range(sways)]
+        # print(points)
+        self.atk={
+            x:0, #x-momentum
+            y:5, #y-momentum
+            direct:False, #direction going in
+        }
+
+
+    def state_attack(self,start=False):
+        if start:
+            #generating loops for the three times it turns
+            #then gluing those turns together with different points that lead to it. 
+            #then creating a new movingPoint object for it.
+            ...
+        else:
+            self.change_state['idle']
+    
+    @staticmethod
+    def generate_turn(start:list,direction:bool) -> list:
+        #generating a turn based off player position
+        base=[[0, -2], [13, 8], [28, 17], [37, 27], [45, 40], [47, 52], [45, 73], [35, 85], [22, 91], [3, 96]]
+        if direction:
+            output=[[base[i][0]+start[0] , base[i][1] + start[1]] for i in range(len(base))]
+        else:
+            output=[[base[i][0]-start[0] , base[i][1] + start[1]] for i in range(len(base))]
+            
+
 class B(Template): #loop-de-loop
-    def __init__(self,offset:tuple,pos:tuple,difficulty:int,skin='nope_B',**kwargs):
-        Template.__init__(self,offset,pos,difficulty)   
+    def __init__(self,skin='nope_B',**kwargs):
+        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
+
+
 class C(Template): #turret
-    def __init__(self,offset:tuple,pos:tuple,difficulty:int,skin='nope_C',player=None,sprites=None,**kwargs):
-        Template.__init__(self,offset,pos,difficulty)  
+    def __init__(self,skin='nope_C',**kwargs):
+        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
-        self.sprites = sprites
-        self.player=player
+        self.sprites = kwargs['sprites']
+        self.player=kwargs['player']
         self.timer = (360 - (5*self.info['difficulty']))
         self.time = random.randint(0,self.timer)
-    def state_idle(self):
+    def state_idle(self,start=False):
         Template.state_idle(self)
         self.time += 1
         if self.time >= self.timer:
             self.change_state('attack')
             self.time = 0
-    def state_attack(self):
-        if self.timers['in_state'] == 1:
+    def state_attack(self,start=False):
+        if start:
             self.change_anim("attack") 
             bul=bullets.HurtBullet(pos=self.rect.center,target=self.player.rect.center,speed=4)
             self.sprites[0].add(bul);self.sprites[2].add(bul)
-        self.change_state('idle')
+        else:    
+            self.change_state('idle')
             
 class D(Template): #special -- uses special value to inherit from that character instead 
-    def __init__(self,offset:tuple,pos:tuple,difficulty:int,skin:str='nope_D',special:str=None,**kwargs):
+    def __init__(self,skin:str='nope_D',special:str=None,**kwargs):
         #placeholder value
-        Template.__init__(self,offset,pos,difficulty)
+        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
 
 class Nope(Template):
-    def __init__(self,offset:tuple,pos:tuple,difficulty:int,skin:str=None,special:str=None,**kwargs):...
+    def __init__(self,skin:str=None,special:str=None,**kwargs):...
     
         
 

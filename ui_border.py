@@ -39,6 +39,7 @@ class Border():
 
         #06/30/2023 - filling dynamic image sizes for the emblems
         #06/24/2023 - Adding EMBLEMS, which are just different UI symbols to add
+        Border.sprites.empty()
         Border.emblems = [
             Em(
                 im = img["logo.png"],

@@ -112,8 +112,10 @@ class Player(pygame.sprite.Sprite):
                 if not bullet.kill_on_spawn: self.change_anim("shoot")
 
             #AUTOSHOOT
-            if event.key == pygame.K_a:
+            if event.key == pygame.K_2:
                 self.autoshoot = not self.autoshoot
+            if event.key == pygame.K_3:
+                self.health += 10
 
 
         #RELEASING movement
@@ -122,6 +124,7 @@ class Player(pygame.sprite.Sprite):
                 self.movement[1] = False
             if event.key == pygame.K_RIGHT:
                 self.movement[2] = False
+            #un-crouching
             if event.key == pygame.K_DOWN:
                 self.movement[4] = False
                 self.change_anim('idle')
@@ -191,6 +194,7 @@ class Player(pygame.sprite.Sprite):
             0, #frames in down jumping movement, 30 frame limit
             False, #moving left
             False, #moving right
+            False, #crouching
         ]
     def display_health(self):
         pass
@@ -198,4 +202,6 @@ class Player(pygame.sprite.Sprite):
     def change_anim(self, anim:str):
         if "sh" in dir(self):
             self.sh.change_anim(anim)
+            self.sh.update()
+            self.image = self.sh.image
             

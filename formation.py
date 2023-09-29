@@ -34,7 +34,7 @@ class Formation():
         self.timer = { #timers used 
             "time":0, #current timer, will check every so and so frames
             "duration":0, #how long the state has been alive for. used for positioning
-            "spawn":60, #how often it takes for something to spawn
+            "spawn":120, #how often it takes for something to spawn
             "reset":720, #when the timer resets
             "dead":30, #how often dead characters are checked
             "atk":100, #how often an enemy will attack 
@@ -45,6 +45,7 @@ class Formation():
 
         #the spawn lists needed, which tell the game what enemies to spawn
         self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
+        self.spawn_list=["AAAAAAAAAA"]
         self.spawned_list = []
 
         #SPAWN INFO - the game stores the offset value here in order to spawn enemies in special ways, so now they don't all have to spawn in order
@@ -103,6 +104,8 @@ class Formation():
         #timer["atk"] = how often characters are thrown down to attack #goes down a frame every level
         #max_characters = how many characters can be down at a time, goes up by 1 every 5 levels
 
+        self.enter_key = 0 #what is used for spawning entrance values, yada yada yada
+
     def update(self):
         #updating everything
         self.states[self.state]()
@@ -112,6 +115,8 @@ class Formation():
         #clear check
         self.cleared = (len(self.spawned_list) <= 0)
     
+
+
     def state_start(self):
         # #spawning all characters at once for the time being
         # for row in range(len(self.spawn_list)):
@@ -132,17 +137,37 @@ class Formation():
             type_to_spawn = self.spawning_keys[self.spawning_key]
             spawned_id = self.spawn_organized[self.spawning_keys[self.spawning_key]][self.spawning_value]
             offset = self.spawn_offsets[spawned_id[0]][spawned_id[1]]
+
+
+            #finding the spawning entrance points, like the galaga loop-de-loop
+            if type_to_spawn in self.world_data['start_patterns'].keys() and len(self.world_data['start_patterns'][type_to_spawn]) > 0:
+                #fetching entrance points immediately
+                entrance_info = entrance_points = self.world_data['start_patterns'][type_to_spawn]
+                entrance_points = entrance_info['patterns']
+            else:
+                #if no entrance points
+                entrance_points = None
+
             #creating enemy
             char = characters.loaded[type_to_spawn](
-                offset=offset,pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player
+                offset=offset,
+                pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player,
+                entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
+                entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
             )
             #adding enemy to groups
             self.spawned_list.append(char)
             self.sprites[0].add(char);self.sprites[2].add(char)
 
+            #resetting enter key
+            if entrance_points is not None:
+                self.enter_key += 1
+                if self.enter_key >= len(entrance_points):
+                    self.enter_key = 0
+
             #new column
             self.spawning_value += 1
-            self.timer['spawn'] = 5 #keeping the timer quick
+            self.timer['spawn'] = entrance_info['timer'] if entrance_points is not None else 1 #keeping the timer quick
             #new row
             if self.spawning_value >= len(self.spawn_organized[self.spawning_keys[self.spawning_key]]):
                 self.spawning_value = 0 
@@ -155,6 +180,8 @@ class Formation():
         
         
         self.update_movement()#keepin 'em moving
+
+
 
 
     def state_idle(self): #resting state, attacking, etc.

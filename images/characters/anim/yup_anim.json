@@ -68,7 +68,7 @@
 		"frames":[
             5
         ],
-        "FPS":15, 
+        "FPS":60, 
         "loop":0, 
         "return_to":"crouch"      
     }
