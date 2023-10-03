@@ -72,12 +72,7 @@ class State():
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
 
-        # TEST - text spawn
-        for i in range(0):
-            spd=random.randint(-5,5)
-            if spd == 0: spd = 1
-            txt=text.Text(text=random.choice(["owo","uwu","hewwo","cwinge","howy fuck"]),vertex=(random.randint(0,450),random.randint(0,600)),pos=(random.randint(0,450),random.randint(0,600)),pattern="sine",duration=3600,modifier=random.randint(1,100),modifier2=(random.randint(1,25)/random.randint(1,100)),speed=spd)
-            sprites[0].add(txt)
+
 
         #relating to advance sprite
         self.in_advance:bool = False #if true, will not update much besides the background and player

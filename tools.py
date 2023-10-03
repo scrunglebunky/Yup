@@ -1,16 +1,31 @@
 from math import sqrt
 
+
 #a moving point class that calculates the distances and how much to move
 class MovingPoint():
-    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1):
+    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1,check_finished:bool=False):
+        #defining values
         self.pointA,self.pointB = pointA,pointB #saving points
         self.position = list(self.pointA)
         self.distance = MovingPoint.calc_distance(pointA,pointB)
-        self.move_vals = MovingPoint.calc_move_vals(pointA,pointB,self.distance,speed) #calculating values
-
+        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance,speed) #calculating values
+        self.finished = False ; self.check_finished = check_finished
+        self.speed = speed
+    #called every frame
     def update(self):
         self.position[0] += self.move_vals[0]
         self.position[1] += self.move_vals[1]
+        #checking for finish
+        if self.check_finished:
+            self.distance = MovingPoint.calc_distance(self.position,self.pointB)
+            self.finished = abs(self.distance)<self.speed*1.5
+    #updating everything if needed
+    def change_all(self,pointB):
+        self.pointB = pointB
+        self.distance = MovingPoint.calc_distance(self.pointA,self.pointB,) #yea
+        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance,self.speed) #calculating values
+
+
 
     @staticmethod
     def calc_move_vals(pointA:tuple,pointB:tuple,distance:float=None,speed:int=1) -> tuple: #calculating how much to move
@@ -87,7 +102,7 @@ class Clock(): # a redo of pygame.clock to add more values
     def __init__(self,clock,FPS=60): #initiating stuff
         self.FPS = FPS
         self.clock = clock
-        self.offset = 2
+        self.offset = 1
     def tick(self): #updating clock
         self.clock.tick(self.FPS)
         self.offset = 60/(self.clock.get_fps() if self.clock.get_fps() != 0 else 60)

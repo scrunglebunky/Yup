@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
+- 9/29/23: Enemies move along a set path when spawning. Character A now has a set attack structure. It looks awesome.
 - 9/21/23: redid characters, almost finished with redoing the formation, redid characters spawning system, redid levels, patched bugs, levels can advance now, fixed high scores
 - 9/05/23: Finished all of game over, sprite groups fixed, etc. 
 - 9/01/23: Almost finished the game over screen, I just have to fix bugs relating to **emptying scores**, **sprite groups**, and **backgrounds**

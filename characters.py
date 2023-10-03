@@ -24,6 +24,7 @@ class Template(pygame.sprite.Sprite):
             "dead":False,
             "difficulty":difficulty,
             "state":"enter",
+            "atk":False, #this is important -- it marks if the enemy can attack or not
         }
         self.timers = { #counters to use to check how long something is there for
             "exist":0,
@@ -43,13 +44,13 @@ class Template(pygame.sprite.Sprite):
         #entrance
         self.entrance_points = entrance_points 
         if self.entrance_points is not None:
-            self.enter_vector = tools.MovingPoints(
+            self.follow = tools.MovingPoints(
                 self.entrance_points[0],
                 self.entrance_points,
                 speed=entrance_speed,
                 final_pos=self.idle['full'])
         else:
-            self.enter_vector = None
+            self.follow = None
 
     def update(self): #this should be run the same no matter what
         #updating state
@@ -73,12 +74,12 @@ class Template(pygame.sprite.Sprite):
 
     ##########STATE FUNCTIONS################
     def state_enter(self,start=False):
-        if self.enter_vector is None:
+        if self.follow is None:
             self.info["state"] = 'idle'
         else:
-            self.enter_vector.update()
-            self.rect.center = self.enter_vector.pos
-            if self.enter_vector.finished:
+            self.follow.update()
+            self.rect.center = self.follow.pos
+            if self.follow.finished:
                 self.info['state'] = 'idle'
     def state_idle(self,start=False):
         self.rect.center = self.idle["full"]
@@ -141,36 +142,97 @@ class A(Template): #geurilla warfare
         # points = [dist*i for i in range(sways)]
         # print(points)
         self.atk={
-            x:0, #x-momentum
-            y:5, #y-momentum
-            direct:False, #direction going in
+            "x":0, #x-momentum
+            "y":5, #y-momentum
+            "terminal":5, #terminal x-velocity
+            'turn_amt':2+self.info['difficulty'], #how often the enemy will turn
+            'turn_vals':[], #turns x can be on
+            'turn_cur':0, #which x-turn A is on.
+            "acc":0.5, #acceleration
+            "direct":False, #direction going in - True = Right, False = Left
         }
+        self.info['atk'] = True
+        #generating first turn to see what direction is started on 
+        self.atk['turn_vals'].append(random.randint(100,pygame.display.play_dimensions[0]-100))
+        self.atk['direct'] = turn = self.idle['full'][0]<self.atk['turn_vals'][0]
+        #adding all values to turn on
+        for i in range(self.atk['turn_amt']): #i is previous index, i+i is current index.
+            #as these are picking the *next* values, the direction is the direct opposite of what it should be
+            if turn: 
+                self.atk['turn_vals'].append(random.randint(100,self.atk['turn_vals'][i]))
+            else:
+                self.atk['turn_vals'].append(random.randint(self.atk['turn_vals'][i],pygame.display.play_dimensions[0]-100))
+            turn = (not turn)
+        del turn
 
 
     def state_attack(self,start=False):
+        #resetting values to start
         if start:
-            #generating loops for the three times it turns
-            #then gluing those turns together with different points that lead to it. 
-            #then creating a new movingPoint object for it.
-            ...
+            self.atk['x'] = 0
+            self.atk['turn_cur'] = 0
+            self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0]
+            return
+        #changing x and y by x and y velocities
+        self.rect.y += self.atk['y']
+        self.rect.x += self.atk['x']
+        #updating x velocity by acceleration if not reached terminal velocity
+        if self.atk['direct']:
+            self.atk['x'] += self.atk['acc']
+            if abs(self.atk['x']) > self.atk['terminal']:
+                self.atk['x'] = self.atk['terminal']
         else:
-            self.change_state['idle']
+            self.atk['x'] -= self.atk['acc']
+            if abs(self.atk['x']) > self.atk['terminal']:
+                self.atk['x'] = self.atk['terminal']*-1
+        #checking to turn around to next value
+        if abs(self.rect.center[0]-self.atk['turn_vals'][self.atk['turn_cur']]) < self.atk['terminal'] * 2:
+            # print("FINISHED:",self.atk['turn_cur'],'OF',len(self.atk['turn_vals']),self.atk['turn_vals'][self.atk['turn_cur']])
+
+            #updating values
+            self.atk['turn_cur'] += 1
+            self.atk['direct'] = not self.atk['direct']
+            #looping back if turned too much
+            if self.atk['turn_cur'] >= len(self.atk['turn_vals']):
+                self.atk['turn_cur'] = 0
+                self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0] 
+            # print(self.atk['direct'])
+            
+        #resetting when hitting bottom
+        if self.rect.top>pygame.display.play_dimensions[1]:
+            self.change_state('return')
+            return
+            
+    def state_return(self,start=False):
+        if start:
+            self.rect.center=(pygame.display.play_dimensions[0]/2,self.rect.height*-1)
+            self.follow = tools.MovingPoint(self.rect.center,self.idle['full'],speed=5,check_finished=True)
+        self.follow.update()
+        self.rect.center = self.follow.position
+
+        #calling to update follow's values every 5 or so frames in order to prevent constant unneeded running
+        if self.timers['exist'] % 10 == 0:
+            self.follow.change_all(self.idle['full'])
+
+        if self.follow.finished:
+            self.change_state('idle')
+
     
-    @staticmethod
-    def generate_turn(start:list,direction:bool) -> list:
-        #generating a turn based off player position
-        base=[[0, -2], [13, 8], [28, 17], [37, 27], [45, 40], [47, 52], [45, 73], [35, 85], [22, 91], [3, 96]]
-        if direction:
-            output=[[base[i][0]+start[0] , base[i][1] + start[1]] for i in range(len(base))]
-        else:
-            output=[[base[i][0]-start[0] , base[i][1] + start[1]] for i in range(len(base))]
+    
             
 
 class B(Template): #loop-de-loop
     def __init__(self,skin='nope_B',**kwargs):
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
-
+        self.info['atk'] = True
+    def state_attack(self,start=False):
+        if start:
+            ...
+            return
+        else:
+            self.change_state('idle')
+        
 
 class C(Template): #turret
     def __init__(self,skin='nope_C',**kwargs):

@@ -45,7 +45,8 @@ class Formation():
 
         #the spawn lists needed, which tell the game what enemies to spawn
         self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
-        self.spawn_list=["AAAAAAAAAA"]
+        self.spawn_list=["BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB"]
+        # self.spawn_list = ["CCCCCCCCCC","DDDBBBBDDD","AAAAAAAAAA","AAAAAAAAAA"]
         self.spawned_list = []
 
         #SPAWN INFO - the game stores the offset value here in order to spawn enemies in special ways, so now they don't all have to spawn in order
@@ -97,7 +98,7 @@ class Formation():
         self.difficulty = self.level//5
         self.attack={
             #throwdown amount = how many characters are thrown down in an attack stance #goes up once every 10 levels
-            "amount":self.difficulty,
+            "amount":self.difficulty+1,
             "max":3+(self.difficulty//2),
         }
         self.timer['atk'] = 100 - (self.difficulty*4)
@@ -222,7 +223,7 @@ class Formation():
             idle_count = []
             for _ in enumerate(self.spawned_list):
                 if _[1].info['state'] == 'attack': atk_count += 1
-                elif _[1].info['state'] == 'idle': idle_count.append(_[0])
+                elif _[1].info['state'] == 'idle' and _[1].info['atk']: idle_count.append(_[0])
             if atk_count <= self.attack["max"] and len(idle_count) > 0:
                 self.make_attack(idle_count)
     
