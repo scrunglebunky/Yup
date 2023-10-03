@@ -3,18 +3,21 @@ from math import sqrt
 
 #a moving point class that calculates the distances and how much to move
 class MovingPoint():
-    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1,check_finished:bool=False):
+    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1,check_finished:bool=False,ignore_speed:bool=False):
         #defining values
         self.pointA,self.pointB = pointA,pointB #saving points
         self.position = list(self.pointA)
-        self.distance = MovingPoint.calc_distance(pointA,pointB)
-        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance,speed) #calculating values
+        #calculations
+        self.distance = MovingPoint.calc_distance(pointA,pointB) #calculating distance
+        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance, speed = (speed if not ignore_speed else 1)) #calculating values
+        #more arguments
         self.finished = False ; self.check_finished = check_finished
+        self.ignore_speed = ignore_speed #A value to make the speed separate from the calc_move_vals function to change speeds separately
         self.speed = speed
     #called every frame
     def update(self):
-        self.position[0] += self.move_vals[0]
-        self.position[1] += self.move_vals[1]
+        self.position[0] += (self.move_vals[0] if not self.ignore_speed else self.move_vals[0]*self.speed)
+        self.position[1] += (self.move_vals[1] if not self.ignore_speed else self.move_vals[1]*self.speed)
         #checking for finish
         if self.check_finished:
             self.distance = MovingPoint.calc_distance(self.position,self.pointB)
@@ -35,8 +38,8 @@ class MovingPoint():
         #preventing zero division
         if distance == 0:
             return (
-            (speed * (pointB[0] - pointA[0]) ),
-            (speed * (pointB[1] - pointA[1]) )
+            ((pointB[0] - pointA[0]) ),
+            ((pointB[1] - pointA[1]) )
         )
 
         #normal movement calc

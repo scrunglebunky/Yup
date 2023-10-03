@@ -45,7 +45,7 @@ class Formation():
 
         #the spawn lists needed, which tell the game what enemies to spawn
         self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
-        self.spawn_list=["BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB"]
+        # self.spawn_list=["BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB"]
         # self.spawn_list = ["CCCCCCCCCC","DDDBBBBDDD","AAAAAAAAAA","AAAAAAAAAA"]
         self.spawned_list = []
 

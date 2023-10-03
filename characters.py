@@ -131,16 +131,7 @@ class A(Template): #geurilla warfare
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         
-        #too complex
-        # self.atk={}
-        # sways = 2+self.info['difficulty']
-        # self.atk['speed'] = self.info['difficulty']+5
-        # self.atk['sway_x'] = [random.randint(0,pygame.display.play_dimensions[0]) for i in range(sways)] #i mean hey, it's always the same per-character, so you can guess it now!
-        # turnVal = True if self.rect.center[0] < self.atk['sway_x'][0] else False  #False - going left, turning to right ; True - going right, turning to left
-        # self.atk['points'] = []
-        # dist = pygame.display.play_dimensions[1] // sways
-        # points = [dist*i for i in range(sways)]
-        # print(points)
+        #values created for when the opponent attacks you
         self.atk={
             "x":0, #x-momentum
             "y":5, #y-momentum
@@ -226,12 +217,37 @@ class B(Template): #loop-de-loop
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.info['atk'] = True
+
+        self.atk = {
+            "speed":5+self.info['difficulty'], #where the opponent goes 
+            "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+self.info['difficulty'])], #where the opponent moves to
+            "index":0, #which point the opponent is going to first
+        }
+        
+
+
     def state_attack(self,start=False):
         if start:
-            ...
+            self.atk['index'] = 0 
+            self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
             return
-        else:
-            self.change_state('idle')
+        #updating position
+        self.follow.update()
+        self.rect.center=self.follow.position
+        #updating movement patterns
+        if self.follow.finished:
+            self.atk['index'] += 1
+            #finishing movement
+            if self.atk['index'] >= len(self.atk['points']):
+                self.follow=None
+                self.atk['index'] = 0
+                self.change_state('return')
+            #updating if not finished
+            else:
+                self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
+
+
+        
         
 
 class C(Template): #turret
