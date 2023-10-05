@@ -12,9 +12,9 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    max = 3
+    max = 2
 
-    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True, **kwargs):
+    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=20,is_default:bool = True, **kwargs):
         
         pygame.sprite.Sprite.__init__(self)
         

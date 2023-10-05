@@ -46,12 +46,12 @@ class Formation():
         #the spawn lists needed, which tell the game what enemies to spawn
         self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
         # self.spawn_list=["AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA"]
-        self.spawn_list = [
-            "CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC",
-            "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
-            "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
-            "DDDDDDDDDDDDDDD",
-        ]
+        # self.spawn_list = [
+        #     "CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC",
+        #     "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
+        #     "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
+        #     "DDDDDDDDDDDDDDD",
+        # ]
         self.spawned_list = []
 
         #SPAWN INFO - the game stores the offset value here in order to spawn enemies in special ways, so now they don't all have to spawn in order
@@ -231,13 +231,16 @@ class Formation():
     def find_spawn_list(self,level,world_data) -> list:
         spawn_list = []
         rows,columns = random.randint(5,10),random.randint(10,12)
-        if world_data["random"]: #trip to see if an entire world should be random
+        if world_data["random"]: 
+            #trip to see if an entire form should be random
             for row in range(rows):
                 spawn_list.append("")
                 for column in range(columns):
                     spawn_list[row] += random.choice(("A","B","C","D"))
+        #picking an ordered form from the set
         elif world_data['manual_ordered']:
-            spawn_list = world_data['manual_formations'][level - (len(world_data['manual_order'])*(level//len(world_data['manual_order'])))]
+            spawn_list = world_data['manual_formations'][level - (len(world_data['manual_order'])*(level//(len(world_data['manual_order'])+1)))]
+        #picking a random form from the set
         else:
             spawn_list = random.choice(world_data["manual_formations"])
         return spawn_list

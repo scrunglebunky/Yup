@@ -272,6 +272,9 @@ class B(Template): #loop-de-loop
         if self.timers['in_state'] >= 120:
             self.change_state('return')     
 
+
+
+
 class C(Template): #turret
     def __init__(self,skin='nope_C',**kwargs):
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
@@ -293,7 +296,9 @@ class C(Template): #turret
             self.sprites[0].add(bul);self.sprites[2].add(bul)
         else:    
             self.change_state('idle')
-            
+
+
+
 class D(Template): #special -- uses special value to inherit from that character instead 
     def __init__(self,skin:str='nope_D',special:str=None,**kwargs):
         #placeholder value

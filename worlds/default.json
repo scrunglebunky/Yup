@@ -35,17 +35,26 @@
 
     "manual_formations":[
         [
-            "AAAAAAAAAA",
-            "BBBBBBBBBB",
-            "CCCCCCCCCC"
+            "AAAAAAAAAAAAAAA",
+            "AAAAAAAAAAAAAAA"
         ],
         [
-            "AAAAABBBBB",
-            "BBBBBAAAAA",
-            "ABCABCABCA"
+            "AAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBB"
+        ],
+        [
+            "CBBAACCCCCAABBC",
+            "ACAAAAACAAAAACA",
+            "BBBBBBBBBBBBBBB"
+        ],
+        [
+            "AACCCCCCCCCCCAA",
+            "AAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBB",
+            "AAAAABBBBBAAAAA"
         ]
     ],
-    "random":true,
+    "random":false,
     "manual_ordered":true,
     "manual_order":[0,1],
 
