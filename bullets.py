@@ -12,9 +12,10 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    max = 2
+    max = 3
 
     def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True, **kwargs):
+        
         pygame.sprite.Sprite.__init__(self)
         
         self.image = Bullet.image
@@ -67,6 +68,7 @@ class HurtBullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0, 0, 450, 600)
     def __init__(self,pos:tuple,target:tuple,speed:int=2,image:pygame.Surface = None):
         pygame.sprite.Sprite.__init__(self)
+        
         #setting number values
         self.pos = pos
         self.target = target
@@ -74,10 +76,10 @@ class HurtBullet(pygame.sprite.Sprite):
         self.health = 1
         #setting image
         if image is not None:
-            ...
+            self.image = pygame.transform.scale(image,(10,10))
         else:
             self.image = HurtBullet.image
-            self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect()
         self.rect.center = self.move.position
         
     def update(self):

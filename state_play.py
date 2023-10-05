@@ -179,6 +179,11 @@ class State():
             if event.key == pygame.K_4:
                 self.debug[0].pop(len(self.debug[0])-1)
                 self.debug[1].pop(len(self.debug[1])-1)
+            if event.key == pygame.K_5:
+                print("@@@@@@@@@@@")
+                for item in self.formation.spawned_list:
+                    print(item.info['state'])
+                print("@@@@@@@@@@@")
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = tuple(pygame.mouse.get_pos())
             pos = [pos[0]-pygame.display.play_pos[0],pos[1]-pygame.display.play_pos[0]]

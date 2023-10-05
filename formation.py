@@ -45,8 +45,13 @@ class Formation():
 
         #the spawn lists needed, which tell the game what enemies to spawn
         self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
-        # self.spawn_list=["BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB","BBBBBBBBBB"]
-        # self.spawn_list = ["CCCCCCCCCC","DDDBBBBDDD","AAAAAAAAAA","AAAAAAAAAA"]
+        # self.spawn_list=["AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA","AAAAAAAAAAAAA"]
+        self.spawn_list = [
+            "CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC",
+            "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
+            "AAAABBBBBBBAAAA","AAAABBBBBBBAAAA","AAAABBBBBBBAAAA",
+            "DDDDDDDDDDDDDDD",
+        ]
         self.spawned_list = []
 
         #SPAWN INFO - the game stores the offset value here in order to spawn enemies in special ways, so now they don't all have to spawn in order
@@ -95,13 +100,13 @@ class Formation():
         self.pos[0] = (pygame.display.play_dimensions[0]/2) - ((len(self.spawn_list[0])*self.world_data["char_distance_x"])/2)
 
         #difficulty calculations
-        self.difficulty = self.level//5
+        self.difficulty = self.level//5 
         self.attack={
             #throwdown amount = how many characters are thrown down in an attack stance #goes up once every 10 levels
-            "amount":self.difficulty+1,
+            "amount":(self.difficulty+1) if (self.difficulty < 14) else 15,
             "max":3+(self.difficulty//2),
         }
-        self.timer['atk'] = 100 - (self.difficulty*4)
+        self.timer['atk'] = (100 - (self.difficulty*4)) if self.difficulty < 25 else 1
         #timer["atk"] = how often characters are thrown down to attack #goes down a frame every level
         #max_characters = how many characters can be down at a time, goes up by 1 every 5 levels
 
@@ -119,19 +124,6 @@ class Formation():
 
 
     def state_start(self):
-        # #spawning all characters at once for the time being
-        # for row in range(len(self.spawn_list)):
-        #     for column in range(len(self.spawn_list[row])):
-        #         #spawning all the characters
-        #         type_to_spawn = self.spawn_list[row][column]
-        #         char = (characters.loaded[type_to_spawn](
-        #             self.spawn_offsets[row][column],
-        #             self.pos,
-        #             difficulty=1,
-        #             sprites=self.sprites,
-        #             player=self.player))
-        #         self.spawned_list.append(char)
-        #         self.sprites[0].add(char);self.sprites[2].add(char)
         #changing around spawn order
         if self.timer['time'] % self.timer['spawn'] == 0:
             #saving values as to what exactly i'm keeping track of

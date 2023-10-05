@@ -15,8 +15,8 @@
     
     "levels":10,
 
-    "char_distance_x":45, 
-    "char_distance_y":45,
+    "char_distance_x":35, 
+    "char_distance_y":35,
 
     "throwdown_time":32, 
     "throwdown_amount":1,

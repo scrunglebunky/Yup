@@ -7,53 +7,54 @@
 
 # YUP DEVLOG
 ## PART ONE- GETTING IT ALL TOGETHER
-- 9/29/23: Enemies move along a set path when spawning. Character A now has a set attack structure. It looks awesome.
-- 9/21/23: redid characters, almost finished with redoing the formation, redid characters spawning system, redid levels, patched bugs, levels can advance now, fixed high scores
-- 9/05/23: Finished all of game over, sprite groups fixed, etc. 
-- 9/01/23: Almost finished the game over screen, I just have to fix bugs relating to **emptying scores**, **sprite groups**, and **backgrounds**
-- 8/07/23: Finished title screen - of course it can be fixed a little more but still
-- 7/31/23: started working on title screen, made high score graphics that are able to be used in the game, revamped text values into sprites that can be now handled separately
-- 7/23/23: added a pause menu
-- 7/??/23: added an options screen
-- 7/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally
-- 6/30/23: made the configuration file usable
-- 6/30/23: made the screen and play dimensions resizeable, changed original resolution to 600x800 but scaled down
-- 6/24/23: FIXED THE FPS ISSUE
-- 6/24/23: sounds load and play now ; loading failsafe in place
-- 6/23/23: state_play's window now works as a separate surface that can be drawn to the window on its own, allowing for borders to now work.
-- 6/23/23: Formations can now randomly generate as well as manually generate, chances and specific details for formation modes now work
-- 6/22/23: Made it so manual formations will now loop 
-- 6/22/23: Made formations actually spawn the correct characters
-- 6/22/23: (originally 6/20/23) images can now be resized, the ui bar is its own class in its own file
-- 6/18/23: formations now respawn when the level is completed
-- 6/06/23: changed animations to return surface ; fixed player invincibility bug
-- 6/06/23: formation spawns characters, makes characters attack, and checks for fomration completion
-- 6/05/23: added level documentation docstring for reference, as there's a lot of options ; used level to change dymanic intensities or whatnot ; made the level file decide everything in a bg
-- 6/03/23: added a little bar rectangle for the UI, when the 
-- 6/03/23: programmed backgrounds; layering for scrolling images; resizing;
-- 6/02/23: made individual image loading
-- 6/02/23: made the formation somewhat functional, with a graphical representation of its position
-- 6/02/23: learned that \*\*kwargs is a thing, also working on fixing arguments to be more universal per everything (characters, formations, states, etc)
-- 6/01/23: made a data file called "loadlist" that calls for everything to be preloaded; replaces RevC's large glob of image loading
-- 6/01/23: scrapped the class, made it a function for easier navigation and less confusing-ness; it now just returns a loaded level
-- 6/01/23: Made a class that takes the level data into account
-- 6/01/23: started loading all level files in /levels/
-- 5/31/23: started working on json files for levels 
-- 5/31/23: ADDED levels.py, universal levels class/func to handle data
-- 5/31/23: Fixed up text.py and added finishing touches
-- 5/30/23: ADDED text.py, made numbers and text displayed
-- 5/30/23: halted player shoot animation if too many bullets onscreen
-- 5/30/23: organized files
-- 5/29/23: [START WORKING ON LOADING TEXT]
-- 5/28/23: Added new states instead of holding everything in main
-- 5/26/23: Added player collision; added default enemy death; made collision federally controlled; started bullets 
-- 5/25/23: Added player movement barriers, made shooting animations, made early collision recognition
-- 5/24/23: Started working on Player. I realized I do not have to make everything interconnect at the start, as it makes me overthink everything. I just need to program YUP and get it all done with. She has values such as health and momentum, but movement is most of it: a dictionary containing information about moving up, down, left, and right. 
-- 5/?/23: Made a character template with **char_template.py**, which stores default values and functions for characters to fall back to when there is not a unique value programmed. Examples include state, health, points, what to do when attacking, defending, etc. 
-- 5/?/23: Made **anim.py**, which is a class that *loads* all spritesheets and data, *analyzes* animation JSONs, and *updates* frames; sprites use it as a reference to pull a spritesheet frame and use it in the sprite/set self.image to it. 
-- 5/11/23: Used old sprite-gen program to make individual images into spritesheets and respective JSON files. 
-- 5/11/23: Created new game folder; created outline files; created MAIN loop
-- 4/17/23: Conceptualization begins
+- 10/05/23: All enemies except NOPE_D have an attack structure. Difficulty Scaling now works
+- 09/29/23: Enemies move along a set path when spawning. Character A now has a set attack structure. It looks awesome.
+- 09/21/23: redid characters, almost finished with redoing the formation, redid characters spawning system, redid levels, patched bugs, levels can advance now, fixed high scores
+- 09/05/23: Finished all of game over, sprite groups fixed, etc. 
+- 09/01/23: Almost finished the game over screen, I just have to fix bugs relating to **emptying scores**, **sprite groups**, and **backgrounds**
+- 08/07/23: Finished title screen - of course it can be fixed a little more but still
+- 07/31/23: started working on title screen, made high score graphics that are able to be used in the game, revamped text values into sprites that can be now handled separately
+- 07/23/23: added a pause menu
+- 07/??/23: added an options screen
+- 07/10/23: Removed old and bad sprites, replaced with simple shapes | tweaked anim | started working on config file | backgrounds move with character optionally
+- 06/30/23: made the configuration file usable
+- 06/30/23: made the screen and play dimensions resizeable, changed original resolution to 600x800 but scaled down
+- 06/24/23: FIXED THE FPS ISSUE
+- 06/24/23: sounds load and play now ; loading failsafe in place
+- 06/23/23: state_play's window now works as a separate surface that can be drawn to the window on its own, allowing for borders to now work.
+- 06/23/23: Formations can now randomly generate as well as manually generate, chances and specific details for formation modes now work
+- 06/22/23: Made it so manual formations will now loop 
+- 06/22/23: Made formations actually spawn the correct characters
+- 06/22/23: (originally 6/20/23) images can now be resized, the ui bar is its own class in its own file
+- 06/18/23: formations now respawn when the level is completed
+- 06/06/23: changed animations to return surface ; fixed player invincibility bug
+- 06/06/23: formation spawns characters, makes characters attack, and checks for fomration completion
+- 06/05/23: added level documentation docstring for reference, as there's a lot of options ; used level to change dymanic intensities or whatnot ; made the level file decide everything in a bg
+- 06/03/23: added a little bar rectangle for the UI, when the 
+- 06/03/23: programmed backgrounds; layering for scrolling images; resizing;
+- 06/02/23: made individual image loading
+- 06/02/23: made the formation somewhat functional, with a graphical representation of its position
+- 06/02/23: learned that \*\*kwargs is a thing, also working on fixing arguments to be more universal per everything (characters, formations, states, etc)
+- 06/01/23: made a data file called "loadlist" that calls for everything to be preloaded; replaces RevC's large glob of image loading
+- 06/01/23: scrapped the class, made it a function for easier navigation and less confusing-ness; it now just returns a loaded level
+- 06/01/23: Made a class that takes the level data into account
+- 06/01/23: started loading all level files in /levels/
+- 05/31/23: started working on json files for levels 
+- 05/31/23: ADDED levels.py, universal levels class/func to handle data
+- 05/31/23: Fixed up text.py and added finishing touches
+- 05/30/23: ADDED text.py, made numbers and text displayed
+- 05/30/23: halted player shoot animation if too many bullets onscreen
+- 05/30/23: organized files
+- 05/29/23: [START WORKING ON LOADING TEXT]
+- 05/28/23: Added new states instead of holding everything in main
+- 05/26/23: Added player collision; added default enemy death; made collision federally controlled; started bullets 
+- 05/25/23: Added player movement barriers, made shooting animations, made early collision recognition
+- 05/24/23: Started working on Player. I realized I do not have to make everything interconnect at the start, as it makes me overthink everything. I just need to program YUP and get it all done with. She has values such as health and momentum, but movement is most of it: a dictionary containing information about moving up, down, left, and right. 
+- 05/?/23: Made a character template with **char_template.py**, which stores default values and functions for characters to fall back to when there is not a unique value programmed. Examples include state, health, points, what to do when attacking, defending, etc. 
+- 05/?/23: Made **anim.py**, which is a class that *loads* all spritesheets and data, *analyzes* animation JSONs, and *updates* frames; sprites use it as a reference to pull a spritesheet frame and use it in the sprite/set self.image to it. 
+- 05/11/23: Used old sprite-gen program to make individual images into spritesheets and respective JSON files. 
+- 05/11/23: Created new game folder; created outline files; created MAIN loop
+- 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
 - [ ] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 

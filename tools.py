@@ -21,7 +21,7 @@ class MovingPoint():
         #checking for finish
         if self.check_finished:
             self.distance = MovingPoint.calc_distance(self.position,self.pointB)
-            self.finished = abs(self.distance)<self.speed*1.5
+            self.finished = abs(self.distance)<(self.speed*5)
     #updating everything if needed
     def change_all(self,pointB):
         self.pointB = pointB

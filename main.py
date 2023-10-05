@@ -60,7 +60,6 @@ def state_switch(
         cur_state = states[state[0].lower()]
         cur_state.on_start(return_state = state[1])
     return cur_state,state
-    #hi
     
 
 #setting the state

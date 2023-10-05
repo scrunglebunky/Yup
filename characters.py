@@ -135,13 +135,14 @@ class A(Template): #geurilla warfare
         self.atk={
             "x":0, #x-momentum
             "y":5, #y-momentum
-            "terminal":5, #terminal x-velocity
+            "terminal":5+self.info['difficulty'], #terminal x-velocity
             'turn_amt':2+self.info['difficulty'], #how often the enemy will turn
             'turn_vals':[], #turns x can be on
             'turn_cur':0, #which x-turn A is on.
             "acc":0.5, #acceleration
             "direct":False, #direction going in - True = Right, False = Left
         }
+        self.atk['acc'] = self.atk['terminal']/10 #fixed
         self.info['atk'] = True
         #generating first turn to see what direction is started on 
         self.atk['turn_vals'].append(random.randint(100,pygame.display.play_dimensions[0]-100))
@@ -198,15 +199,22 @@ class A(Template): #geurilla warfare
         if start:
             self.rect.center=(pygame.display.play_dimensions[0]/2,self.rect.height*-1)
             self.follow = tools.MovingPoint(self.rect.center,self.idle['full'],speed=5,check_finished=True)
+            return
+        
         self.follow.update()
         self.rect.center = self.follow.position
 
         #calling to update follow's values every 5 or so frames in order to prevent constant unneeded running
         if self.timers['exist'] % 10 == 0:
             self.follow.change_all(self.idle['full'])
-
+        #finishing
         if self.follow.finished:
             self.change_state('idle')
+
+        #ERROR CHECKING - fixing return state
+        if self.timers['in_state'] > 120:
+            self.change_state('return')
+        
 
     
     
@@ -219,12 +227,11 @@ class B(Template): #loop-de-loop
         self.info['atk'] = True
 
         self.atk = {
-            "speed":5+self.info['difficulty'], #where the opponent goes 
+            "speed":10+((self.info['difficulty']) if (self.info['difficulty']<10) else (10+self.info['difficulty']//10)) , #where the opponent goes 
             "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+self.info['difficulty'])], #where the opponent moves to
             "index":0, #which point the opponent is going to first
         }
         
-
 
     def state_attack(self,start=False):
         if start:
@@ -234,6 +241,8 @@ class B(Template): #loop-de-loop
         #updating position
         self.follow.update()
         self.rect.center=self.follow.position
+        #updating follow speed
+        self.follow.speed = round(self.follow.speed*0.97,2) if self.follow.speed > 2 else 2
         #updating movement patterns
         if self.follow.finished:
             self.atk['index'] += 1
@@ -243,12 +252,25 @@ class B(Template): #loop-de-loop
                 self.atk['index'] = 0
                 self.change_state('return')
             #updating if not finished
-            else:
+            else: 
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
 
-
-        
-        
+    def state_return(self,start=False):
+        if start:
+            self.follow = tools.MovingPoint(self.rect.center,self.idle['full'],speed=10,check_finished=True)
+            return
+        #updating movement
+        self.follow.update()
+        self.rect.center = self.follow.position
+        #changing movement every once in a while
+        if self.timers['exist']%5==0:
+            self.follow.change_all(self.idle['full'])
+        #finishing
+        if self.follow.finished:
+            self.change_state('idle')
+        #error checking
+        if self.timers['in_state'] >= 120:
+            self.change_state('return')     
 
 class C(Template): #turret
     def __init__(self,skin='nope_C',**kwargs):
@@ -256,8 +278,8 @@ class C(Template): #turret
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.sprites = kwargs['sprites']
         self.player=kwargs['player']
-        self.timer = (360 - (5*self.info['difficulty']))
-        self.time = random.randint(0,self.timer)
+        self.timer = (480 - (5*self.info['difficulty'])) if (self.info['difficulty']<75) else 120
+        self.time = random.randint(0,self.timer//10)
     def state_idle(self,start=False):
         Template.state_idle(self)
         self.time += 1
