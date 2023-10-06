@@ -57,10 +57,21 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
-- [ ] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
+- [ ] Add bonuses after completing a world
+- [ ] Add enemy skins per world
+- [ ] Add backgrounds per world
+- [ ][ ][ ][ ][ ][ ] Program FINAL world
+- [ ][ ][ ] Program VAPOR world
+- [ ][ ][ ] Program HAPPY world
+- [ ][ ][ ] Program AQUA world
+- [ ][ ][ ] Program CODE world
+- [ ][ ][ ] Program NOPE world
+- [ ][ ][ ] Program HOME world
+- [ ][ ][ ] Add shooting during enemy entry states, based off of the difficulty value
+- [x] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
 - [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 
-- [ ] implement changes in intensity
+- [x] implement changes in intensity
 - [x] sending characters into attack mode
 - [x] starting a new level when the formation is empty
 - [x] figure out what makes bg lag so bad
@@ -71,7 +82,7 @@
 - [x] Add gameplay elements from MAIN to State_Game_Play
 - [x] Make the gameplay level acknowledge the playing field over the pygame window
 - [x] Add lives
-- [ ] Let the player die 
+- [x] Let the player die 
 - [x] Barriers upon movement based on bar argument
 - [x] Shooting with the space bar
 - [x] Shooting bullet limit
@@ -79,11 +90,11 @@
 - [x] Playing animations with jumping, hitting the wall, getting hit
 - [x] Loop formations or create new ones if there are no more formations left
 - [x] Recognize a completed level and start a new one
-- [ ] Recognize a completed world and start a new one
+- [x] Recognize a completed world and start a new one
 - Levels are loaded by the gameplay state. 
 - The gameplay state does not exit and go to game over states, it just reruns \_\_init\_\_. 
 - Characters do not individually run their own collision worries. This would be far too much code to run every frame. Instead, gameplay will individually check and run collision points for sprite classes whenever it is deemed fit. It worked for Shoot the Baby, it will work here.
-- [ ] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
+- [x] Main has some universal variables that slowly get annoying to pass around as arguments. Maybe I can make it so all classes have them as global variables and MAIN gives them out pre-declaration, instead of in __init__?
 - [x] States having a string element saying what state to go to next, for MAIN to recognize
 - [ ] "Mod Folders" where the program has to recognize words with "anim_loadlist", "levels","order", etc. to plug into main.
 ## SEPARATE -- NEW CHARACTER WORLD MAP
