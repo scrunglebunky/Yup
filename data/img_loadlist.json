@@ -12,7 +12,7 @@
         "levelcomplete.png"],
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
-        "world1.png","world2.png"],
+        "home.png","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufo.png","ship.png"],
     "resize":[
         ["config_menu.png",[400,150]],
         ["logo.png",[200,150]],

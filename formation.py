@@ -239,7 +239,9 @@ class Formation():
                     spawn_list[row] += random.choice(("A","B","C","D"))
         #picking an ordered form from the set
         elif world_data['manual_ordered']:
-            spawn_list = world_data['manual_formations'][level - (len(world_data['manual_order'])*(level//(len(world_data['manual_order'])+1)))]
+            index = level - ((len(world_data['manual_order'])+1)*(level//(len(world_data['manual_order'])+1)))
+            print(index)
+            spawn_list = world_data['manual_formations'][index]
         #picking a random form from the set
         else:
             spawn_list = random.choice(world_data["manual_formations"])
