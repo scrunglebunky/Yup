@@ -18,10 +18,11 @@ def get_image(sheet,
                   colorkey:tuple=(0,0,0)):
         #making empty surface
         output = pygame.Surface((wh[0],wh[1])).convert_alpha()
+        output.fill(colorkey)
         #outputting parts of the image onto the surface
         output.blit(sheet,(0,0),(xy[0],xy[1],wh[0],wh[1]))
         #scaling
-        output = pygame.transform.scale(output,(wh[0]*scale,wh[1]*scale)).convert()
+        output = pygame.transform.scale(output,(wh[0]*scale,wh[1]*scale)).convert_alpha()
         #"greenscreen"ing
         output.set_colorkey(colorkey)
         #output
@@ -29,7 +30,7 @@ def get_image(sheet,
 
 def generate_sprite(data):
     spritesheet=[]
-    raw=pygame.image.load(data["NAME"]+".png").convert()
+    raw=pygame.image.load(data["NAME"]+".png").convert_alpha()
     #LOADING ALL SPRITE IMAGES
     for row in range(data["ROWS/COLUMNS"][0]):
         #it's easier for me, screw off.

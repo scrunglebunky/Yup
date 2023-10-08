@@ -1,7 +1,26 @@
 {
-    "world_name":"test",
+    "world_name":"happi",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"happy.png"
+    "bg":"happy.png",
+    "bg_size":[600,800],
+    "bg_speed":[0,0],
+
+    "skins":{
+        "A":"happy_A",
+        "B":"happy_B",
+        "C":"happy_C"
+    },
+
+    "manual_formations":[
+        [
+            "AACCCCCCCCCCCAA",
+            "AAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBB",
+            "AAAAABBBBBAAAAA"
+        ]
+    ]
+
+
 
 }

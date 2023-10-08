@@ -91,13 +91,13 @@
 
 
     "skins":{
-        "A":"nope_A",
-        "B":"nope_B",
-        "C":"nope_C",
-        "D":"nope_D"
+        "A":null,
+        "B":null,
+        "C":null,
+        "D":null
     },
     "overwrite":{
-        "D":"nope"
+        "D":null
     },
 
     "boss_level":false,

@@ -3,48 +3,9 @@
 
 import os,json,random
 
-"""DOCSTRING - GUIDE ON WHAT LEVEL LEVEL ASSETS ARE WHAT
-- world_name: just for display
-- ui_type: unused
-- song: song to be played
-
-- bg: image of bg used
-- bg_size: resizing of bg, none defaults to the playfield area
-- bg_speed: movement of the background, in x,y format
-- bg_speed_changes: a list of movements in speed based on level ; [type_of_time,time,speed]; types of time: 'level','frames'
-- bg_player_move: if the bg should make slight movements in the player
-
-- levels: how long the world lasts
-
-- char_distance_x : distance between characters in width
-- char_distance_y : same but in height
-- char_min_width: minimum amount of columns allowed in random generation
-- char_min_height: same but with rows
-- char_max_width: maximum amount of columns allowed in random generation
-- char_max_height: same but with rows
-
-- throwdown_time: amount of frames before a character is sent down to attack
-- throwdown_time: amount of characters to be thrown out when a character is sent to be attacked
-- spawn_time: how quickly the formation spawns characters in the startup state
-- max_char: maximum amount of characters allowed to be sent out at a time
-- dynamic_intensity: if the intensity values should be sent through update_intensities, which then ignores the preset values
-- form_drop_speed: how quickly the formation should swoop down to kill you if you take too long 
-- manual_intensity_changes: changing the intensities based on levels manually ; level,spawn_time,spawn_amount,max_char ; note these have to be put in order by level, or the game will bug out because of how JSON files work
-
-- imports: what characters are used during random generation ; bypassed with manual formations
-- bullets: what bullet drops are given
-- drop_health: how many levels it takes for a health box to be dropped
-- drop_bullet: how many levels it takes for a bullet to be dropped
-- speed: i don't know
-
-- manual formations: a list of lists, each list containing more lists for values on rows ; these bypass all other settings given because they are manual 
-- manual_type: how the manual formations are used ; 0 - None | 1 - ordered | 2 - random chance
-- manual_loop: if the manual formations loop after cycled or if they go onto random formations ; only modifies ordered and random chance
-- manual_influence: percent chance that a random manual formation is used over a random one ; only works for manual_type 2 and manual_loop false
-- manual_levels: what level a manual formation is used (manual_type 1) ; what level a manual formation is put into the random roster (manual_type 2)
-
+"""GUIDE ON LEVEL ASSETS
+-- soon :)
 """
-
 
 #5/31/2023 - JSON loading
 # This is the start of the JSON variant of levels.py. 
@@ -78,7 +39,7 @@ def fetch_level_info(
     # There is also error checking. 
     # The world files do not need to contain all of the data seen in default
     # So, in turn, this will copy the default file and merge it with the new content
-    alldata = worlds["default.json"]
+    alldata = worlds["default.json"].copy()
     try:
         if world_force is not None:
             alldata.update(worlds[world_force])

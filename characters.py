@@ -127,7 +127,7 @@ class Template(pygame.sprite.Sprite):
 
 
 class A(Template): #geurilla warfare
-    def __init__(self,skin='nope_A',**kwargs):
+    def __init__(self,skin=None,**kwargs):
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         
@@ -216,12 +216,12 @@ class A(Template): #geurilla warfare
             self.change_state('return')
         
 
-    
-    
+
+
             
 
 class B(Template): #loop-de-loop
-    def __init__(self,skin='nope_B',**kwargs):
+    def __init__(self,skin=None,**kwargs):
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.info['atk'] = True
@@ -275,8 +275,10 @@ class B(Template): #loop-de-loop
 
 
 
+
+
 class C(Template): #turret
-    def __init__(self,skin='nope_C',**kwargs):
+    def __init__(self,skin=None,**kwargs):
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.sprites = kwargs['sprites']
@@ -299,8 +301,10 @@ class C(Template): #turret
 
 
 
+
+
 class D(Template): #special -- uses special value to inherit from that character instead 
-    def __init__(self,skin:str='nope_D',special:str=None,**kwargs):
+    def __init__(self,skin:str=None,special:str=None,**kwargs):
         #placeholder value
         Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None

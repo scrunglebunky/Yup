@@ -147,6 +147,7 @@ class Formation():
                 pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player,
                 entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
                 entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
+                skin=self.world_data['skins'][type_to_spawn]
             )
             #adding enemy to groups
             self.spawned_list.append(char)

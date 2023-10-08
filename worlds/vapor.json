@@ -1,7 +1,9 @@
 {
-    "world_name":"test",
+    "world_name":"TOO AESTHETIC",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"vaporwave.png"
+    "bg":"vaporwave.png",
+    "bg_size":[600,800],
+    "bg_speed":[0,0]
 
 }

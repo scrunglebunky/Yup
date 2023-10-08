@@ -1,7 +1,18 @@
 {
-    "world_name":"test",
+    "world_name":"NOPE! NOPE NOPE NOPE!",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"nope.png"
+    "bg":"nope.png",
+
+    "skins":{
+        "A":"nope_A",
+        "B":"nope_B",
+        "C":"nope_C",
+        "D":"nope_D"
+    },
+    "overwrite":{
+        "D":"nope"
+    }
+
 
 }
