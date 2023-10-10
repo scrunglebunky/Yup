@@ -2,6 +2,30 @@
     "world_name":"COMPOOTR",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"hack.png"
+    "bg":"hack.png",
+
+    "levels":7,
+
+    "char_distance_x":35, 
+    "char_distance_y":50,
+
+    "skins":{
+        "A":"hack_A",
+        "B":"hack_B",
+        "C":"hack_C",
+        "D":"hack_D"
+    },
+    
+
+    "manual_formations":[
+        [
+            "AACCCCCCCCCCCAA",
+            "AAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBB",
+            "AAAAABBBBBAAAAA",
+            "DDDDDDDDDDDDDDD"
+        ]
+    ],
+    "manual_order":[0,0]
 
 }

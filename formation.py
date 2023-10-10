@@ -3,6 +3,7 @@ import random,pygame,math,characters,random
 class Formation():
     def __init__(self,
                 level,
+                level_in_world,
                 world_data,
                 sprites,
                 player,
@@ -15,6 +16,7 @@ class Formation():
         self.sprites = sprites
         self.player = player
         self.level = level
+        self.level_in_world = level_in_world
 
         #formation positioning
         self.pos = [pygame.display.rect.center[0],100] #positioning
@@ -44,7 +46,7 @@ class Formation():
         ######SPAWN LIST INFORMATION##############
 
         #the spawn lists needed, which tell the game what enemies to spawn
-        self.spawn_list = self.find_spawn_list(level=self.level, world_data=self.world_data)
+        self.spawn_list = self.find_spawn_list(level=self.level_in_world, world_data=self.world_data)
         # self.spawn_list=["BBBBBBBBBBBBBBBBBBBB","BBBBBBBBBBBBBBBBBBBB","BBBBBBBBBBBBBBBBBBBB","BBBBBBBBBBBBBBBBBBBB","BBBBBBBBBBBBBBBBBBBB"]
         # self.spawn_list = [
         #     "CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC","CCCCCCCCCCCCCCC",
@@ -240,8 +242,11 @@ class Formation():
                     spawn_list[row] += random.choice(("A","B","C","D"))
         #picking an ordered form from the set
         elif world_data['manual_ordered']:
-            index = level - ((len(world_data['manual_order'])+1)*(level//(len(world_data['manual_order'])+1)))
-            print(index)
+            #the easy way, since arithmetic SUCKS
+            index = level
+            while index >= len(world_data['manual_order']):
+                index -= len(world_data['manual_order'])
+            index = world_data['manual_order'][index]
             spawn_list = world_data['manual_formations'][index]
         #picking a random form from the set
         else:

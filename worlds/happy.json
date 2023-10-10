@@ -6,6 +6,8 @@
     "bg_size":[600,800],
     "bg_speed":[0,0],
 
+    "levels":10,
+
     "skins":{
         "A":"happy_A",
         "B":"happy_B",
@@ -14,13 +16,16 @@
 
     "manual_formations":[
         [
+            "AABBCCAABBCCAAB",
+            "CCCCCCCCCCCCCCC",
+            "CCCCCCCCCCCCCCC",
+            "CCCCCCCCCCCCCCC",
             "AACCCCCCCCCCCAA",
             "AAAAAAAAAAAAAAA",
             "BBBBBBBBBBBBBBB",
             "AAAAABBBBBAAAAA"
         ]
-    ]
-
-
+    ],
+    "manual_order":[0,0]
 
 }

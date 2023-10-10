@@ -82,6 +82,8 @@ class Template(pygame.sprite.Sprite):
             if self.follow.finished:
                 self.info['state'] = 'idle'
     def state_idle(self,start=False):
+        if start:
+            self.change_anim('idle')
         self.rect.center = self.idle["full"]
     def state_attack(self,start=False):
         self.info["state"] = 'idle'
@@ -164,6 +166,8 @@ class A(Template): #geurilla warfare
             self.atk['x'] = 0
             self.atk['turn_cur'] = 0
             self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0]
+            #setting animation
+            self.change_anim('attack')
             return
         #changing x and y by x and y velocities
         self.rect.y += self.atk['y']
@@ -231,12 +235,12 @@ class B(Template): #loop-de-loop
             "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+self.info['difficulty'])], #where the opponent moves to
             "index":0, #which point the opponent is going to first
         }
-        
 
     def state_attack(self,start=False):
         if start:
             self.atk['index'] = 0 
             self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
+            self.change_anim('attack')
             return
         #updating position
         self.follow.update()

@@ -16,7 +16,7 @@
     "levels":1,
 
     "char_distance_x":35, 
-    "char_distance_y":35,
+    "char_distance_y":40,
 
     "throwdown_time":32, 
     "throwdown_amount":1,
@@ -51,12 +51,13 @@
             "AACCCCCCCCCCCAA",
             "AAAAAAAAAAAAAAA",
             "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA"
+            "AAAAABBBBBAAAAA",
+            "DDDDDDDDDDDDDDD"
         ]
     ],
     "random":false,
     "manual_ordered":true,
-    "manual_order":[0,1],
+    "manual_order":[0,1,2,3],
 
     "start_patterns":{
         "A":{

@@ -185,10 +185,10 @@ class Spritesheet():
                 
     
     def change_anim(self,new:str,overwrite:bool=False):
-        #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it
-        if "interrupt" in self.all_anim[self.current_anim].keys() and not self.all_anim[self.current_anim]["interrupt"] and not overwrite:return
         #checking for if the animation even exists
         if self.current_anim not in self.all_anim.keys():return
+        #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it
+        if "interrupt" in self.all_anim[self.current_anim].keys() and not self.all_anim[self.current_anim]["interrupt"] and not overwrite:return
         #resets all frames, changes current animation
         self.current_anim = new
         self.current_anim_frame = 0

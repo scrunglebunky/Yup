@@ -3,7 +3,20 @@
     "ui_type":"default",
     "song":"cabbage.mp3",
     "bg":"vaporwave.png",
+
+    "levels":10,
+
     "bg_size":[600,800],
-    "bg_speed":[0,0]
+    "bg_speed":[0,0],
+
+    "char_distance_y":50,
+
+
+    "skins":{
+        "A":"vapor_A",
+        "B":"vapor_B",
+        "C":"vapor_C",
+        "D":"vapor_D"
+    }
 
 }

@@ -4,6 +4,8 @@
     "song":"cabbage.mp3",
     "bg":"nope.png",
 
+    "levels":7,
+
     "skins":{
         "A":"nope_A",
         "B":"nope_B",

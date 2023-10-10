@@ -4,6 +4,8 @@
     "./images/characters/":[
         "nope_A","nope_B","nope_C","nope_D",
         "happy_A","happy_B","happy_C",
+        "hack_A","hack_B","hack_C","hack_D",
+        "vapor_A","vapor_B","vapor_C","vapor_D",
         "YUP",
         "kaboom"
     ],
