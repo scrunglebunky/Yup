@@ -11,21 +11,19 @@
     "skins":{
         "A":"happy_A",
         "B":"happy_B",
-        "C":"happy_C"
+        "C":"happy_C",
+        "D":null
     },
 
     "manual_formations":[
         [
-            "AABBCCAABBCCAAB",
-            "CCCCCCCCCCCCCCC",
-            "CCCCCCCCCCCCCCC",
-            "CCCCCCCCCCCCCCC",
             "AACCCCCCCCCCCAA",
             "AAAAAAAAAAAAAAA",
             "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA"
+            "AAAAABBBBBAAAAA",
+            "DDDDDDDDDDDDDDD"
         ]
     ],
-    "manual_order":[0,0]
+    "manual_order":[0]
 
 }

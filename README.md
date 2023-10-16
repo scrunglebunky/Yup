@@ -6,7 +6,10 @@
 - This is my last attempt: a refresher that ensures that I make a simple, intuitive game that I do not overthink about.
 
 # YUP DEVLOG
-## PART ONE- GETTING IT ALL TOGETHER
+## PART TWO - ADDING CONTENT
+- 10/11/23: Difficulty scaling tweaks, enemies shoot in attack state, plans to add more bullets
+- 10/07/23: Added temporary world backgrounds, enemies for vaporwave, nope, happy
+## PART ONE - GETTING IT ALL TOGETHER
 - 10/05/23: All enemies except NOPE_D have an attack structure. Difficulty Scaling now works
 - 09/29/23: Enemies move along a set path when spawning. Character A now has a set attack structure. It looks awesome.
 - 09/21/23: redid characters, almost finished with redoing the formation, redid characters spawning system, redid levels, patched bugs, levels can advance now, fixed high scores
@@ -57,15 +60,16 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] Fix gameover bug
 - [ ] Add bonuses after completing a world
 - [ ] Add enemy skins per world
 - [ ] Add backgrounds per world
 - [ ][ ][ ][ ][ ][ ] Program FINAL world
-- [ ][ ][ ] Program VAPOR world
-- [ ][ ][ ] Program HAPPY world
+- [x][x][ ] Program VAPOR world
+- [x][x][ ] Program HAPPY world
 - [ ][ ][ ] Program AQUA world
-- [ ][ ][ ] Program CODE world
-- [ ][ ][ ] Program NOPE world
+- [x][ ][ ] Program CODE world
+- [x][ ][ ] Program NOPE world
 - [ ][ ][ ] Program HOME world
 - [ ][ ][ ] Add shooting during enemy entry states, based off of the difficulty value
 - [x] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 

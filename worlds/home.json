@@ -2,6 +2,23 @@
     "world_name":"HOME PLANET",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"home.png"
+    "bg":"home.png",
+
+    "skins":{
+        "A":"home_A",
+        "B":"home_B",
+        "C":"home_C",
+        "D":"home_D"
+    },
+    "manual_formations":[
+        [
+            "AACCCCCCCCCCCAA",
+            "AAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBB",
+            "AAAAABBBBBAAAAA",
+            "DDDDDDDDDDDDDDD"
+        ]
+    ],
+    "manual_order":[0]
 
 }

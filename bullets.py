@@ -66,14 +66,24 @@ class HurtBullet(pygame.sprite.Sprite):
     pygame.draw.circle(image, "#AA0000", (5, 5), 5)
     pygame.draw.circle(image, "red", (5, 5), 4)
     screen_rect = pygame.Rect(0, 0, 450, 600)
+
+    #limits so the game doesnt lag
+    count = 0
+    max = 100
+
     def __init__(self,pos:tuple,target:tuple,speed:int=2,image:pygame.Surface = None):
         pygame.sprite.Sprite.__init__(self)
         
+        #checking for max bullet count
+        HurtBullet.count += 1
+        self.killonstart = True if HurtBullet.count > HurtBullet.max else False
+
         #setting number values
         self.pos = pos
         self.target = target
         self.move = tools.MovingPoint(pos,target,speed=speed)
         self.health = 1
+        
         #setting image
         if image is not None:
             self.image = pygame.transform.scale(image,(10,10))

@@ -56,7 +56,7 @@ class MovingPoint():
             ) 
 
 class MovingPoints(MovingPoint):
-    def __init__(self,pos:tuple,points:list,speed:int=1,final_pos:list=None):
+    def __init__(self,pos:tuple,points:list,speed:int=1,final_pos:list=None,trip=999):
         self.pos = list(pos)
         self.points = points #points to follow
         self.cur_target = 0 #which point in points to target
@@ -70,6 +70,9 @@ class MovingPoints(MovingPoint):
         self.final_pos = [final_pos,] if final_pos is not None else None
         #a trigger to see if the final pos has been reached yet
         self.final_trigger = False if self.final_pos is not None else True
+        #a trip for events to occur in the host object
+        self.trip=self.tripped=False
+        self.trip_val=trip
         
     def update(self):
         if not self.finished:
@@ -98,7 +101,9 @@ class MovingPoints(MovingPoint):
                 else:
                     self.distance = MovingPoint.calc_distance(self.pos,self.points[self.cur_target])
                     self.move_vals = MovingPoint.calc_move_vals(self.pos,self.points[self.cur_target],self.distance,self.speed)
-    
+                #no matter what, tripping the switch for evemy movement (REMOVE THIS IF NOT IN YUP)
+                if self.cur_target >= self.trip_val and not self.tripped:
+                    self.trip=self.tripped=True
 
 
 class Clock(): # a redo of pygame.clock to add more values

@@ -11,7 +11,10 @@ class Template(pygame.sprite.Sprite):
         difficulty:int=0,
         entrance_points:dict=None,
         entrance_speed:float=1.0,
-        entrance_shoot:list=[],):
+        entrance_shoot:list=[],
+        sprites:pygame.sprite.Group = None,
+        player:pygame.sprite.Sprite = None,
+        trip:int=999):
         pygame.sprite.Sprite.__init__(self)
 
         self.idle={ #information about the idle state
@@ -36,11 +39,16 @@ class Template(pygame.sprite.Sprite):
             "attack":self.state_attack,
             "return":self.state_return,
         }
+        self.atk = {
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2)
+            }
         #image values, including spritesheets
         self.spritesheet = None
         self.image = Template.image
         self.rect = self.image.get_rect()
         self.rect.center = self.idle["full"]
+
+
         #entrance
         self.entrance_points = entrance_points 
         if self.entrance_points is not None:
@@ -48,9 +56,14 @@ class Template(pygame.sprite.Sprite):
                 self.entrance_points[0],
                 self.entrance_points,
                 speed=entrance_speed,
-                final_pos=self.idle['full'])
+                final_pos=self.idle['full'],
+                trip=trip)
         else:
             self.follow = None
+
+        #extras
+        self.sprites = sprites
+        self.player = player
 
     def update(self): #this should be run the same no matter what
         #updating state
@@ -81,6 +94,11 @@ class Template(pygame.sprite.Sprite):
             self.rect.center = self.follow.pos
             if self.follow.finished:
                 self.info['state'] = 'idle'
+        #shooting based off the follow values
+        if self.follow.trip:
+            if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
+                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=5)
+            self.follow.trip = False
     def state_idle(self,start=False):
         if start:
             self.change_anim('idle')
@@ -124,25 +142,37 @@ class Template(pygame.sprite.Sprite):
             (new_pos[0] + self.idle["offset"][0]),
             (new_pos[1] + self.idle["offset"][1])]
         
-
+    def shoot(self,pos,target,speed:float = 2):
+        bullet = bullets.HurtBullet(pos=pos,target=target,speed=speed)
+        self.sprites[0].add(bullet)
+        self.sprites[2].add(bullet)
 
 
 
 class A(Template): #geurilla warfare
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])
+        Template.__init__(self,
+            offset=kwargs['offset'],
+            pos=kwargs['pos'],
+            difficulty=kwargs['difficulty'],
+            entrance_points=kwargs['entrance_points'],
+            entrance_speed=kwargs['entrance_speed'],
+            sprites=kwargs['sprites'],
+            player=kwargs['player'],
+            trip=kwargs['trip'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         
         #values created for when the opponent attacks you
         self.atk={
             "x":0, #x-momentum
             "y":5, #y-momentum
-            "terminal":5+self.info['difficulty'], #terminal x-velocity
-            'turn_amt':2+self.info['difficulty'], #how often the enemy will turn
+            "terminal":5+(self.info['difficulty'] if self.info['difficulty']<50 else 10), #terminal x-velocity
+            'turn_amt':2+(self.info['difficulty'] if self.info['difficulty']<50 else 15), #how often the enemy will turn
             'turn_vals':[], #turns x can be on
             'turn_cur':0, #which x-turn A is on.
             "acc":0.5, #acceleration
             "direct":False, #direction going in - True = Right, False = Left
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2)
         }
         self.atk['acc'] = self.atk['terminal']/10 #fixed
         self.info['atk'] = True
@@ -188,11 +218,13 @@ class A(Template): #geurilla warfare
             #updating values
             self.atk['turn_cur'] += 1
             self.atk['direct'] = not self.atk['direct']
-            #looping back if turned too much
+            #looping back if reached end of turn list
             if self.atk['turn_cur'] >= len(self.atk['turn_vals']):
                 self.atk['turn_cur'] = 0
                 self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0] 
-            # print(self.atk['direct'])
+            # shooting if needed
+            if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
+                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=3)
             
         #resetting when hitting bottom
         if self.rect.top>pygame.display.play_dimensions[1]:
@@ -226,14 +258,24 @@ class A(Template): #geurilla warfare
 
 class B(Template): #loop-de-loop
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
+        Template.__init__(self,
+            offset=kwargs['offset'],
+            pos=kwargs['pos'],
+            difficulty=kwargs['difficulty'],
+            entrance_points=kwargs['entrance_points'],
+            entrance_speed=kwargs['entrance_speed'],
+            sprites=kwargs['sprites'],
+            player=kwargs['player'],
+            trip=kwargs['trip'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.info['atk'] = True
 
         self.atk = {
             "speed":10+((self.info['difficulty']) if (self.info['difficulty']<10) else (10+self.info['difficulty']//10)) , #where the opponent goes 
-            "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+self.info['difficulty'])], #where the opponent moves to
+            "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+(self.info['difficulty'] if self.info['difficulty']<10 else 10))], #where the opponent moves to
             "index":0, #which point the opponent is going to first
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2), #chance of a shot coming out during attack
+
         }
 
     def state_attack(self,start=False):
@@ -258,6 +300,9 @@ class B(Template): #loop-de-loop
             #updating if not finished
             else: 
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
+            # shooting if needed
+            if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
+                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=3)
 
     def state_return(self,start=False):
         if start:
@@ -283,10 +328,16 @@ class B(Template): #loop-de-loop
 
 class C(Template): #turret
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
+        Template.__init__(self,
+            offset=kwargs['offset'],
+            pos=kwargs['pos'],
+            difficulty=kwargs['difficulty'],
+            entrance_points=kwargs['entrance_points'],
+            entrance_speed=kwargs['entrance_speed'],
+            sprites=kwargs['sprites'],
+            player=kwargs['player'],
+            trip=kwargs['trip'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
-        self.sprites = kwargs['sprites']
-        self.player=kwargs['player']
         self.timer = (480 - (5*self.info['difficulty'])) if (self.info['difficulty']<75) else 120
         self.time = random.randint(0,self.timer//10)
     def state_idle(self,start=False):

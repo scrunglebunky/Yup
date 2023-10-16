@@ -36,6 +36,9 @@ class Formation():
         self.timer = { #timers used 
             "time":0, #current timer, will check every so and so frames
             "duration":0, #how long the state has been alive for. used for positioning
+            "grace":0, #timer for the formation stopping the character spawn waiting
+            "grace_start": 240, #how long until the grace period starts
+            "grace_end": 480, #how long until the grace period ends
             "spawn":120, #how often it takes for something to spawn
             "reset":720, #when the timer resets
             "dead":30, #how often dead characters are checked
@@ -120,6 +123,7 @@ class Formation():
         #timer updates
         self.timer["duration"] += 1
         self.timer["time"] = self.timer["time"] + 1 if self.timer["time"] < self.timer["reset"] else 0 
+        self.timer["grace"] = self.timer["grace"] + 1 if self.timer ["grace"] < self.timer["grace_end"] else 0
         #clear check
         self.cleared = (len(self.spawned_list) <= 0)
     
@@ -149,7 +153,8 @@ class Formation():
                 pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player,
                 entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
                 entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
-                skin=self.world_data['skins'][type_to_spawn]
+                skin=self.world_data['skins'][type_to_spawn],
+                trip=entrance_info['shoot'] if entrance_points is not None else 999,
             )
             #adding enemy to groups
             self.spawned_list.append(char)
@@ -212,7 +217,7 @@ class Formation():
 
     def check_for_atk(self): #throwing down an enemy to attack the player
         #only runs if the timer is ok
-        if (self.timer["time"] % self.timer["atk"] == 0):
+        if (self.timer["time"] % self.timer["atk"] == 0) and (self.timer["grace"] < self.timer["grace_start"]):
             #counting all enemies in idle 
             atk_count = 0
             idle_count = []
@@ -248,6 +253,7 @@ class Formation():
                 index -= len(world_data['manual_order'])
             index = world_data['manual_order'][index]
             spawn_list = world_data['manual_formations'][index]
+            del index
         #picking a random form from the set
         else:
             spawn_list = random.choice(world_data["manual_formations"])
