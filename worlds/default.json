@@ -6,12 +6,6 @@
     "bg":"test.png",
     "bg_size":[600,800],
     "bg_speed":[0,2],
-    "bg_speed_changes":[
-        ["level",5,[0,-1]],
-        ["level",6,[0,1]],
-        ["frame",6000,[3,-5]]
-        ],
-
     
     "levels":1,
 
@@ -106,5 +100,10 @@
     },
 
     "boss_level":false,
-    "boss_name":"ufo"
+    "boss_name":"ufo",
+
+
+    "events":{
+        "0":[false,["level",2],"print('hello world!')"]
+    }
 }

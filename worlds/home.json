@@ -4,21 +4,13 @@
     "song":"cabbage.mp3",
     "bg":"home.png",
 
+    "levels":5,
+
     "skins":{
         "A":"home_A",
         "B":"home_B",
         "C":"home_C",
         "D":"home_D"
-    },
-    "manual_formations":[
-        [
-            "AACCCCCCCCCCCAA",
-            "AAAAAAAAAAAAAAA",
-            "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA",
-            "DDDDDDDDDDDDDDD"
-        ]
-    ],
-    "manual_order":[0]
+    }
 
 }

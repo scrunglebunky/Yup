@@ -2,6 +2,15 @@
     "world_name":"AQUAZONE",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"water.png"
+    "bg":"water.png",
+
+    "levels":5,
+
+    "skins":{
+        "A":"aqua_A",
+        "B":"aqua_B",
+        "C":"aqua_C",
+        "D":"aqua_D"
+    }
 
 }

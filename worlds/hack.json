@@ -4,7 +4,7 @@
     "song":"cabbage.mp3",
     "bg":"hack.png",
 
-    "levels":7,
+    "levels":5,
 
     "char_distance_x":35, 
     "char_distance_y":50,
