@@ -94,11 +94,11 @@ class Template(pygame.sprite.Sprite):
             self.rect.center = self.follow.pos
             if self.follow.finished:
                 self.info['state'] = 'idle'
-        #shooting based off the follow values
-        if self.follow.trip:
-            if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=5)
-            self.follow.trip = False
+            #shooting based off the follow values
+            if self.follow.trip:
+                if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
+                    self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=5)
+                self.follow.trip = False
     def state_idle(self,start=False):
         if start:
             self.change_anim('idle')

@@ -6,13 +6,13 @@
     "bg_size":[600,800],
     "bg_speed":[0,0],
 
-    "levels":7,
+    "levels":5,
 
     "skins":{
         "A":"happy_A",
         "B":"happy_B",
         "C":"happy_C",
-        "D":null
+        "D":"happy_D"
     },
 
     "manual_formations":[

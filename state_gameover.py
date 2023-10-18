@@ -166,6 +166,9 @@ class State():
                 sp.pattern="sine"
                 State.sprites.add(sp)
                 self.exit_ok = True
+
+        if self.timer > 1190:
+            self.timer = 1001
         
 
 
@@ -284,5 +287,6 @@ class State():
             window=self.play_state.fullwindow,
             is_restart=True
         )
+        self.__init__(window=self.window,play_state=self.play_state)
         score.save_scores(scores=score.scores)
         self.next_state="title"

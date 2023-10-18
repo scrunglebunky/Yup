@@ -7,6 +7,8 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 10/18/23: started adding unique entrance patterns, fixed gameover bug, plans to change formation entrance framework
+- 10/17/23: added most sprites, fixed difficulty scaling more
 - 10/11/23: Difficulty scaling tweaks, enemies shoot in attack state, plans to add more bullets
 - 10/07/23: Added temporary world backgrounds, enemies for vaporwave, nope, happy
 ## PART ONE - GETTING IT ALL TOGETHER
@@ -60,17 +62,22 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] Executable events, only use of exec() function
+- [ ] Unique formations per world
+- [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
+- [ ] Enemy replacements, specifically for D and E but it'll work with anything
+- [ ] unique entrances per world
 - [ ] Fix gameover bug
 - [ ] Add bonuses after completing a world
-- [ ] Add enemy skins per world
+- [x] Add enemy skins per world
 - [ ] Add backgrounds per world
 - [ ][ ][ ][ ][ ][ ] Program FINAL world
 - [x][x][ ] Program VAPOR world
 - [x][x][ ] Program HAPPY world
-- [ ][ ][ ] Program AQUA world
+- [x][ ][ ] Program AQUA world
 - [x][ ][ ] Program CODE world
 - [x][ ][ ] Program NOPE world
-- [ ][ ][ ] Program HOME world
+- [x][ ][ ] Program HOME world
 - [ ][ ][ ] Add shooting during enemy entry states, based off of the difficulty value
 - [x] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
 - [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.

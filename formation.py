@@ -220,11 +220,13 @@ class Formation():
         if (self.timer["time"] % self.timer["atk"] == 0) and (self.timer["grace"] < self.timer["grace_start"]):
             #counting all enemies in idle 
             atk_count = 0
+            trip = False #a trip to see if the enemies are still entering - WILL NOT ATTACK
             idle_count = []
             for _ in enumerate(self.spawned_list):
                 if _[1].info['state'] == 'attack': atk_count += 1
+                if _[1].info['state'] == 'enter': trip=True
                 elif _[1].info['state'] == 'idle' and _[1].info['atk']: idle_count.append(_[0])
-            if atk_count <= self.attack["max"] and len(idle_count) > 0:
+            if (atk_count <= self.attack["max"] and len(idle_count) > 0) and not trip:
                 self.make_attack(idle_count)
     
     def make_attack(self,idle_count:list):
