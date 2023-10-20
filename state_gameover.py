@@ -227,14 +227,14 @@ class State():
         #makes a rank value and gives you a set of ranks based off of it
         rank_val = score.score * (1 + 0.01*self.play_state.world) * (1+(0.01*self.play_state.level))
         ranks = {
-            0:("WHAT THE FUCK YOU SUCK", "HOW DO YOU HAVE A SCORE OF 0","YOU WILL DIE ALONE","KILL YOURSELF","ZERO???????"), #joke 
-            1000:("THERE WAS AN ATTEMPT", "pathetic", "PATHETIC, TRULY PATHETIC", "YOU'RE BAAAAD", "PRESS THE BUTTONS TO DO STUFF","SCHTINKY"), #horrible
+            0:("WHAT THE *** YOU SUCK", "HOW DO YOU HAVE A SCORE OF 0","YOU WILL DIE ALONE","YOU SERVE -- ZERO PURPOSE","ZERO???????"), #joke 
+            1000:("THERE WAS AN ATTEMPT", "pathetic", "RAAAAA YOU SUCK", "YOU'RE BAAAAD", "PRESS THE BUTTONS TO DO STUFF","SCHTINKY"), #horrible
             5000:("bad,bad,bad,bad,bad","you kinda suck","uwu ur bad","not horrendous but not good either", "I LOVE DRUGS"), #bad
             10000:("SWAGSHIT-MONEYMONEY","pm sucks","FIRST TIME?","YUP MORE LIKE... FUCKING STUPID LMAO"), #not good
             50000:("WHAT","kinda mid ngl","YOU PROBABLY DRINK WHITE MONSTER","FEMBOY PLAYIN ASS","HARDCORE PLAYER MORE LIKE MIDCORE MIDDER HAHAHA"), #mid
             100000:("WHEN","ok","better than mid ig","WOOOOOW DUDE YOU SUCK ASS (nah jk)","Not Bad!","cellular redistribution","UNDERGO MITOSIS NOW"), #ok
             250000:("WHO","hey you're pretty good at this","WOW YOU'RE OK AT THIS","sweat much?","STOP TRYING SO HARD","give up"), #good 
-            500000:("I HATE   EARTH DAY", "KILL THE HOMELESS", "SHITPOST RANK", "DOUBLE DOG DOGSHIT","PLAY AGAIN IF YOU'RE RACIST","QUIT IF YOU'RE RACIST","mid, mid mid mid"), #great (shitpost)
+            500000:("I HATE   EARTH DAY", "KILL THE HOMELESS", "SHITPOST RANK", "DOUBLE DOG DOGSHIT","organ donor","mid, mid mid mid"), #great (shitpost)
             1000000:("this is actually the worst rank you can get, i can't believe you're so bad at the game kill yourself","ONE MILLION RANKS","WHERE","YOU'RE FUCKING GOOD AT THE GAME I GET IT"), #amazing
             2500000:("YOU'RE CRACKED","no rank","how","STOP PLAYING GOOD IT'S MAKING ME JEALOUS"), #cracked 1
             7500000:("YOU'RE CRACKEDER","gay"), #cracked 2
