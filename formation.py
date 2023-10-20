@@ -169,10 +169,11 @@ class Formation():
             #new column
             self.spawning_value += 1
             self.timer['spawn'] = entrance_info['timer'] if entrance_points is not None else 1 #keeping the timer quick
-            #new row
+            #new row / new character set
             if self.spawning_value >= len(self.spawn_organized[self.spawning_keys[self.spawning_key]]):
                 self.spawning_value = 0 
                 self.spawning_key += 1
+                self.enter_key = 0 
                 self.timer['spawn'] = 180 #a pause between spawning
             #finished
             if self.spawning_key >= len(self.spawning_keys):

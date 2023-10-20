@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 10/20/23: added unique spawn patterns for the home world, somehow added a new bug in gameover, plans to optimize the vectors
 - 10/18/23: started adding unique entrance patterns, fixed gameover bug, plans to change formation entrance framework
 - 10/17/23: added most sprites, fixed difficulty scaling more
 - 10/11/23: Difficulty scaling tweaks, enemies shoot in attack state, plans to add more bullets
@@ -62,12 +63,14 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [ ] Re-orderable spawn character orders (instead of in the order they are first spawned)
+- [ ] Store all movement values between points immediately so repeated calculations aren't needed - using movingpoints
 - [ ] Executable events, only use of exec() function
 - [ ] Unique formations per world
 - [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
 - [ ] Enemy replacements, specifically for D and E but it'll work with anything
-- [ ] unique entrances per world
-- [ ] Fix gameover bug
+- [x] unique entrances per world
+- [x] Fix gameover bug
 - [ ] Add bonuses after completing a world
 - [x] Add enemy skins per world
 - [ ] Add backgrounds per world
