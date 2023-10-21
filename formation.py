@@ -146,7 +146,6 @@ class Formation():
             else:
                 #if no entrance points
                 entrance_points = None
-
             #creating enemy
             char = characters.loaded[type_to_spawn](
                 offset=offset,
@@ -154,7 +153,7 @@ class Formation():
                 entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
                 entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
                 skin=self.world_data['skins'][type_to_spawn],
-                trip=entrance_info['shoot'] if entrance_points is not None else 999,
+                trip=entrance_info['shoot'] if entrance_points is not None else [999],
             )
             #adding enemy to groups
             self.spawned_list.append(char)

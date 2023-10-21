@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 10/20/23: added a bunch more spawning patterns, and fixed some more difficulty scaling issues
 - 10/20/23: added unique spawn patterns for the home world, somehow added a new bug in gameover, plans to optimize the vectors
 - 10/18/23: started adding unique entrance patterns, fixed gameover bug, plans to change formation entrance framework
 - 10/17/23: added most sprites, fixed difficulty scaling more
@@ -63,6 +64,7 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- NOTE - in the AQUA world - the jellyfish special D type will only be able to be killed by jumping on him. he checks this through a special check run through jellyfish's on_collide function - they will have a special idle state where they camp below the formation and do nothing else - in order to kill the other ones, you either have to jump on them at the start, or wait to kill them when they attack later - due to this, the aqua formation will not move down
 - [ ] Re-orderable spawn character orders (instead of in the order they are first spawned)
 - [ ] Store all movement values between points immediately so repeated calculations aren't needed - using movingpoints
 - [ ] Executable events, only use of exec() function

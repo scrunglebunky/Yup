@@ -14,9 +14,8 @@ class Template(pygame.sprite.Sprite):
         entrance_shoot:list=[],
         sprites:pygame.sprite.Group = None,
         player:pygame.sprite.Sprite = None,
-        trip:int=999):
+        trip:list=(999,)):
         pygame.sprite.Sprite.__init__(self)
-
         self.idle={ #information about the idle state
             "offset":offset,
             "full":[(pos[0]+offset[0]),(pos[1]+offset[1])] # current position in idle
@@ -39,8 +38,10 @@ class Template(pygame.sprite.Sprite):
             "attack":self.state_attack,
             "return":self.state_return,
         }
-        self.atk = {
-            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2)
+        self.atk_basic = {
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2),
+            "start_shoot_chance":(5 - self.info['difficulty'] if self.info['difficulty']<4 else 1),
+            "trip":trip,
             }
         #image values, including spritesheets
         self.spritesheet = None
@@ -56,8 +57,7 @@ class Template(pygame.sprite.Sprite):
                 self.entrance_points[0],
                 self.entrance_points,
                 speed=entrance_speed,
-                final_pos=self.idle['full'],
-                trip=trip)
+                final_pos=self.idle['full'],)
         else:
             self.follow = None
 
@@ -95,8 +95,8 @@ class Template(pygame.sprite.Sprite):
             if self.follow.finished:
                 self.info['state'] = 'idle'
             #shooting based off the follow values
-            if self.follow.trip:
-                if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
+            if self.follow.trip and self.follow.cur_target in self.atk_basic["trip"]:
+                if random.randint(0,self.atk_basic['start_shoot_chance'])==self.atk_basic['start_shoot_chance']:
                     self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=5)
                 self.follow.trip = False
     def state_idle(self,start=False):
@@ -271,10 +271,10 @@ class B(Template): #loop-de-loop
         self.info['atk'] = True
 
         self.atk = {
-            "speed":10+((self.info['difficulty']) if (self.info['difficulty']<10) else (10+self.info['difficulty']//10)) , #where the opponent goes 
-            "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-25)) for i in range(5+(self.info['difficulty'] if self.info['difficulty']<10 else 10))], #where the opponent moves to
+            "speed":10+((self.info['difficulty']) if (self.info['difficulty']<10) else (10+self.info['difficulty']//10) ) , #where the opponent goes 
+            "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-50)) for i in range(5+(self.info['difficulty'] if self.info['difficulty']<5 else 5))], #where the opponent moves to
             "index":0, #which point the opponent is going to first
-            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2), #chance of a shot coming out during attack
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<6 else 3), #chance of a shot coming out during attack
 
         }
 
@@ -338,7 +338,7 @@ class C(Template): #turret
             player=kwargs['player'],
             trip=kwargs['trip'])   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
-        self.timer = (480 - (5*self.info['difficulty'])) if (self.info['difficulty']<75) else 120
+        self.timer = (480 - (10*self.info['difficulty'])) if (self.info['difficulty']<40) else 80
         self.time = random.randint(0,self.timer//10)
     def state_idle(self,start=False):
         Template.state_idle(self)
@@ -361,7 +361,15 @@ class C(Template): #turret
 class D(Template): #special -- uses special value to inherit from that character instead 
     def __init__(self,skin:str=None,special:str=None,**kwargs):
         #placeholder value
-        Template.__init__(self,kwargs['offset'],kwargs['pos'],kwargs['difficulty'],kwargs['entrance_points'],kwargs['entrance_speed'])   
+        Template.__init__(self,
+            offset=kwargs['offset'],
+            pos=kwargs['pos'],
+            difficulty=kwargs['difficulty'],
+            entrance_points=kwargs['entrance_points'],
+            entrance_speed=kwargs['entrance_speed'],
+            sprites=kwargs['sprites'],
+            player=kwargs['player'],
+            trip=kwargs['trip'])
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
 
 class Nope(Template):

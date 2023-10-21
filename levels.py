@@ -24,7 +24,7 @@ for _ in os.listdir("./worlds/"):
         with open("./worlds/"+str(_), "r") as raw:
             worlds[str(_)] = json.load(raw)
 
-print("WORLDS-----\n",worlds.keys(),"\nCAMPAIGNS-------\n",campaigns)        
+# print("WORLDS-----\n",worlds.keys(),"\nCAMPAIGNS-------\n",campaigns)        
 
 
 #6/1/2023 - LEVEL FUNCTIONS

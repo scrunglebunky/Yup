@@ -16,8 +16,8 @@ class State():
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 0,
-                 level:int = 15,
+                 world:int = 1,
+                 level:int = 5,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  ):

@@ -4,8 +4,6 @@
     "song":"cabbage.mp3",
     "bg":"vaporwave.png",
 
-    "levels":5,
-
     "bg_size":[600,800],
     "bg_speed":[0,0],
 
