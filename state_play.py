@@ -16,8 +16,8 @@ class State():
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 1,
-                 level:int = 5,
+                 world:int = 3,
+                 level:int = 0,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  ):
@@ -108,15 +108,8 @@ class State():
         #ending function early if advancing
         if self.in_advance: return 
 
-        #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide(State.sprites[1],State.sprites[2],False,False,collided=pygame.sprite.collide_mask)
-        collidelist2=pygame.sprite.groupcollide(State.sprites[2],State.sprites[3],False,False,collided=pygame.sprite.collide_mask)
-        for key,value in collidelist.items():
-            key.on_collide(2)
-            value[0].on_collide(1)
-        for key,value in collidelist2.items():
-            key.on_collide(3)
-            value[0].on_collide(2)
+        #calling collision
+        self.collision()
 
         
         #06/18/2023 - Starting a new level
@@ -142,7 +135,16 @@ class State():
             self.next_state = "gameover"
 
 
-        
+    def collision(self):
+        #Detecting collision between players and enemies 
+        collidelist=pygame.sprite.groupcollide(State.sprites[1],State.sprites[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist2=pygame.sprite.groupcollide(State.sprites[2],State.sprites[3],False,False,collided=pygame.sprite.collide_mask)
+        for key,value in collidelist.items():
+            key.on_collide(2,value[0])
+            value[0].on_collide(1,key)
+        for key,value in collidelist2.items():
+            key.on_collide(3,value[0])
+            value[0].on_collide(2,key)    
 
 
     def new_world(self):

@@ -50,11 +50,12 @@ class Bullet(pygame.sprite.Sprite):
     def on_screen(self) -> bool:
         return Bullet.screen_rect.colliderect(self.rect)
 
-    def on_collide(self,collide_type):
+    def on_collide(self,collide_type,collided):
         #5/26/23 - This is usually explained elsewhere
         #collision with enemy types
         if collide_type == 2:
             self.health -= 1
+            collided.hurt()
 
     def kill(self):
         pygame.sprite.Sprite.kill(self)
@@ -98,11 +99,14 @@ class HurtBullet(pygame.sprite.Sprite):
         if not Bullet.on_screen(self) or self.health <= 0: 
             self.kill()
     
-    def on_collide(self,collide_type):
+    def on_collide(self,collide_type,collided):
         #5/26/23 - This is usually explained elsewhere
         #collision with enemy types
         if collide_type == 1:
-            self.health -= 1
+            self.hurt()
+    
+    def hurt(self):
+        self.health -= 1
 
 
 

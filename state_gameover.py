@@ -161,6 +161,7 @@ class State():
                 self.timer = 1200
                 State.sprites.empty()
                 self.kaboom(coord=pygame.display.rect.center,animation_resize=(3000,3000))
+                return
             else:
                 sp = Em(im=img["gameover_return.png"],coord=(pygame.display.rect.width*0.75,pygame.display.rect.center[1]),isCenter=True)
                 sp.pattern="sine"
@@ -227,19 +228,19 @@ class State():
         #makes a rank value and gives you a set of ranks based off of it
         rank_val = score.score * (1 + 0.01*self.play_state.world) * (1+(0.01*self.play_state.level))
         ranks = {
-            0:("WHAT THE *** YOU SUCK", "HOW DO YOU HAVE A SCORE OF 0","YOU WILL DIE ALONE","YOU SERVE -- ZERO PURPOSE","ZERO???????"), #joke 
-            1000:("THERE WAS AN ATTEMPT", "pathetic", "RAAAAA YOU SUCK", "YOU'RE BAAAAD", "PRESS THE BUTTONS TO DO STUFF","SCHTINKY"), #horrible
-            5000:("bad,bad,bad,bad,bad","you kinda suck","uwu ur bad","not horrendous but not good either", "I LOVE DRUGS"), #bad
-            10000:("SWAGSHIT-MONEYMONEY","pm sucks","FIRST TIME?","YUP MORE LIKE... FUCKING STUPID LMAO"), #not good
-            50000:("WHAT","kinda mid ngl","YOU PROBABLY DRINK WHITE MONSTER","FEMBOY PLAYIN ASS","HARDCORE PLAYER MORE LIKE MIDCORE MIDDER HAHAHA"), #mid
-            100000:("WHEN","ok","better than mid ig","WOOOOOW DUDE YOU SUCK ASS (nah jk)","Not Bad!","cellular redistribution","UNDERGO MITOSIS NOW"), #ok
-            250000:("WHO","hey you're pretty good at this","WOW YOU'RE OK AT THIS","sweat much?","STOP TRYING SO HARD","give up"), #good 
-            500000:("I HATE   EARTH DAY", "KILL THE HOMELESS", "SHITPOST RANK", "DOUBLE DOG DOGSHIT","organ donor","mid, mid mid mid"), #great (shitpost)
-            1000000:("this is actually the worst rank you can get, i can't believe you're so bad at the game kill yourself","ONE MILLION RANKS","WHERE","YOU'RE FUCKING GOOD AT THE GAME I GET IT"), #amazing
-            2500000:("YOU'RE CRACKED","no rank","how","STOP PLAYING GOOD IT'S MAKING ME JEALOUS"), #cracked 1
-            7500000:("YOU'RE CRACKEDER","gay"), #cracked 2
-            10000000:("YOU'RE CRACKEDERER","cringe ass naenae rank"), #cracked 3
-            999999999:("HOLY SHIT","WHAT THE FUCK","YOU'RE CHEATING","STOP DOING THIS SHIT","STOP CHEATING GODDAMN","YOU'RE CRACKEDEST","NO PM STUDENT WILL GET THIS RANK","cisgender") #holy shit
+            0:("so bad its a joke [placeholder]"), #joke 
+            1000:("horrible [placeholder]"), #horrible
+            5000:("bad [placeholder]"), #bad
+            10000:("not bad but not good [placeholder]"), #not good
+            50000:("mid [placeholder]"), #mid
+            100000:("ok [placeholder]"), #ok
+            250000:("good [placeholder]"), #good 
+            500000:("great [placeholder]"), #great (shitpost)
+            1000000:("amazing [placeholder]"), #amazing
+            2500000:("cracked 1 [placeholder]"), #cracked 1
+            7500000:("cracked 2 [placeholder]"), #cracked 2
+            10000000:("cracked 3 [placeholder]"), #cracked 3
+            999999999:("holy shit [placeholder]") #holy shit
         }
         #figuring out what rank to put you into
         rank_key=None

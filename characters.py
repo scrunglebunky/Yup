@@ -6,25 +6,26 @@ class Template(pygame.sprite.Sprite):
     pygame.draw.circle(image, "red", (15, 15), 15)
 
     def __init__(self,
-        offset:tuple=(0,0),
-        pos:tuple=(0,0),
-        difficulty:int=0,
-        entrance_points:dict=None,
-        entrance_speed:float=1.0,
-        entrance_shoot:list=[],
-        sprites:pygame.sprite.Group = None,
-        player:pygame.sprite.Sprite = None,
-        trip:list=(999,)):
+        # offset:tuple=(0,0),
+        # pos:tuple=(0,0),
+        # difficulty:int=0,
+        # entrance_points:dict=None,
+        # entrance_speed:float=1.0,
+        # entrance_shoot:list=[],
+        # sprites:pygame.sprite.Group = None,
+        # player:pygame.sprite.Sprite = None,
+        # trip:list=(999,)
+        kwargs:dict):
         pygame.sprite.Sprite.__init__(self)
         self.idle={ #information about the idle state
-            "offset":offset,
-            "full":[(pos[0]+offset[0]),(pos[1]+offset[1])] # current position in idle
+            "offset":kwargs['offset'],
+            "full":[(kwargs['pos'][0]+kwargs['offset'][0]),(kwargs['pos'][1]+kwargs['offset'][1])] # current position in idle
         }
         self.info = { #basic information on the character
             "health":1,
             "score":100,
             "dead":False,
-            "difficulty":difficulty,
+            "difficulty":kwargs['difficulty'],
             "state":"enter",
             "atk":False, #this is important -- it marks if the enemy can attack or not
         }
@@ -41,7 +42,7 @@ class Template(pygame.sprite.Sprite):
         self.atk_basic = {
             "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2),
             "start_shoot_chance":(5 - self.info['difficulty'] if self.info['difficulty']<4 else 1),
-            "trip":trip,
+            "trip":kwargs['trip'],
             }
         #image values, including spritesheets
         self.spritesheet = None
@@ -51,19 +52,19 @@ class Template(pygame.sprite.Sprite):
 
 
         #entrance
-        self.entrance_points = entrance_points 
+        self.entrance_points = kwargs['entrance_points'] 
         if self.entrance_points is not None:
             self.follow = tools.MovingPoints(
                 self.entrance_points[0],
                 self.entrance_points,
-                speed=entrance_speed,
+                speed=kwargs['entrance_speed'],
                 final_pos=self.idle['full'],)
         else:
             self.follow = None
 
         #extras
-        self.sprites = sprites
-        self.player = player
+        self.sprites = kwargs['sprites']
+        self.player = kwargs['player']
 
     def update(self): #this should be run the same no matter what
         #updating state
@@ -126,13 +127,21 @@ class Template(pygame.sprite.Sprite):
         self.info['dead'] = True
 
         return self.timers['exist']
-        
+
+
+
     def on_collide(self,
-                   collide_type:int #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collided:pygame.sprite.Sprite,
                    ):
         #5/26/23 - Updating health shizznit if interaction with "player type" class
-        if collide_type == 1 or collide_type == 3:
-            self.info['health'] -= 1
+        # if collide_type == 1 or collide_type == 3:
+        #     self.info['health'] -= 1
+        ... #this has all been commented out, as the player now handles what gets damaged and what doesn't
+
+    def hurt(self):
+        self.info['health'] -= 1
+        self.change_anim("hurt")
 
     def formationUpdate(self,
         new_pos:tuple #location of the formation, not including offset
@@ -151,15 +160,7 @@ class Template(pygame.sprite.Sprite):
 
 class A(Template): #geurilla warfare
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,
-            offset=kwargs['offset'],
-            pos=kwargs['pos'],
-            difficulty=kwargs['difficulty'],
-            entrance_points=kwargs['entrance_points'],
-            entrance_speed=kwargs['entrance_speed'],
-            sprites=kwargs['sprites'],
-            player=kwargs['player'],
-            trip=kwargs['trip'])   
+        Template.__init__(self,kwargs=kwargs)   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         
         #values created for when the opponent attacks you
@@ -258,15 +259,7 @@ class A(Template): #geurilla warfare
 
 class B(Template): #loop-de-loop
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,
-            offset=kwargs['offset'],
-            pos=kwargs['pos'],
-            difficulty=kwargs['difficulty'],
-            entrance_points=kwargs['entrance_points'],
-            entrance_speed=kwargs['entrance_speed'],
-            sprites=kwargs['sprites'],
-            player=kwargs['player'],
-            trip=kwargs['trip'])   
+        Template.__init__(self,kwargs=kwargs)   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.info['atk'] = True
 
@@ -328,15 +321,7 @@ class B(Template): #loop-de-loop
 
 class C(Template): #turret
     def __init__(self,skin=None,**kwargs):
-        Template.__init__(self,
-            offset=kwargs['offset'],
-            pos=kwargs['pos'],
-            difficulty=kwargs['difficulty'],
-            entrance_points=kwargs['entrance_points'],
-            entrance_speed=kwargs['entrance_speed'],
-            sprites=kwargs['sprites'],
-            player=kwargs['player'],
-            trip=kwargs['trip'])   
+        Template.__init__(self,kwargs=kwargs)   
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.timer = (480 - (10*self.info['difficulty'])) if (self.info['difficulty']<40) else 80
         self.time = random.randint(0,self.timer//10)
@@ -361,15 +346,7 @@ class C(Template): #turret
 class D(Template): #special -- uses special value to inherit from that character instead 
     def __init__(self,skin:str=None,special:str=None,**kwargs):
         #placeholder value
-        Template.__init__(self,
-            offset=kwargs['offset'],
-            pos=kwargs['pos'],
-            difficulty=kwargs['difficulty'],
-            entrance_points=kwargs['entrance_points'],
-            entrance_speed=kwargs['entrance_speed'],
-            sprites=kwargs['sprites'],
-            player=kwargs['player'],
-            trip=kwargs['trip'])
+        Template.__init__(self,kwargs=kwargs)
         self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
 
 class Nope(Template):

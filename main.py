@@ -3,7 +3,6 @@ import pygame,os,text,random,json
 from options import settings 
 import tools
 
-
 clock = tools.Clock(pygame.time.Clock())
 run=True; cur_state = None
 
@@ -33,7 +32,7 @@ border = ui_border.Border()
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title"
+state = "play"
 states["play"] = state_play.State(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
@@ -65,6 +64,8 @@ def state_switch(
 #setting the state
 cur_state = states[state] ; cur_state.on_start()
 
+freeze = False
+
 while run:
 
     #filling the screen in case something is offscreen
@@ -92,16 +93,23 @@ while run:
             #DEBUG - max FPS
             if event.key == pygame.K_1:
                 clock.FPS = 0 if clock.FPS == 60 else 60
+            if event.key == pygame.K_u:
+                freeze = not freeze
                 
 
         cur_state.event_handler(event=event)
 
-    #updating states
-    cur_state.update()
-    # checking if the state has to be changed
-    cur_state,state = state_switch(cur_state,state)
-    # print(state)
-    border.update()
+    #debug pause function
+
+    if not freeze:
+        #updating states 
+        cur_state.update()
+        # checking if the state has to be changed
+        cur_state,state = state_switch(cur_state,state)
+        # print(state)
+        border.update()
+    elif freeze:
+        window.blit(states["play"].window,(0,0))
 
     #general update
     pygame.display.update()

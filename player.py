@@ -93,9 +93,7 @@ class Player(pygame.sprite.Sprite):
 
             #STARTING THE JUMPS
             if event.key == pygame.K_UP and not self.movement[3]:
-                self.movement[0]=-6
-                self.movement[3]=True
-                self.change_anim("jump")
+                self.bounce()
             if event.key == pygame.K_DOWN and self.movement[3]:
                 self.movement[0]=25
             elif event.key == pygame.K_DOWN:
@@ -145,7 +143,7 @@ class Player(pygame.sprite.Sprite):
         #doing y momentum stuffystuff
         if self.movement[3]:
             self.rect.y += self.movement[0]
-            self.movement[0] += .2
+            self.movement[0] += .3
             if self.rect.center[1]>self.bar[1]:
                 #finishing the jump, including stopping values
                 self.rect.center = (self.rect.center[0],self.bar[1])
@@ -173,12 +171,34 @@ class Player(pygame.sprite.Sprite):
         ##checking for death
         self.dead = self.health < 1
 
+
+
     def on_collide(self,
-                   collide_type:int #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collided:pygame.sprite.Sprite, #the specific object being collided with
                    ):
-        #if colliding with an enemy, hurt.
+        #creating new rects based off the masks of the surfaces of both the player and enemy
+        player_mask = pygame.mask.from_surface(self.image).get_rect(center=self.rect.center)
+        enemy_mask = pygame.mask.from_surface(collided.image).get_rect(center=self.rect.center)
+        #if colliding with an enemy, either hurt or bounce based on positioning
         if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
-            self.hurt()
+            if (player_mask.bottom < enemy_mask.center[1]+2*self.movement[0]): #(2*self.movement[0] is based off the player's y-momentum)
+                #rejumping
+                self.bounce()
+                #making the player invincible for six frames to prevent accidental damage
+                self.invincibility_counter = 6
+            else:
+                self.hurt()
+        #commiting to another bounce if 
+        elif collide_type == 2:
+            if (player_mask.bottom-10 < collided.rect.center[1]+2*self.movement[0]):
+                self.bounce()
+                self.invincibility_counter = 6
+        #damaging the enemy either way
+        collided.hurt()
+            
+
+
 
     def hurt(self,amount:int=1):
         self.change_anim("hurt")
@@ -187,6 +207,10 @@ class Player(pygame.sprite.Sprite):
         audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
         if self.health <= 0: self.kill()
 
+    def bounce(self):
+        self.movement[0]=-7.5
+        self.movement[3]=True
+        self.change_anim("jump")
         
     def reset_movement(self):
         self.movement = [

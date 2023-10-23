@@ -7,7 +7,7 @@
     "bg_size":[600,800],
     "bg_speed":[0,2],
     
-    "levels":1,
+    "levels":2,
 
     "char_distance_x":35, 
     "char_distance_y":40,
@@ -18,9 +18,6 @@
     "max_char":25,
     "dynamic_intensity":false,
     "form_drop_speed":0.1,
-    "manual_intensity_changes":[
-        [0,1,1,1]
-    ],
 
     "bullets":[],
     "drop_health": 5,
@@ -29,10 +26,7 @@
 
     "manual_formations":[
         [
-            "AACCCCCCCCCCCAA",
-            "AAAAAAAAAAAAAAA",
-            "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA",
+            
             "DDDDDDDDDDDDDDD"
         ]
     ],
@@ -54,7 +48,7 @@
             "shoot":[6]
         },
         "C":{
-            "patterns":[[[278, 530], [286, 530], [282, 531], [289, 534], [282, 532], [286, 533], [279, 531], [287, 532], [278, 533], [288, 534], [278, 534], [289, 533], [279, 533], [290, 533], [280, 535], [291, 535], [280, 535], [291, 535]]],
+            "patterns":[[[0,0]]],
             "speed":10,
             "timer":5,
             "shoot":[999]
