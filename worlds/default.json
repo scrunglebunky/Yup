@@ -26,7 +26,10 @@
 
     "manual_formations":[
         [
-            
+            "DAAAACCCCCAAAAD",
+            "BBBBBBBBBBBBBBB",
+            "AAAAAAAAAAAAAAA",
+            "AAAAABBBBBAAAAA",
             "DDDDDDDDDDDDDDD"
         ]
     ],
@@ -69,7 +72,6 @@
         "D":null
     },
     "overwrite":{
-        "D":null
     },
 
     "boss_level":false,

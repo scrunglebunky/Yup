@@ -35,16 +35,17 @@ def generate_sprite(data):
     for row in range(data["ROWS/COLUMNS"][0]):
         #it's easier for me, screw off.
         for column in range(data["ROWS/COLUMNS"][1]):
-            spritesheet.append(
-                get_image(
-                    sheet=raw,
-                    wh=data["TILE_SIZE"],
-                    xy=(data["TILE_SIZE"][0]*column,
-                        data["TILE_SIZE"][1]*row),
-                    scale=data["scale"],
-                    colorkey=data["colorkey"],
-                    ).convert())
+            cur_img = get_image(sheet=raw,wh=data["TILE_SIZE"],
+                    xy=(data["TILE_SIZE"][0]*column,data["TILE_SIZE"][1]*row),
+                    scale=data["scale"],colorkey=data["colorkey"],).convert()
+            spritesheet.append(cur_img)
     return spritesheet
+
+def generate_masks(spritesheet):
+    masks = []
+    for sprite in spritesheet:
+        masks.append(pygame.mask.from_surface(sprite))
+    return masks
 
 #06/01/2023 - USING ANIM_LOADLIST TO FIND OUT WHAT TO LOAD
 with open("./data/anim_loadlist.json","r") as raw:
@@ -57,8 +58,11 @@ for directory,filelist in anim_loadlist.items():
     for filename in filelist:
         with open(directory+filename+".json") as raw:
             current_file = json.load(raw)
+        #generating spritesheet
+        spritesheet = generate_sprite(current_file)
+        masksheet = generate_masks(spritesheet)
         #adding to main directory, generating a spritesheet
-        all_loaded_spritesheets[filename] = (current_file,generate_sprite(current_file))
+        all_loaded_spritesheets[filename] = (current_file,spritesheet,masksheet)
         #loading animation files if existent
         if current_file["ANIM"] is not None:
             with open("./images/characters/anim/"+str(current_file["ANIM"]),"r") as raw:
@@ -133,6 +137,7 @@ class Spritesheet():
         
         #DEFINITIONS
         self.name = name
+        self.all_loaded_spritesheets = all_loaded_spritesheets #for external use
         self.all_anim = all_loaded_spritesheets[name][0]["anim"] #self-explanatory
         self.current_anim = current_anim #current animation played
         self.current_anim_loop = 0 #amount of loops
@@ -141,6 +146,7 @@ class Spritesheet():
         self.image_displayed = 0 #the index of self.spritesheet; callback to actual sprite played\\
         self.resize = resize
         self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+        self.mask = all_loaded_spritesheets[self.name][2][self.image_displayed]
         if self.resize is not None: self.image = pygame.transform.scale(self.image,self.resize)
         self.changed = False #a way to tell if the image was changed, so the image isn't being reset every frame
         self.looped = False #a checker for emblem to tell if an asset should be deleted
@@ -177,8 +183,11 @@ class Spritesheet():
         #updating the actual current image being used, as a numerical frame
         self.image_displayed = self.all_anim[self.current_anim]["frames"][self.current_anim_frame]
 
+        #changing values if needed to
         if self.changed:
             self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+            self.mask = all_loaded_spritesheets[self.name][2][self.image_displayed]
+
             if self.resize is not None: self.image = pygame.transform.scale(self.image,self.resize)
             self.changed = False #resetting
 

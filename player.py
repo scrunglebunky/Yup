@@ -177,37 +177,21 @@ class Player(pygame.sprite.Sprite):
                    collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
                    collided:pygame.sprite.Sprite, #the specific object being collided with
                    ):
-        #creating new rects based off the masks of the surfaces of both the player and enemy
-        player_mask = pygame.mask.from_surface(self.image).get_rect(center=self.rect.center)
-        enemy_mask = pygame.mask.from_surface(collided.image).get_rect(center=self.rect.center)
-        #if colliding with an enemy, either hurt or bounce based on positioning
-        if collide_type == 2 and self.invincibility_counter < 1 : #(the player cannot be invincible)
-            if (player_mask.bottom < enemy_mask.center[1]+2*self.movement[0]): #(2*self.movement[0] is based off the player's y-momentum)
-                #rejumping
-                self.bounce()
-                #making the player invincible for six frames to prevent accidental damage
-                self.invincibility_counter = 6
-            else:
-                self.hurt()
-        #commiting to another bounce if 
-        elif collide_type == 2:
-            if (player_mask.bottom-10 < collided.rect.center[1]+2*self.movement[0]):
-                self.bounce()
-                self.invincibility_counter = 6
-        #damaging the enemy either way
-        collided.hurt()
+        ... #moved to enemy classes
             
 
 
 
     def hurt(self,amount:int=1):
-        self.change_anim("hurt")
-        self.health -= amount
-        self.invincibility_counter = 60
-        audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
-        if self.health <= 0: self.kill()
+        if self.invincibility_counter < 1:
+            self.change_anim("hurt")
+            self.health -= amount
+            self.invincibility_counter = 60
+            audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
+            if self.health <= 0: self.kill()
 
     def bounce(self):
+        #make the player bounce
         self.movement[0]=-7.5
         self.movement[3]=True
         self.change_anim("jump")

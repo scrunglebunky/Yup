@@ -51,11 +51,10 @@ class Bullet(pygame.sprite.Sprite):
         return Bullet.screen_rect.colliderect(self.rect)
 
     def on_collide(self,collide_type,collided):
-        #5/26/23 - This is usually explained elsewhere
-        #collision with enemy types
-        if collide_type == 2:
-            self.health -= 1
-            collided.hurt()
+        ...
+    
+    def hurt(self):
+        self.health -= 1
 
     def kill(self):
         pygame.sprite.Sprite.kill(self)
@@ -83,7 +82,7 @@ class HurtBullet(pygame.sprite.Sprite):
         self.pos = pos
         self.target = target
         self.move = tools.MovingPoint(pos,target,speed=speed)
-        self.health = 1
+        self.health = 15
         
         #setting image
         if image is not None:
@@ -104,6 +103,7 @@ class HurtBullet(pygame.sprite.Sprite):
         #collision with enemy types
         if collide_type == 1:
             self.hurt()
+            collided.hurt()
     
     def hurt(self):
         self.health -= 1

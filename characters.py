@@ -1,4 +1,5 @@
 import pygame,anim,random,score,bullets,tools
+from player import Player
 
 class Template(pygame.sprite.Sprite):
     #default image if unchanged
@@ -44,9 +45,11 @@ class Template(pygame.sprite.Sprite):
             "start_shoot_chance":(5 - self.info['difficulty'] if self.info['difficulty']<4 else 1),
             "trip":kwargs['trip'],
             }
+        
+        
         #image values, including spritesheets
-        self.spritesheet = None
-        self.image = Template.image
+        self.spritesheet = anim.Spritesheet(kwargs['skin'],current_anim='idle') if kwargs['skin'] is not None else None
+        self.image = Template.image if self.spritesheet is None else self.spritesheet.image
         self.rect = self.image.get_rect()
         self.rect.center = self.idle["full"]
 
@@ -74,6 +77,7 @@ class Template(pygame.sprite.Sprite):
         if type(self.spritesheet) == anim.Spritesheet:
             self.spritesheet.update()
             self.image = self.spritesheet.image
+            self.mask = self.spritesheet.mask
         else:
             self.image = Template.image
         
@@ -137,7 +141,21 @@ class Template(pygame.sprite.Sprite):
         #5/26/23 - Updating health shizznit if interaction with "player type" class
         # if collide_type == 1 or collide_type == 3:
         #     self.info['health'] -= 1
-        ... #this has all been commented out, as the player now handles what gets damaged and what doesn't
+        #if colliding with an enemy, either hurt or bounce based on positioning
+        if type(collided) == Player :
+            if ((self.rect.centery) > collided.rect.bottom-collided.movement[0]): 
+                #bouncing the player up
+                collided.bounce()
+                #making the player invincible for six frames to prevent accidental damage
+                collided.invincibility_counter = 6
+            else:
+                collided.hurt()
+            #damaging the enemy either way
+            self.hurt()
+        elif collide_type == 3:
+            #I SAID damaging the enemy either way
+            self.hurt()
+            collided.hurt()
 
     def hurt(self):
         self.info['health'] -= 1
@@ -159,9 +177,8 @@ class Template(pygame.sprite.Sprite):
 
 
 class A(Template): #geurilla warfare
-    def __init__(self,skin=None,**kwargs):
+    def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)   
-        self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         
         #values created for when the opponent attacks you
         self.atk={
@@ -258,9 +275,8 @@ class A(Template): #geurilla warfare
             
 
 class B(Template): #loop-de-loop
-    def __init__(self,skin=None,**kwargs):
+    def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)   
-        self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.info['atk'] = True
 
         self.atk = {
@@ -320,9 +336,8 @@ class B(Template): #loop-de-loop
 
 
 class C(Template): #turret
-    def __init__(self,skin=None,**kwargs):
+    def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)   
-        self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
         self.timer = (480 - (10*self.info['difficulty'])) if (self.info['difficulty']<40) else 80
         self.time = random.randint(0,self.timer//10)
     def state_idle(self,start=False):
@@ -344,15 +359,43 @@ class C(Template): #turret
 
 
 class D(Template): #special -- uses special value to inherit from that character instead 
-    def __init__(self,skin:str=None,special:str=None,**kwargs):
+    def __init__(self,**kwargs):
         #placeholder value
         Template.__init__(self,kwargs=kwargs)
-        self.spritesheet = anim.Spritesheet(skin,current_anim='idle') if skin is not None else None
 
-class Nope(Template):
-    def __init__(self,skin:str=None,special:str=None,**kwargs):...
     
-        
+
+class Jelle(Template): #special jellyfish
+    def __init__(self,**kwargs):
+        #placeholder value
+        Template.__init__(self,kwargs=kwargs)
+    def update(self):
+        Template.update(self)
+        #keeping the sprite mask locked so it doesn't bounce and accidentally kill the player
+        self.mask = self.spritesheet.all_loaded_spritesheets[self.spritesheet.name][2][0]
+    def on_collide(self,
+                   collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collided:pygame.sprite.Sprite,
+                   ):
+        #if colliding with an enemy, either hurt or bounce based on positioning
+        if type(collided) == Player :
+            if ((self.rect.centery) > collided.rect.bottom-collided.movement[0]): 
+                #bouncing the player up
+                collided.bounce()
+                #this enemy only takes damage when jumped on!
+                self.hurt()
+                #making the player invincible for six frames to prevent accidental damage
+                collided.invincibility_counter = 6
+            elif collided.invincibility_counter < 1 : #(the player cannot be invincible)
+                collided.hurt()
+                #cutesy animation
+                self.change_anim("attack")
+        elif collide_type == 3:
+            collided.hurt()
+            self.change_anim("attack")
+
+
+   
 
 
 loaded = {
@@ -360,6 +403,7 @@ loaded = {
     "B":B,
     "C":C,
     "D":D,
+    'jelle':Jelle
     }
 
 

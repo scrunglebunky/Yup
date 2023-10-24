@@ -11,8 +11,8 @@
         "frames":[
             6,7,8,9
         ],
-        "FPS":24, 
-        "loop":0, 
-        "return_to":"attack"
+        "FPS":12, 
+        "loop":3, 
+        "return_to":"idle"
     }
 }

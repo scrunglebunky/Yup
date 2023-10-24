@@ -97,6 +97,8 @@ class State():
         State.sprites[0].update()
         State.sprites[0].draw(self.window)
         self.formation.update()
+        #DEBUG PURPOSES ONLY - REMOVE AFTER USE
+        for sprite in State.sprites[0]:pygame.draw.rect(self.window, 'red', sprite.rect, width=1)
 
         #print debug positions
         for pos in self.debug[0]:
@@ -110,6 +112,7 @@ class State():
 
         #calling collision
         self.collision()
+        
 
         
         #06/18/2023 - Starting a new level
