@@ -1,9 +1,24 @@
-from math import sqrt
+from math import sqrt,atan2,sin,cos,radians
+
+"""USE IT BEFORE YOU LOSE IT!
+from math import sin, cos, atan2
+
+target_x, target_y = ...
+player_x, player_y = ...
+
+# Get the angle in radians between target and player coords
+angle = atan2(target_y - player_y, target_x - player_x)
+
+# Move the player in the direction X pixels
+player_x += cos(angle) * X
+player_y += sin(angle) * X
+# TO USE JUST AN ANGLE, math.radians()
+"""
 
 
 #a moving point class that calculates the distances and how much to move
 class MovingPoint():
-    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1,check_finished:bool=False,ignore_speed:bool=False):
+    def __init__(self,pointA:tuple,pointB:tuple,distance:float=None,speed:int=1,ignore_speed:bool=False,check_finished:bool=False):
         #defining values
         self.pointA,self.pointB = pointA,pointB #saving points
         self.position = list(self.pointA)
@@ -18,34 +33,26 @@ class MovingPoint():
     def update(self):
         self.position[0] += (self.move_vals[0] if not self.ignore_speed else self.move_vals[0]*self.speed)
         self.position[1] += (self.move_vals[1] if not self.ignore_speed else self.move_vals[1]*self.speed)
+        self.distance = 0
         #checking for finish
         if self.check_finished:
             self.distance = MovingPoint.calc_distance(self.position,self.pointB)
             self.finished = abs(self.distance)<(self.speed*5)
+
     #updating everything if needed
     def change_all(self,pointB):
         self.pointB = pointB
-        self.distance = MovingPoint.calc_distance(self.pointA,self.pointB,) #yea
-        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance,self.speed) #calculating values
+        if self.check_finished: self.distance = MovingPoint.calc_distance(self.pointA,self.pointB,) #yea
+        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance,(self.speed if not self.ignore_speed else 1)) #calculating values
 
 
 
     @staticmethod
     def calc_move_vals(pointA:tuple,pointB:tuple,distance:float=None,speed:int=1) -> tuple: #calculating how much to move
-        if type(distance) != float:
-            distance=calc_distance(pointA,pointB)
-
-        #preventing zero division
-        if distance == 0:
-            return (
-            ((pointB[0] - pointA[0]) ),
-            ((pointB[1] - pointA[1]) )
-        )
-
-        #normal movement calc
+        angle = atan2(pointB[1] - pointA[1], pointB[0] - pointA[0])
         return (
-            (speed * (pointB[0] - pointA[0]) / distance),
-            (speed * (pointB[1] - pointA[1]) / distance)
+            cos(angle) * speed,
+            sin(angle) * speed
         )
     
     @staticmethod
@@ -103,6 +110,26 @@ class MovingPoints(MovingPoint):
                 self.trip=True
 
 
+
+#an angular version of the movingpoint class
+class AnglePoint():
+    def __init__(self,pointA:tuple,angle:int,speed=1,static_speed:bool=True,check_finished:bool=False):
+        self.angle = radians(angle)
+        self.speed = speed
+        self.static_speed = static_speed ; self.check_finished = check_finished
+        self.move_vals = AnglePoint.calc_move_vals(angleRAD = self.angle, speed = speed, static_speed = static_speed)
+        self.position = list(pointA)
+    @staticmethod
+    def calc_move_vals(angleRAD:float,speed:int,static_speed:bool=True):
+        return (
+            cos(angleRAD) * (speed if static_speed else 1),
+            sin(angleRAD) * (speed if static_speed else 1)
+        )
+    def update(self):
+        self.position[0] += self.move_vals[0] * (self.speed if not self.static_speed else 1)
+        self.position[1] += self.move_vals[1] * (self.speed if not self.static_speed else 1)
+
+
 class Clock(): # a redo of pygame.clock to add more values
     def __init__(self,clock,FPS=60): #initiating stuff
         self.FPS = FPS
@@ -111,3 +138,8 @@ class Clock(): # a redo of pygame.clock to add more values
     def tick(self): #updating clock
         self.clock.tick(self.FPS)
         self.offset = 60/(self.clock.get_fps() if self.clock.get_fps() != 0 else 60)
+
+
+
+demo = False #tools is just globals
+debug = False

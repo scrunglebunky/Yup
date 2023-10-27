@@ -228,19 +228,19 @@ class State():
         #makes a rank value and gives you a set of ranks based off of it
         rank_val = score.score * (1 + 0.01*self.play_state.world) * (1+(0.01*self.play_state.level))
         ranks = {
-            0:("so bad its a joke [placeholder]"), #joke 
-            1000:("horrible [placeholder]"), #horrible
-            5000:("bad [placeholder]"), #bad
-            10000:("not bad but not good [placeholder]"), #not good
-            50000:("mid [placeholder]"), #mid
-            100000:("ok [placeholder]"), #ok
-            250000:("good [placeholder]"), #good 
-            500000:("great [placeholder]"), #great (shitpost)
-            1000000:("amazing [placeholder]"), #amazing
-            2500000:("cracked 1 [placeholder]"), #cracked 1
-            7500000:("cracked 2 [placeholder]"), #cracked 2
-            10000000:("cracked 3 [placeholder]"), #cracked 3
-            999999999:("holy shit [placeholder]") #holy shit
+            0:("so bad its a joke",), #joke 
+            1000:("horrible",), #horrible
+            5000:("bad",), #bad
+            10000:("not bad but not good",), #not good
+            50000:("mid",), #mid
+            100000:("ok",), #ok
+            250000:("good",), #good 
+            500000:("great",), #great (shitpost)
+            1000000:("amazing",), #amazing
+            2500000:("cracked",), #cracked 1
+            7500000:("crackeder",), #cracked 2
+            10000000:("crackedest",), #cracked 3
+            999999999:("holy hell",) #holy shit
         }
         #figuring out what rank to put you into
         rank_key=None

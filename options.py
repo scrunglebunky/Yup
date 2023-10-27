@@ -1,5 +1,5 @@
 ## CODE BY ANDREW CHURCH
-import json,text,pygame,random,audio
+import json,text,pygame,random,audio,tools
 
 #07/04/2023 - ADDING OPTIONS MENU
 # The options menu is going to iterate through everything in the settings dictionary and let people modify it with the menu buttons
@@ -39,8 +39,8 @@ def apply_settings(border:ui_border.Border = None):
     #display
     pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
     pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
-    print(pygame.display.dimensions)
-    pygame.display.set_mode(pygame.display.dimensions, pygame.SCALED)
+    # print(pygame.display.dimensions)
+    pygame.display.set_mode(pygame.display.dimensions, pygame.SCALED if not settings['fullscreen'][1] else pygame.FULLSCREEN|pygame.SCALED)
     #sounds
     audio.change_volumes(ostvol = settings["music_vol"][1] , soundvol = settings["sound_vol"][1])
     if settings["mute"][1]: audio.change_volumes(ostvol = 0 , soundvol = 0)
@@ -83,6 +83,8 @@ class State():
 
     def on_start(self,return_state:str="title",**kwargs): #__init__ v2, pretty much.
         self.return_state = return_state
+        if tools.demo: #auto exit for demo
+            self.next_state = self.return_state
 
     def on_end(self,**kwargs):... #un-init, kind of
     

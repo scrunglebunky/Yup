@@ -24,15 +24,14 @@ import state_play,ui_border,options,state_pause,state_title,state_gameover,state
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
 
-
-
+tools.debug = True
 
 # 7/02/2023 - ADDING SPECIFIC STATES
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "play"
+state = "title"
 states["play"] = state_play.State(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
@@ -66,6 +65,8 @@ cur_state = states[state] ; cur_state.on_start()
 
 freeze = False
 
+# tools.demo = True #DELETE AFTERWARDS
+
 while run:
 
     #filling the screen in case something is offscreen
@@ -88,13 +89,18 @@ while run:
     #event handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            run = False
+            if tools.demo:
+                pass
+                # print("haha")
+            else:
+                run = False
+                # print("false")
         if event.type == pygame.KEYDOWN:
             #DEBUG - max FPS
             if event.key == pygame.K_1:
-                clock.FPS = 0 if clock.FPS == 60 else 60
+                if tools.debug: clock.FPS = 0 if clock.FPS == 60 else 60
             if event.key == pygame.K_u:
-                freeze = not freeze
+                if tools.debug: freeze = not freeze
                 
 
         cur_state.event_handler(event=event)

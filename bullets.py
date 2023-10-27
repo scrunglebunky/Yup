@@ -14,7 +14,7 @@ class Bullet(pygame.sprite.Sprite):
     count = 0
     max = 3
 
-    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=20,is_default:bool = True, **kwargs):
+    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True,**kwargs):
         
         pygame.sprite.Sprite.__init__(self)
         
@@ -40,12 +40,10 @@ class Bullet(pygame.sprite.Sprite):
         
 
     def update(self):
-        if self.kill_on_spawn:
+        if not self.on_screen() or self.health <= 0 or self.kill_on_spawn:
             self.kill()
-
         self.rect.y -= self.speed
-        if not self.on_screen() or self.health <= 0: 
-            self.kill()
+        
 
     def on_screen(self) -> bool:
         return Bullet.screen_rect.colliderect(self.rect)
@@ -58,7 +56,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def kill(self):
         pygame.sprite.Sprite.kill(self)
-        Bullet.count -= 1
+        Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
         
 class HurtBullet(pygame.sprite.Sprite):
     #DEFAULT IMAGE - rendered by pygame draw function
@@ -69,9 +67,10 @@ class HurtBullet(pygame.sprite.Sprite):
 
     #limits so the game doesnt lag
     count = 0
-    max = 100
+    max = 1000
 
-    def __init__(self,pos:tuple,target:tuple,speed:int=2,image:pygame.Surface = None):
+    def __init__(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)),image:pygame.Surface=None):
+        #FOR AN ANGLE, the info is (pointa,angle)
         pygame.sprite.Sprite.__init__(self)
         
         #checking for max bullet count
@@ -79,10 +78,11 @@ class HurtBullet(pygame.sprite.Sprite):
         self.killonstart = True if HurtBullet.count > HurtBullet.max else False
 
         #setting number values
-        self.pos = pos
-        self.target = target
-        self.move = tools.MovingPoint(pos,target,speed=speed)
-        self.health = 15
+        if type == "point":
+            self.move = tools.MovingPoint(pointA=info[0],pointB=info[1],speed=spd)
+        elif type == "angle":
+            self.move = tools.AnglePoint(pointA=info[0],angle=info[1],speed=spd)
+        self.health = 1
         
         #setting image
         if image is not None:
@@ -95,8 +95,9 @@ class HurtBullet(pygame.sprite.Sprite):
     def update(self):
         self.move.update()
         self.rect.center = self.move.position
-        if not Bullet.on_screen(self) or self.health <= 0: 
+        if not Bullet.on_screen(self) or self.health <= 0 or self.killonstart: 
             self.kill()
+            HurtBullet.count = HurtBullet.count - 1 if HurtBullet.count > 0 else 0 
     
     def on_collide(self,collide_type,collided):
         #5/26/23 - This is usually explained elsewhere

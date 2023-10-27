@@ -1,5 +1,5 @@
 #Code by Andrew Church
-import pygame,anim,math,bullets,audio
+import pygame,anim,math,bullets,audio,tools
 
 # "bar":(
 #         "h", #if the bar is horizontal or vertical.
@@ -15,18 +15,20 @@ class Player(pygame.sprite.Sprite):
     image = pygame.Surface((30, 30), pygame.SRCALPHA)
     pygame.draw.rect(image,"white",pygame.Rect(0,0,30,30))
 
-    def __init__(self,bar,sprite_groups):
+    def __init__(self,bar,sprite_groups, demo=False): #again, the demo here is different from tools.demo
         pygame.sprite.Sprite.__init__(self)
 
         #ARGUMENTATIVE 
         self.bar=bar
         self.sprite_groups = sprite_groups
+        self.demo = demo
 
         #IMAGE AND POSITIONING
         self.sh = anim.Spritesheet("YUP","idle")
         self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
         self.rect = self.image.get_rect()
         self.rect.center = (300,self.bar[1])
+        
 
         #MOVEMENT CODE
         self.movement = [
@@ -78,6 +80,10 @@ class Player(pygame.sprite.Sprite):
             self.sprite_groups[0].add(bullet)
             self.sprite_groups[3].add(bullet)
 
+        #demo
+        if self.demo:
+            self.invincibility_counter = 6
+
 
 
 
@@ -104,16 +110,17 @@ class Player(pygame.sprite.Sprite):
 
             #SHOOTING
             if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
-                bullet=bullets.Bullet(self.rect.center)
+                bullet=bullets.Bullet(self.rect.center,is_default=not self.demo)
                 self.sprite_groups[0].add(bullet)
                 self.sprite_groups[3].add(bullet)
                 if not bullet.kill_on_spawn: self.change_anim("shoot")
 
             #AUTOSHOOT
-            if event.key == pygame.K_2:
-                self.autoshoot = not self.autoshoot
-            if event.key == pygame.K_3:
-                self.health += 10
+            if tools.debug:
+                if event.key == pygame.K_2:
+                    self.autoshoot = not self.autoshoot
+                if event.key == pygame.K_3:
+                    self.health += 10
 
 
         #RELEASING movement

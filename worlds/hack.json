@@ -13,15 +13,14 @@
         "C":"hack_C",
         "D":"hack_D"
     },
+    "overwrite":{
+        "D":"compootr"
+    },
     
 
     "manual_formations":[
         [
-            "AACCCCCCCCCCCAA",
-            "AAAAAAAAAAAAAAA",
-            "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA",
-            "DDDDDDDDDDDDDDD"
+            "DDDDDDDD"
         ]
     ],
     "manual_order":[0,0],

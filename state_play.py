@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio
+import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio,tools
 from emblems import Emblem as Em
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
@@ -12,24 +12,32 @@ class State():
             2:pygame.sprite.Group(), #ENEMY SPRITES
             3:pygame.sprite.Group(), #BULLET SPRITES
         }
+    demo_sprites = { #sprites exclusively for the demo state
+            0:pygame.sprite.Group(), #ALL SPRITES
+            1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
+            2:pygame.sprite.Group(), #ENEMY SPRITES
+            3:pygame.sprite.Group(), #BULLET SPRITES
+        }
 
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 3,
-                 level:int = 0,
+                 world:int = 2,
+                 level:int = 55,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
+                 is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
 
         self.next_state = None #Needed to determine if a state is complete
         self.fullwindow = window
 
         self.debug = {0:[],1:[]}
+        self.is_demo = is_demo
 
 
         #resetting the sprite groups
-        for group in self.sprites.values():
+        for group in (State.sprites if not self.is_demo else State.demo_sprites).values():
             group.empty()
 
         #06/23/2023 - SETTING THE GAMEPLAY WINDOW
@@ -47,8 +55,8 @@ class State():
             1, #gravity. 
             )
             
-        self.player = player.Player(bar=self.bar,sprite_groups=State.sprites)
-        State.sprites[0].add(self.player); State.sprites[1].add(self.player)
+        self.player = player.Player(bar=self.bar,sprite_groups=(self.sprites if not self.is_demo else self.demo_sprites),demo=self.is_demo)
+        (self.sprites if not self.is_demo else self.demo_sprites)[0].add(self.player); (self.sprites if not self.is_demo else self.demo_sprites)[1].add(self.player)
 
         #06/01/2023 - Loading in level data
         self.campaign = campaign
@@ -67,7 +75,7 @@ class State():
             world_data = self.world_data,
             level=self.level,
             level_in_world=self.level_in_world, 
-            sprites=State.sprites,)
+            sprites=(self.sprites if not self.is_demo else self.demo_sprites),)
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
@@ -86,7 +94,7 @@ class State():
 
     def on_end(self,**kwargs): #un-init, kind of
         pygame.mixer.music.stop()
-        print(self.debug.values())
+        if tools.debug: print(self.debug.values())
 
     
     def update(self, draw=True):
@@ -94,11 +102,11 @@ class State():
         #Updating sprites
         self.background.update()
         self.background.draw(self.window)
-        State.sprites[0].update()
-        State.sprites[0].draw(self.window)
+        (self.sprites if not self.is_demo else self.demo_sprites)[0].update()
+        (self.sprites if not self.is_demo else self.demo_sprites)[0].draw(self.window)
         self.formation.update()
         #DEBUG PURPOSES ONLY - REMOVE AFTER USE
-        for sprite in State.sprites[0]:pygame.draw.rect(self.window, 'red', sprite.rect, width=1)
+        # for sprite in State.sprites[0]:pygame.draw.rect(self.window, 'red', sprite.rect, width=1)
 
         #print debug positions
         for pos in self.debug[0]:
@@ -131,7 +139,7 @@ class State():
                 world_data = self.world_data,
                 level=self.level,
                 level_in_world=self.level_in_world, 
-                sprites=State.sprites,
+                sprites=(self.sprites if not self.is_demo else self.demo_sprites),
                 player=self.player,)
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
@@ -140,8 +148,8 @@ class State():
 
     def collision(self):
         #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide(State.sprites[1],State.sprites[2],False,False,collided=pygame.sprite.collide_mask)
-        collidelist2=pygame.sprite.groupcollide(State.sprites[2],State.sprites[3],False,False,collided=pygame.sprite.collide_mask)
+        collidelist=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[1],(self.sprites if not self.is_demo else self.demo_sprites)[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist2=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[2],(self.sprites if not self.is_demo else self.demo_sprites)[3],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             key.on_collide(2,value[0])
             value[0].on_collide(1,key)
@@ -163,6 +171,7 @@ class State():
 
 
     def event_handler(self,event):
+        if self.is_demo: return
         self.player.controls(event)
         #changing what comes next
         if event.type == pygame.KEYDOWN:
@@ -170,28 +179,29 @@ class State():
                 self.next_state = "options","play"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"
-            if event.key == pygame.K_0:
-                self.player.hurt()
-            if event.key == pygame.K_2:
-                self.formation.cleared = True
-            if event.key == pygame.K_b:
-                State.sprites[0].add(
-                    Em(
-                        im=None,
-                        coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
-                        isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
-                ))
-            if event.key == pygame.K_4:
-                self.debug[0].pop(len(self.debug[0])-1)
-                self.debug[1].pop(len(self.debug[1])-1)
-            if event.key == pygame.K_5:
-                print("@@@@@@@@@@@")
-                for item in self.formation.spawned_list:
-                    print(item.info['state'])
-                print("@@@@@@@@@@@")
-            if event.key == pygame.K_6:
-                self.formation.empty()
-                self.formation.finished = True
+            if tools.debug: 
+                if event.key == pygame.K_0:
+                    self.player.hurt()
+                if event.key == pygame.K_2:
+                    self.formation.cleared = True
+                if event.key == pygame.K_b:
+                    (self.sprites if not self.is_demo else self.demo_sprites)[0].add(
+                        Em(
+                            im=None,
+                            coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
+                            isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
+                    ))
+                if event.key == pygame.K_4:
+                    self.debug[0].pop(len(self.debug[0])-1)
+                    self.debug[1].pop(len(self.debug[1])-1)
+                if event.key == pygame.K_5:
+                    print("@@@@@@@@@@@")
+                    for item in self.formation.spawned_list:
+                        print(item.info['state'])
+                    print("@@@@@@@@@@@")
+                if event.key == pygame.K_6:
+                    self.formation.empty()
+                    self.formation.finished = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             pos = tuple(pygame.mouse.get_pos())
             pos = [pos[0]-pygame.display.play_pos[0],pos[1]-pygame.display.play_pos[0]]

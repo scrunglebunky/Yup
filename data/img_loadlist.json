@@ -9,7 +9,7 @@
         "config_menu.png","on.png","off.png","paused.png","pauseborder.png",
         "high_scores.png","hiscore.png","hiscore_name.png",
         "gameover.png","gameover_score.png","gameover_level.png","gameover_rank.png","gameover_return.png",
-        "levelcomplete.png"],
+        "levelcomplete.png","demo.png"],
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
         "home.png","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufo.png","ship.png"],

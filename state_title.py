@@ -1,7 +1,9 @@
-import pygame,text,score
+import pygame,text,score,random
 from emblems import Emblem as Em
 from anim import all_loaded_images as img
 from text import loaded_text as txt
+from state_play import State as Pstate 
+
 class State():
     emblems = {}
     emblems_perm = {}
@@ -11,59 +13,58 @@ class State():
         self.window=window
         self.border=border
         self.next_state = None
+        
 
-        self.id = 999
-        self.frames = 999
-        self.elements = ["title","highscores","title","lore",] #add "title","gameplay"
-        State.emblems = {
-            "title":Em(im=img["logo.png"],coord=(-999,-999)),
-            "highscores":Em(im=score.scoreboard,coord=(-999,-999)),
-            "lore":Em(im=img["placeholder.bmp"],coord=(-999,-999)),}
-        State.emblems_perm = {
-            "pressenter":Em(im=txt["INSERT A COIN (OR PRESS ENTER)"],coord=(-999,-999),isCenter=True)
+        self.demo_state = Pstate(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True) #this is different from the tools.demo value, as this is just to simulate a player
+
+        #basic events that will occur during the title
+        self.events = [
+            "demo",
+            "hiscore",
+        ]
+        self.timers = [
+            480,
+            240,
+        ]
+        self.event = 0
+        self.id =  0
+        self.image_placements = {
+            "welcome":(pygame.display.rect.width*0.01,pygame.display.rect.height*0.01),
+            "else":(pygame.display.rect.width*0.01 + img["demo.png"].get_width() + pygame.display.rect.width*0.01 ,
+                    pygame.display.rect.height*0.01),
         }
-        for emblem in State.emblems.values():
-            State.sprites.add(emblem)
-        for emblem in State.emblems_perm.values():
-            State.sprites.add(emblem)
     
     
     def on_start(self):
-        self.id = 999
-        self.frames = 999
-        for emblem in self.border.emblems: #RESETTING BORDER EMBLEMS
-            emblem.change_pos((-999,-999))
-        State.emblems_perm["pressenter"].change_pos((pygame.display.rect.center[0],pygame.display.rect.height*0.75),isCenter=True) # positioning for press enter
-        State.emblems["highscores"].image = score.scoreboard
+        self.event = self.id = 0
+        self.demo_state.__init__(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True)
 
-    def on_end(self):
-        for emblem in self.border.emblems: #RESETTING BORDER EMBLEMS
-            emblem.reset_coord()
-        for emblem in State.emblems.values(): #RESETTING THESE EMBLEMS
-            emblem.reset_coord()
-        for emblem in State.emblems_perm.values(): #RESETTING PERMANENT EMBLEMS
-            emblem.reset_coord()
+    def on_end(self):...
 
 
     def update(self):
-        #07/27/2023 - PLANS FOR THE TITLE SCREEN
-        # The logo is now flying up and down in a sinewave motion
-        # The UI elements are missing; gone, and most of what is happening is just random icon shennanigans
-        # A few things will flash by, like the high score menu, some gameplay snippets, and the lore
-        # This stuff will all cycle by from left to right, in the same sinewave motion
-        self.frames += 1
-        if self.frames >= 480:
-            if self.id <= (len(self.elements)-1):
-                State.emblems[self.elements[self.id]].pattern = None
-                State.emblems[self.elements[self.id]].pattern_f = 0
-                State.emblems[self.elements[self.id]].change_pos((-999,-999))
-            self.id = self.id + 1 if self.id < (len(self.elements)-1) else 0 
-            State.emblems[self.elements[self.id]].pattern = "sine"
-            State.emblems[self.elements[self.id]].change_pos(pygame.display.rect.center,isCenter=True)
-            self.frames = 0
-        #08/02/2023 - drawing graphical stuff
-        State.sprites.update()
-        State.sprites.draw(self.window)
+        #updating demo state
+        self.demo_state.update(draw=False)
+        
+        #drawing
+        self.window.blit(img['demo.png'],self.image_placements['welcome'])
+        self.window.blit(pygame.transform.scale(self.demo_state.window,pygame.display.play_dimensions_resize),self.image_placements['else'])
+        #creating an
+
+        event = pygame.event.Event(random.choice([pygame.KEYDOWN,pygame.KEYUP]), key = random.choice([pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_z,pygame.K_x])) #create the event
+        
+        #stopping constant movement
+        if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
+            if event.key == pygame.K_LEFT:
+                self.demo_state.player.momentum = self.demo_state.player.speed*-1 if not self.demo_state.player.movement[4] else self.demo_state.player.crouch_speed*-1
+            else:
+                self.demo_state.player.momentum = self.demo_state.player.speed if not self.demo_state.player.movement[4] else self.demo_state.player.crouch_speed
+        else:
+            self.demo_state.player.controls(event)
+
+
+        
+
 
     def event_handler(self,event):
         if event.type == pygame.KEYDOWN:

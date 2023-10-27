@@ -147,6 +147,9 @@ class Formation():
                 #if no entrance points
                 entrance_points = None
             
+            #finding the skin to use
+            spawn_skin = self.world_data['skins'][type_to_spawn] if type_to_spawn in self.world_data['skins'].keys() else None
+            
             #using overwrite to change type_to_spawn, only at the end
             if type_to_spawn in self.world_data['overwrite'].keys():
                 type_to_spawn = self.world_data['overwrite'][type_to_spawn]
@@ -157,7 +160,7 @@ class Formation():
                 pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player,
                 entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
                 entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
-                skin=self.world_data['skins'][type_to_spawn] if type_to_spawn in self.world_data['skins'].keys() else None,
+                skin=spawn_skin,
                 trip=entrance_info['shoot'] if entrance_points is not None else [999],
             )
             #adding enemy to groups

@@ -3,7 +3,7 @@ class State():
     def __init__(self,window:pygame.Surface,play_state):
         
         self.next_state = None #Needed to determine if a state is complete
-
+        self.play_state = play_state
         self.window = window
         self.bg = play_state.window
         self.logo_pos:list = [0,0] #[frames_in,y_pos] 
@@ -26,5 +26,9 @@ class State():
                 self.next_state = "options","pause"
             if event.key == pygame.K_q:
                 self.next_state = "title"
+                self.play_state.__init__(
+                    window=self.play_state.fullwindow,
+                    is_restart=True
+                )
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "play"

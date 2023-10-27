@@ -102,7 +102,7 @@ class Template(pygame.sprite.Sprite):
             #shooting based off the follow values
             if self.follow.trip and self.follow.cur_target in self.atk_basic["trip"]:
                 if random.randint(0,self.atk_basic['start_shoot_chance'])==self.atk_basic['start_shoot_chance']:
-                    self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=5)
+                    self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
                 self.follow.trip = False
     def state_idle(self,start=False):
         if start:
@@ -169,10 +169,12 @@ class Template(pygame.sprite.Sprite):
             (new_pos[0] + self.idle["offset"][0]),
             (new_pos[1] + self.idle["offset"][1])]
         
-    def shoot(self,pos,target,speed:float = 2):
-        bullet = bullets.HurtBullet(pos=pos,target=target,speed=speed)
+    def shoot(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100))) -> bullets.HurtBullet:
+        
+        bullet = bullets.HurtBullet(type=type,spd=spd,info=info)
         self.sprites[0].add(bullet)
         self.sprites[2].add(bullet)
+        return bullet
 
 
 
@@ -242,7 +244,7 @@ class A(Template): #geurilla warfare
                 self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0] 
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=3)
+                self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
             
         #resetting when hitting bottom
         if self.rect.top>pygame.display.play_dimensions[1]:
@@ -311,7 +313,7 @@ class B(Template): #loop-de-loop
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(pos=self.rect.center,target=self.player.rect.center,speed=3)
+                self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
 
     def state_return(self,start=False):
         if start:
@@ -349,7 +351,7 @@ class C(Template): #turret
     def state_attack(self,start=False):
         if start:
             self.change_anim("attack") 
-            bul=bullets.HurtBullet(pos=self.rect.center,target=self.player.rect.center,speed=4)
+            self.shoot(type="point",spd=7.5,info=(self.rect.center,self.player.rect.center))
             self.sprites[0].add(bul);self.sprites[2].add(bul)
         else:    
             self.change_state('idle')
@@ -364,6 +366,46 @@ class D(Template): #special -- uses special value to inherit from that character
         Template.__init__(self,kwargs=kwargs)
 
     
+class Compootr(Template): #special world 3 item
+    #broken fucking code
+    #python is a broken fucking mess that makes no fucking sense
+    #this function runs ONCE
+    #ONE FUCKING TIME
+    #WHY IS IT RUNNING TEN FUCKING TIMES
+    #FOR NO FUCKING REASON
+    #IT IS NOT ALLOWED TO DO THAT THE CODE IS PERFECT THERE IS NOT A SINGLE FUCKING FLAW TO IT
+    def __init__(self,**kwargs):
+        Template.__init__(self,kwargs=kwargs)
+        self.info['atk'] = True
+        self.atk = {
+           "shots":10+(self.info["difficulty"]*2 if self.info['difficulty'] < 10 else 20),
+           "cur_shot":0
+        }
+        
+    def update(self):
+        Template.update(self)
+
+
+    def state_attack(self,start:bool=False):
+        if self.timers["in_state"] < 15:
+            self.rect.y += 10
+        elif self.timers["in_state"] > 15 and self.atk['cur_shot'] <= self.atk['shots']:
+            self.shoot(type="angle",spd=5,info=(self.rect.center,30*self.atk['cur_shot']))
+            self.atk['cur_shot'] += 1
+        else:
+            self.rect.y -= 15
+            if abs(self.rect.centery - self.idle['full'][1]) < 15:
+                self.atk['cur_shot'] = 0
+                #returning to idle
+                self.change_state('idle')
+                return
+    #special kill code due to the attack limit
+    def kill(self,reason=None) -> int:
+        Template.kill(self,reason=reason)
+            
+        
+        
+
 
 class Jelle(Template): #special jellyfish
     def __init__(self,**kwargs):
@@ -385,7 +427,7 @@ class Jelle(Template): #special jellyfish
                 #this enemy only takes damage when jumped on!
                 self.hurt()
                 #making the player invincible for six frames to prevent accidental damage
-                collided.invincibility_counter = 6
+                collided.invincibility_counter += 6
             elif collided.invincibility_counter < 1 : #(the player cannot be invincible)
                 collided.hurt()
                 #cutesy animation
@@ -393,6 +435,7 @@ class Jelle(Template): #special jellyfish
         elif collide_type == 3:
             collided.hurt()
             self.change_anim("attack")
+    
 
 
    
@@ -403,7 +446,8 @@ loaded = {
     "B":B,
     "C":C,
     "D":D,
-    'jelle':Jelle
+    'jelle':Jelle,
+    'compootr':Compootr
     }
 
 
