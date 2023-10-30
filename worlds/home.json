@@ -10,6 +10,9 @@
         "C":"home_C",
         "D":"home_D"
     },
+    "overwrite":{
+        "D":"sammich"
+    },
 
     "manual_formations":[
         [

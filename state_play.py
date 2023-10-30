@@ -22,9 +22,9 @@ class State():
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 2,
-                 level:int = 55,
-                 level_in_world:int = 0,
+                 world:int = 1,
+                 level:int = 99999,
+                 level_in_world:int = 3,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -75,7 +75,8 @@ class State():
             world_data = self.world_data,
             level=self.level,
             level_in_world=self.level_in_world, 
-            sprites=(self.sprites if not self.is_demo else self.demo_sprites),)
+            sprites=(self.sprites if not self.is_demo else self.demo_sprites),
+            window=self.window)
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
@@ -140,7 +141,7 @@ class State():
                 level=self.level,
                 level_in_world=self.level_in_world, 
                 sprites=(self.sprites if not self.is_demo else self.demo_sprites),
-                player=self.player,)
+                player=self.player,window=self.window)
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
             self.next_state = "gameover"

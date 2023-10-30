@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 10/29/23: added new bullets, all spawning patterns exist in game, all enemies have skins, unique entrance patterns per world
 - 10/20/23: added a bunch more spawning patterns, and fixed some more difficulty scaling issues
 - 10/20/23: added unique spawn patterns for the home world, somehow added a new bug in gameover, plans to optimize the vectors
 - 10/18/23: started adding unique entrance patterns, fixed gameover bug, plans to change formation entrance framework

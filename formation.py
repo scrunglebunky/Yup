@@ -17,6 +17,7 @@ class Formation():
         self.player = player
         self.level = level
         self.level_in_world = level_in_world
+        self.window = kwargs['window'] if 'window' in kwargs.keys() else None
 
         #formation positioning
         self.pos = [pygame.display.rect.center[0],100] #positioning
@@ -37,14 +38,14 @@ class Formation():
             "time":0, #current timer, will check every so and so frames
             "duration":0, #how long the state has been alive for. used for positioning
             "grace":0, #timer for the formation stopping the character spawn waiting
-            "grace_start": 240, #how long until the grace period starts
-            "grace_end": 480, #how long until the grace period ends
+            "grace_start": 0, #how long until the grace period starts
+            "grace_end": 0, #how long until the grace period ends
             "spawn":120, #how often it takes for something to spawn
             "reset":720, #when the timer resets
             "dead":30, #how often dead characters are checked
             "atk":100, #how often an enemy will attack 
         }
-
+        #more info on grace periods lower down near the difficulty settings
 
         ######SPAWN LIST INFORMATION##############
 
@@ -114,6 +115,11 @@ class Formation():
         self.timer['atk'] = (100 - (self.difficulty*4)) if self.difficulty < 25 else 1
         #timer["atk"] = how often characters are thrown down to attack #goes down a frame every level
         #max_characters = how many characters can be down at a time, goes up by 1 every 5 levels
+        
+        #grace periods get slightly longer and start more often as the game gets harder
+        self.timer['grace_start'] = (480 - self.difficulty*20) if self.difficulty < 10 else 60
+        self.timer['grace_end'] = self.timer['grace_start']+60 + (self.difficulty * 15 if self.difficulty < 20 else 300)
+
 
         self.enter_key = 0 #what is used for spawning entrance values, yada yada yada
 
@@ -162,6 +168,8 @@ class Formation():
                 entrance_speed=entrance_info['speed'] if entrance_points is not None else None,
                 skin=spawn_skin,
                 trip=entrance_info['shoot'] if entrance_points is not None else [999],
+                formation=self,
+                window=self.window
             )
             #adding enemy to groups
             self.spawned_list.append(char)
@@ -238,11 +246,17 @@ class Formation():
                 self.make_attack(idle_count)
     
     def make_attack(self,idle_count:list):
-        for i in range(self.attack['amount']):
-            self.spawned_list[random.choice(idle_count)].change_state('attack')
+        for i in range(self.difficulty):
+            index = random.randint(0,(len(idle_count)-1))
+            choice = idle_count[index]
+            self.spawned_list[choice].change_state('attack')
+            idle_count.pop(index)
+            if len(idle_count) <= 0:
+                break
+        return
         
     def update_movement(self): #updating where the idle position is
-        self.pos[1] = (math.sin(self.timer["duration"] * 0.1) * 15) + ((self.timer["duration"]*0.25) if self.state != "start" else 0)
+        self.pos[1] = 45 + (math.sin(self.timer["duration"] * 0.1) * 15) + ((self.timer["duration"]*self.world_data["form_drop_speed"]) if self.state != "start" else 0)
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
 

@@ -1,6 +1,6 @@
 
 {
-    "./":[],
+    "./images/":["arrow.png"],
     "./images/characters/":[],
     "./images/ui/":[
         "placeholder.bmp",

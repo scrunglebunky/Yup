@@ -48,7 +48,7 @@ class State():
         
         #drawing
         self.window.blit(img['demo.png'],self.image_placements['welcome'])
-        self.window.blit(pygame.transform.scale(self.demo_state.window,pygame.display.play_dimensions_resize),self.image_placements['else'])
+        self.window.blit(pygame.transform.scale(self.demo_state.window,(450,600)),self.image_placements['else'])
         #creating an
 
         event = pygame.event.Event(random.choice([pygame.KEYDOWN,pygame.KEYUP]), key = random.choice([pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_z,pygame.K_x])) #create the event

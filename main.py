@@ -6,7 +6,7 @@ import tools
 clock = tools.Clock(pygame.time.Clock())
 run=True; cur_state = None
 
-#setting window values - THE OPTIONS IMPORT DOES HALF OF THE JOB ALREADY - THIS IS THE REST
+
 defaultcolor = "#AAAAAA"
 window = pygame.display.get_surface() 
 pygame.display.rect = pygame.display.get_surface().get_rect()
@@ -31,7 +31,7 @@ tools.debug = True
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title"
+state = "play"
 states["play"] = state_play.State(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])

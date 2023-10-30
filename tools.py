@@ -23,7 +23,8 @@ class MovingPoint():
         self.pointA,self.pointB = pointA,pointB #saving points
         self.position = list(self.pointA)
         #calculations
-        self.distance = MovingPoint.calc_distance(pointA,pointB) #calculating distance
+        if check_finished: self.distance = MovingPoint.calc_distance(pointA,pointB) #calculating distance
+        else: self.distance = None
         self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,self.distance, speed = (speed if not ignore_speed else 1)) #calculating values
         #more arguments
         self.finished = False ; self.check_finished = check_finished

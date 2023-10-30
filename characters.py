@@ -1,4 +1,5 @@
 import pygame,anim,random,score,bullets,tools
+from math import sin,cos,atan2,degrees
 from player import Player
 
 class Template(pygame.sprite.Sprite):
@@ -70,8 +71,7 @@ class Template(pygame.sprite.Sprite):
         self.player = kwargs['player']
 
     def update(self): #this should be run the same no matter what
-        #updating state
-        self.states[self.info["state"]]()
+        
 
         #updating spritesheet
         if type(self.spritesheet) == anim.Spritesheet:
@@ -90,6 +90,9 @@ class Template(pygame.sprite.Sprite):
         self.timers['exist'] += 1
         self.timers['in_state'] += 1
 
+        #updating state
+        self.states[self.info["state"]]()
+
     ##########STATE FUNCTIONS################
     def state_enter(self,start=False):
         if self.follow is None:
@@ -102,7 +105,7 @@ class Template(pygame.sprite.Sprite):
             #shooting based off the follow values
             if self.follow.trip and self.follow.cur_target in self.atk_basic["trip"]:
                 if random.randint(0,self.atk_basic['start_shoot_chance'])==self.atk_basic['start_shoot_chance']:
-                    self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
+                    self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
                 self.follow.trip = False
     def state_idle(self,start=False):
         if start:
@@ -111,7 +114,17 @@ class Template(pygame.sprite.Sprite):
     def state_attack(self,start=False):
         self.info["state"] = 'idle'
     def state_return(self,start=False):
-        self.info["state"] = 'idle'
+        if start:
+            #figuring out where to go
+            self.follow = tools.MovingPoint(self.rect.center,self.idle['full'],speed=15,check_finished=True)
+        elif not self.follow.finished:
+            #going there
+            self.follow.update()
+            self.rect.center=self.follow.position
+        elif self.follow.finished:
+            #done going there
+            self.change_state('idle')
+        
 
 
     #############SPECIAL###############
@@ -169,11 +182,12 @@ class Template(pygame.sprite.Sprite):
             (new_pos[0] + self.idle["offset"][0]),
             (new_pos[1] + self.idle["offset"][1])]
         
-    def shoot(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100))) -> bullets.HurtBullet:
-        
-        bullet = bullets.HurtBullet(type=type,spd=spd,info=info)
-        self.sprites[0].add(bullet)
-        self.sprites[2].add(bullet)
+    def shoot(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False) -> bullets.HurtBullet:
+        bullet=None
+        if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
+            bullet = bullets.HurtBullet(type=type,spd=spd,info=info)
+            self.sprites[0].add(bullet)
+            self.sprites[2].add(bullet)
         return bullet
 
 
@@ -244,7 +258,7 @@ class A(Template): #geurilla warfare
                 self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0] 
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
+                self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
             
         #resetting when hitting bottom
         if self.rect.top>pygame.display.play_dimensions[1]:
@@ -282,7 +296,7 @@ class B(Template): #loop-de-loop
         self.info['atk'] = True
 
         self.atk = {
-            "speed":10+((self.info['difficulty']) if (self.info['difficulty']<10) else (10+self.info['difficulty']//10) ) , #where the opponent goes 
+            "speed":10+((self.info['difficulty']) if (self.info['difficulty']<5) else (5+self.info['difficulty']//10) if (self.info['difficulty']<50) else 20 ) , #where the opponent goes 
             "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-50)) for i in range(5+(self.info['difficulty'] if self.info['difficulty']<5 else 5))], #where the opponent moves to
             "index":0, #which point the opponent is going to first
             "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<6 else 3), #chance of a shot coming out during attack
@@ -299,7 +313,7 @@ class B(Template): #loop-de-loop
         self.follow.update()
         self.rect.center=self.follow.position
         #updating follow speed
-        self.follow.speed = round(self.follow.speed*0.97,2) if self.follow.speed > 2 else 2
+        self.follow.speed = round(self.follow.speed*0.96,2) if self.follow.speed > 2 else 2
         #updating movement patterns
         if self.follow.finished:
             self.atk['index'] += 1
@@ -313,7 +327,7 @@ class B(Template): #loop-de-loop
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(type="point",spd=10,info=(self.rect.center,self.player.rect.center))
+                self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
 
     def state_return(self,start=False):
         if start:
@@ -351,8 +365,7 @@ class C(Template): #turret
     def state_attack(self,start=False):
         if start:
             self.change_anim("attack") 
-            self.shoot(type="point",spd=7.5,info=(self.rect.center,self.player.rect.center))
-            self.sprites[0].add(bul);self.sprites[2].add(bul)
+            self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
         else:    
             self.change_state('idle')
 
@@ -365,21 +378,25 @@ class D(Template): #special -- uses special value to inherit from that character
         #placeholder value
         Template.__init__(self,kwargs=kwargs)
 
-    
+
+
+
+
+
+
+
+
 class Compootr(Template): #special world 3 item
-    #broken fucking code
-    #python is a broken fucking mess that makes no fucking sense
-    #this function runs ONCE
-    #ONE FUCKING TIME
-    #WHY IS IT RUNNING TEN FUCKING TIMES
-    #FOR NO FUCKING REASON
-    #IT IS NOT ALLOWED TO DO THAT THE CODE IS PERFECT THERE IS NOT A SINGLE FUCKING FLAW TO IT
+    #Limits for how many can be attacking at once
+    atk_count = 0
+    atk_max = 3
     def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)
         self.info['atk'] = True
         self.atk = {
            "shots":10+(self.info["difficulty"]*2 if self.info['difficulty'] < 10 else 20),
-           "cur_shot":0
+           "cur_shot":0,
+           "return":False,
         }
         
     def update(self):
@@ -387,34 +404,81 @@ class Compootr(Template): #special world 3 item
 
 
     def state_attack(self,start:bool=False):
-        if self.timers["in_state"] < 15:
-            self.rect.y += 10
-        elif self.timers["in_state"] > 15 and self.atk['cur_shot'] <= self.atk['shots']:
-            self.shoot(type="angle",spd=5,info=(self.rect.center,30*self.atk['cur_shot']))
-            self.atk['cur_shot'] += 1
+        if start:
+            Compootr.atk_count += 1
+            if Compootr.atk_count > Compootr.atk_max:
+                self.atk['return'] = True
+            else:
+                self.atk['return'] = False
+        elif self.atk['return']:
+            Compootr.atk_count = Compootr.atk_count - 1 if Compootr.atk_count > 0 else 0 
+            self.change_state('idle')
         else:
-            self.rect.y -= 15
-            if abs(self.rect.centery - self.idle['full'][1]) < 15:
-                self.atk['cur_shot'] = 0
-                #returning to idle
-                self.change_state('idle')
-                return
+            if self.timers["in_state"] < 15:
+                #start
+                self.rect.y += 10
+            elif self.timers["in_state"] > 15 and self.atk['cur_shot'] <= self.atk['shots']:
+                #shooting
+                self.shoot(type="angle",spd=5,info=(self.rect.center,30*self.atk['cur_shot']))
+                self.atk['cur_shot'] += 1
+            else:
+                #exit code
+                self.rect.y -= 15
+                if abs(self.rect.centery - self.idle['full'][1]) < 15:
+                    self.atk['cur_shot'] = 0
+                    #returning to idle
+                    self.atk['return'] = True
+                    return
     #special kill code due to the attack limit
     def kill(self,reason=None) -> int:
         Template.kill(self,reason=reason)
+        if self.info['state'] == 'attack':
+            Compootr.atk_count = Compootr.atk_count - 1 if Compootr.atk_count > 0 else 0 
+
+
             
         
         
 
 
 class Jelle(Template): #special jellyfish
+    #Limits for attacking
+    atk_count = 0
+    atk_max = 2
     def __init__(self,**kwargs):
         #placeholder value
         Template.__init__(self,kwargs=kwargs)
+        self.atk_move = None
+        self.info['atk']=True
+        self.atk = {'return':False,'y':0,'trip':False}
     def update(self):
         Template.update(self)
         #keeping the sprite mask locked so it doesn't bounce and accidentally kill the player
         self.mask = self.spritesheet.all_loaded_spritesheets[self.spritesheet.name][2][0]
+
+    def state_idle(self,start=False):
+        self.rect.center = self.idle['full']
+
+    def state_attack(self,start=False):
+        #moving down until instructed to go back up, then returning
+        if start:
+            self.atk['y'] = 1
+            self.atk['trip'] = False
+        #going down
+        elif not self.atk['trip']:
+            self.rect.y += self.atk['y'] 
+            self.atk['y'] = self.atk['y'] + 0.25 if self.atk['y'] < 7 else 7
+            if self.rect.centery > self.player.rect.centery:
+                self.atk['trip'] = True
+        #returning
+        elif self.atk['trip']:
+            self.rect.y += self.atk['y']
+            self.atk['y'] -= 0.4
+            if self.rect.centery < self.idle['full'][1]:
+                self.change_state('idle')
+
+        
+
     def on_collide(self,
                    collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
                    collided:pygame.sprite.Sprite,
@@ -435,11 +499,114 @@ class Jelle(Template): #special jellyfish
         elif collide_type == 3:
             collided.hurt()
             self.change_anim("attack")
-    
+
+
+
+
+
+class Sammich(Template):
+    def __init__(self,**kwargs):
+        Template.__init__(self,kwargs=kwargs)
+        self.info['atk'] = True
+        self.atk = {
+            'side':0,
+            0:pygame.display.play_dimensions[0]*0.01, #left position
+            1:pygame.display.play_dimensions[0]*0.99, #right position
+            'momentum':0
+        }
+    def state_attack(self,start=False):
+        #homes in on you from the sides, and then lunges at you
+        if start:
+            self.atk['side'] = random.randint(0,1) #selecting whether COMING FROM the right or left
+        #homing in
+        elif self.timers['in_state'] < 90:
+            self.rect.centery = self.player.rect.centery - 10
+            self.rect.centerx = self.atk[self.atk['side']]
+        #stopping movement to show you where it's about to aim
+        elif self.timers['in_state'] < 120:
+            self.rect.center = self.rect.center
+        #lunging at player
+        elif self.timers['in_state'] < 150:
+            self.rect.x = self.rect.x - self.atk['momentum'] if self.atk['side'] == 1 else self.rect.x + self.atk['momentum'] if self.atk['side'] == 0 else self.rect.x
+            self.atk['momentum'] += 2
+        else:
+            self.change_state('idle')
+            self.atk['momentum'] = 0 
+
+
+        
+    def state_return(self,start=False):
+        ...
 
 
    
 
+class Nope(Template):
+    arrow:pygame.Surface = pygame.transform.scale(anim.all_loaded_images['arrow.png'],(75,75))
+    arrow_rect:pygame.Rect = arrow.get_rect()
+    def __init__(self,**kwargs):
+        Template.__init__(self,kwargs=kwargs)
+        self.atk = {}
+        self.info['atk'] = True
+    def state_attack(self,start=False):
+        if start:
+            self.atk = {
+            'vert':0,
+            'horiz':0,
+            'REVERSEvert':False,
+            'REVERSEhoriz':False,
+            'speed':0,
+            'angle':0,
+            'arrow_rect':Nope.arrow.get_rect(),
+            'pos':list(self.rect.center)
+        }
+        elif self.timers['in_state'] < 120:
+            self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
+            self.atk['arrow_rect'].center = self.rect.center
+            self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
+        elif self.timers['in_state'] < 180:
+            #finally deciding where to go, but locking on for a second
+            self.atk['speed'] = 25
+            self.atk['angle'] = self.atk['angle']
+            self.atk['horiz'] = cos(self.atk['angle'])
+            self.atk['vert'] = sin(self.atk['angle'])
+            self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
+        elif self.atk['speed'] > 0:
+            #moving, with extra code on for bouncing n shit
+            self.atk['pos'][0] += self.atk['horiz'] * self.atk['speed'] * (-1 if self.atk['REVERSEhoriz'] else 1)
+            self.atk['pos'][1] += self.atk['vert'] * self.atk['speed'] * (-1 if self.atk['REVERSEvert'] else 1)
+            self.rect.center = self.atk['pos']
+            self.atk['speed'] -= 0.1
+            #bounce collision
+            #if too far left
+            if self.rect.left < 0:
+                if self.atk['horiz'] < 0: #if its going left and goes left by default
+                    self.atk['REVERSEhoriz'] = True
+                elif self.atk['horiz'] > 0: #if its going left and goes right by default
+                    self.atk['REVERSEhoriz'] = False
+            #if too far right
+            elif self.rect.right > 600:
+                if self.atk['horiz'] < 0: #if its going right and goes left by default
+                    self.atk['REVERSEhoriz'] = False
+                elif self.atk['horiz'] > 0: #if its going right and goes right by default
+                    self.atk['REVERSEhoriz'] = True
+            #if too far up
+            if self.rect.top < 0:
+                if self.atk['vert'] < 0: #if its going up and goes up by default
+                    self.atk['REVERSEvert'] = True
+                elif self.atk['vert'] > 0: #if its going up and goes down by default
+                    self.atk['REVERSEvert'] = False
+            #if too far down
+            elif self.rect.bottom > 800:
+                if self.atk['vert'] < 0: #if its going down and goes up by default
+                    self.atk['REVERSEvert'] = False
+                elif self.atk['vert'] > 0: #if its going down and goes down by default
+                    self.atk['REVERSEvert'] = True
+
+        
+        else:
+            self.change_state('return')
+        
 
 loaded = {
     "A":A,
@@ -447,7 +614,9 @@ loaded = {
     "C":C,
     "D":D,
     'jelle':Jelle,
-    'compootr':Compootr
+    'compootr':Compootr,
+    'sammich':Sammich,
+    'nope':Nope
     }
 
 
