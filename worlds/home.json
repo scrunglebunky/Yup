@@ -4,6 +4,8 @@
     "song":"cabbage.mp3",
     "bg":"home.png",
 
+    "levels":3,
+
     "skins":{
         "A":"home_A",
         "B":"home_B",

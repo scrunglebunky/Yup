@@ -12,6 +12,9 @@
         "C":"happy_C",
         "D":"happy_D"
     },
+    "overwrite":{
+        "D":"yippee"
+    },
 
 
     "start_patterns":{

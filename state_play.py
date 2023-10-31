@@ -22,9 +22,9 @@ class State():
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 1,
+                 world:int = 5,
                  level:int = 99999,
-                 level_in_world:int = 3,
+                 level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):

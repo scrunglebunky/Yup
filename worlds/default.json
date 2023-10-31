@@ -7,7 +7,7 @@
     "bg_size":[600,800],
     "bg_speed":[0,0],
     
-    "levels":2,
+    "levels":3,
 
     "char_distance_x":35, 
     "char_distance_y":40,

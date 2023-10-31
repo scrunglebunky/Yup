@@ -608,6 +608,79 @@ class Nope(Template):
             self.change_state('return')
         
 
+
+class Yippee(Template):
+    #a stupid little enemy that shits confetti at you
+    def __init__(self,**kwargs):
+        Template.__init__(self,kwargs=kwargs)
+        self.info['atk'] = True
+        self.atk = {
+            "points":[0,1,2],
+            "initial_follow":None,
+            "initial_x":0,
+        }
+    def state_attack(self,start=False):
+        #selecting initial information
+        if start:
+            self.atk['points'] = [random.randint(100,400) for i in range((self.info['difficulty'] // 2) if self.info['difficulty']<20 else 10)]
+            self.atk['initial_follow'] = tools.MovingPoint(self.rect.center,(self.rect.centerx,50),check_finished=True,speed=10)
+            self.atk['initial_x'] = random.randint(0,75)
+            self.atk['y'] = self.idle['full'][1] + 100
+        #going up to the top position
+        elif self.timers['in_state'] < 30 and not self.atk['initial_follow'].finished:
+            self.atk['initial_follow'].update()
+            self.rect.center = self.atk['initial_follow'].position
+        #floating around and confetti-ing
+        elif len(self.atk['points']) > 0:
+            self.rect.center = (  300 + sin(self.timers['in_state']/25 + self.atk['initial_x'])*250  , self.atk['y']  + sin(self.timers['in_state']/10)*10  )
+            if abs(self.rect.centerx - self.atk['points'][0]) < 10:
+                #confetti time
+                for i in range(5):
+                    confetti = Confetti(pos=self.rect.center)
+                    self.sprites[0].add(confetti)
+                    self.sprites[2].add(confetti)
+                self.atk['points'].pop(0)
+                #animation
+                self.change_anim('attack')
+        else:
+            self.change_state('return')
+
+
+
+class Lumen(Template):
+    #points at you, and shoots a laser 
+    def __init__(self,**kwargs):
+        Template.__init__(self,kwargs=kwargs)
+        self.info['atk'] = True
+        self.atk = {
+            'angle':0,
+            'laser':None,
+            'end_pos':(0,0),
+        }
+    def state_attack(self,start=False):
+        if start:
+            ...
+        elif self.timers['in_state'] < 120:
+            #locking on, moving based on where you are
+            self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
+            self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
+            self.atk['end_pos'] = self.player.rect.center
+        elif self.timers['in_state'] < 240:
+            #waiting for a second to make it fair
+            self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle'])) 
+        elif self.timers['in_state'] == 240:
+            laser = Laser(start_pos = self.rect.center,angle=degrees(self.atk['angle'])) #shooting the laser
+            self.sprites[0].add(laser)
+            self.sprites[2].add(laser)
+        else:
+            self.change_state('idle')
+        #no matter what, maintaining positioning
+        self.rect.center = self.idle['full']
+
+    
+
+
+##SAVING ASSETS IN A DICTIONARY TO BE USED LATER
 loaded = {
     "A":A,
     "B":B,
@@ -616,8 +689,105 @@ loaded = {
     'jelle':Jelle,
     'compootr':Compootr,
     'sammich':Sammich,
-    'nope':Nope
+    'nope':Nope,
+    'yippee':Yippee,
+    'lumen':Lumen,
     }
+
+
+#EXTRA ASSETS -- SPECIAL YIPPEE CONFETTI
+class Confetti(pygame.sprite.Sprite):
+    #all potential images to be used
+    images = []
+    for color in ["red","green","blue","purple","orange","pink"]:
+        surf = pygame.Surface((10,10))
+        pygame.draw.rect(surf,color=color,rect=pygame.Rect(0,0,10,10))
+        images.append(surf)
+    def __init__(self,pos=(0,0)):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = random.choice(Confetti.images)
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.mask = pygame.mask.from_surface(self.image)
+        self.gravity_info = [
+            random.randint(-20,20), #x movement
+            random.randint(-20,-5), #y gravity
+        ]
+        self.duration = 0 
+
+    def update(self):
+        #moving x
+        self.rect.x += self.gravity_info[0]
+        #moving y
+        self.rect.y += self.gravity_info[1]
+
+        #changing x gravity
+        self.gravity_info[0] = round(self.gravity_info[0]*0.98,5) if abs(self.gravity_info[0]) > 0.001 else 0
+        #changing y gravity
+        self.gravity_info[1] = self.gravity_info[1]+0.5 if self.gravity_info[1] < 7 else 7
+
+
+        #updating duration information
+        self.duration += 1
+        #autokill
+        if self.duration > 240 or self.rect.top>800:
+            self.kill()
+        
+        
+    def on_collide(self,
+                   collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collided:pygame.sprite.Sprite,
+                   ):
+        #5/26/23 - Updating health shizznit if interaction with "player type" class
+        # if collide_type == 1 or collide_type == 3:
+        #     self.info['health'] -= 1
+        #if colliding with an enemy, either hurt or bounce based on positioning
+        if type(collided) == Player :
+            collided.hurt()
+            #damaging the enemy either way
+            self.kill()
+        elif collide_type == 3:
+            #I SAID damaging the enemy either way
+            self.kill()
+            collided.hurt()
+
+
+#EXTRA ASSETS -- SPECIAL LUMEN LASER
+class Laser(pygame.sprite.Sprite):
+    def __init__(self,start_pos=(0,0),angle=45,length=800):
+        pygame.sprite.Sprite.__init__(self)
+        #laser image code
+        self.image = pygame.Surface(pygame.display.play_dimensions,pygame.SRCALPHA).convert_alpha() #a rect that spans the ENTIRE SCREEN, as only the mask is used for collision
+        
+        #CODE FROM kadir014 on github.io, will change around myself later
+        start = pygame.Vector2(start_pos[0],start_pos[1])
+        end = start + pygame.Vector2(length,0).rotate(angle)
+        pygame.draw.line(self.image,'red',start,end,15)
+
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        #duration
+        self.duration = 0 
+    def update(self):
+        #it just sits there for a quarter of a second,lol
+        self.duration += 1
+        if self.duration > 15:
+            self.kill()
+    def on_collide(self,
+                   collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
+                   collided:pygame.sprite.Sprite,
+                   ):
+        #5/26/23 - Updating health shizznit if interaction with "player type" class
+        # if collide_type == 1 or collide_type == 3:
+        #     self.info['health'] -= 1
+        #if colliding with an enemy, either hurt or bounce based on positioning
+        if type(collided) == Player :
+            collided.hurt()
+        elif collide_type == 3:
+            collided.hurt()
+
+
+
 
 
 ########OLD
