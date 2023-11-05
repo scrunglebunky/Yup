@@ -1,4 +1,5 @@
 import random,pygame,math,characters,random
+from anim import all_loaded_images as img
 
 class Formation():
     def __init__(self,
@@ -28,10 +29,9 @@ class Formation():
         self.states = { #the states used, organized into a dictionary to reserve lines
             "start":self.state_start,
             "idle":self.state_idle,
-            "exit":self.state_exit,
-            'leave':self.state_leave,
             'destroy':self.state_destroy,
-            'done':self.state_done,
+            'leave':self.state_leave,
+            'done':self.state_done
         }
         
         self.timer = { #timers used 
@@ -106,7 +106,7 @@ class Formation():
         self.pos[0] = (pygame.display.play_dimensions[0]/2) - ((len(self.spawn_list[0])*self.world_data["char_distance_x"])/2)
 
         #difficulty calculations
-        self.difficulty = self.level#//5 
+        self.difficulty = self.level//3
         self.attack={
             #throwdown amount = how many characters are thrown down in an attack stance #goes up once every 10 levels
             "amount":(self.difficulty+1) if (self.difficulty < 14) else 15,
@@ -118,10 +118,17 @@ class Formation():
         
         #grace periods get slightly longer and start more often as the game gets harder
         self.timer['grace_start'] = (480 - self.difficulty*20) if self.difficulty < 10 else 60
-        self.timer['grace_end'] = self.timer['grace_start']+60 + (self.difficulty * 15 if self.difficulty < 20 else 300)
+        self.timer['grace_end'] = self.timer['grace_start']+60 + (self.difficulty * 15 if self.difficulty < 4 else 60)
 
-
+        #a key used to figure out what enemy is to be spawned during the start state.
         self.enter_key = 0 #what is used for spawning entrance values, yada yada yada
+
+
+        #graphical stuff, specifically for the hack world
+        self.image = img[self.world_data['formation_img']] if self.world_data['formation_img'] in img.keys() else None
+        print(self.world_data['world_name'],self.world_data['formation_img'])
+        self.image_size = (50 + (len(self.spawn_list[0]) * self.world_data['char_distance_x']), 75 + (len(self.spawn_list) * self.world_data['char_distance_y']))
+        self.image = pygame.transform.scale(self.image,self.image_size) if self.image is not None else None
 
     def update(self):
         #updating everything
@@ -207,7 +214,7 @@ class Formation():
         self.remove_dead()
         self.update_movement()
 
-    def state_exit(self):... #leaving
+
 
     def state_leave(self): #leaving but animated
         #moving
@@ -220,16 +227,20 @@ class Formation():
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
 
+
     def start_state_leave(self): #starting the leaving animation
         self.leave_y_momentum = 7
         self.state = 'leave'
+
 
     def state_destroy(self): #killing everything
         self.empty()
         self.state='done'
     
+
     def state_done(self):
         ...
+
 
     def check_for_atk(self): #throwing down an enemy to attack the player
         #only runs if the timer is ok
@@ -245,20 +256,24 @@ class Formation():
             if (atk_count <= self.attack["max"] and len(idle_count) > 0) and not trip:
                 self.make_attack(idle_count)
     
+
     def make_attack(self,idle_count:list):
         for i in range(self.difficulty):
             index = random.randint(0,(len(idle_count)-1))
             choice = idle_count[index]
-            self.spawned_list[choice].change_state('attack')
+            if self.spawned_list[choice].info['state'] != 'attack':
+                self.spawned_list[choice].change_state('attack')
             idle_count.pop(index)
             if len(idle_count) <= 0:
                 break
         return
-        
+
+
     def update_movement(self): #updating where the idle position is
         self.pos[1] = 45 + (math.sin(self.timer["duration"] * 0.1) * 15) + ((self.timer["duration"]*self.world_data["form_drop_speed"]) if self.state != "start" else 0)
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
+
 
     def find_spawn_list(self,level,world_data) -> list:
         spawn_list = []
@@ -283,10 +298,12 @@ class Formation():
             spawn_list = random.choice(world_data["manual_formations"])
         return spawn_list
 
+
     def empty(self):
         for enemy in self.spawned_list:
             enemy.kill()
         self.sprites[2].empty()
+
 
     def remove_dead(self):
         #06/06/2023 - removing dead characters
@@ -300,6 +317,12 @@ class Formation():
             copy = []
 
 
+    def draw_img(self,window=None):
+        if window is None: window=self.window
+        if self.image is None or window is None:
+            return
+        window.blit(self.image,(self.pos[0]-25,self.pos[1]-75))
+        
 
 
 

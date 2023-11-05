@@ -1,4 +1,5 @@
 import pygame,anim,random,score,bullets,tools
+from emblems import Emblem as Em
 from math import sin,cos,atan2,degrees
 from player import Player
 
@@ -24,7 +25,7 @@ class Template(pygame.sprite.Sprite):
             "full":[(kwargs['pos'][0]+kwargs['offset'][0]),(kwargs['pos'][1]+kwargs['offset'][1])] # current position in idle
         }
         self.info = { #basic information on the character
-            "health":1,
+            "health":kwargs['difficulty']**0,
             "score":100,
             "dead":False,
             "difficulty":kwargs['difficulty'],
@@ -81,10 +82,6 @@ class Template(pygame.sprite.Sprite):
         else:
             self.image = Template.image
         
-        #checking for death
-        self.info['dead'] = (self.info['health'] <= 0)
-        if self.info['dead']:
-            self.kill(reason="health")
 
         #updating timers
         self.timers['exist'] += 1
@@ -92,6 +89,10 @@ class Template(pygame.sprite.Sprite):
 
         #updating state
         self.states[self.info["state"]]()
+
+        #checking for utter murder
+        self.check_dead()
+
 
     ##########STATE FUNCTIONS################
     def state_enter(self,start=False):
@@ -105,7 +106,7 @@ class Template(pygame.sprite.Sprite):
             #shooting based off the follow values
             if self.follow.trip and self.follow.cur_target in self.atk_basic["trip"]:
                 if random.randint(0,self.atk_basic['start_shoot_chance'])==self.atk_basic['start_shoot_chance']:
-                    self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
+                    self.shoot(type="point",info=(self.rect.center,self.player.rect.center))
                 self.follow.trip = False
     def state_idle(self,start=False):
         if start:
@@ -145,7 +146,11 @@ class Template(pygame.sprite.Sprite):
 
         return self.timers['exist']
 
-
+    def check_dead(self):
+        #checking for death
+        self.info['dead'] = (self.info['health'] <= 0)
+        if self.info['dead']:
+            self.kill(reason="health")
 
     def on_collide(self,
                    collide_type:int, #the collide_type refers to the sprite group numbers. 0 for universal (not used), 1 for other player elements, 2 for enemies
@@ -173,6 +178,7 @@ class Template(pygame.sprite.Sprite):
     def hurt(self):
         self.info['health'] -= 1
         self.change_anim("hurt")
+        self.sprites[0].add(Em(im=None,coord=self.rect.center,isCenter=True,animated=True,animation_name="die",animation_resize=None,animation_killonloop=True))
 
     def formationUpdate(self,
         new_pos:tuple #location of the formation, not including offset
@@ -182,7 +188,7 @@ class Template(pygame.sprite.Sprite):
             (new_pos[0] + self.idle["offset"][0]),
             (new_pos[1] + self.idle["offset"][1])]
         
-    def shoot(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False) -> bullets.HurtBullet:
+    def shoot(self,type:str="point",spd:int=7,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False) -> bullets.HurtBullet:
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
             bullet = bullets.HurtBullet(type=type,spd=spd,info=info)
@@ -258,7 +264,7 @@ class A(Template): #geurilla warfare
                 self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0] 
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
+                self.shoot(type="point",info=(self.rect.center,self.player.rect.center))
             
         #resetting when hitting bottom
         if self.rect.top>pygame.display.play_dimensions[1]:
@@ -300,14 +306,26 @@ class B(Template): #loop-de-loop
             "points":[(random.randint(25,pygame.display.play_dimensions[0]-25),random.randint(25,pygame.display.play_dimensions[1]-50)) for i in range(5+(self.info['difficulty'] if self.info['difficulty']<5 else 5))], #where the opponent moves to
             "index":0, #which point the opponent is going to first
             "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<6 else 3), #chance of a shot coming out during attack
-
+            "warnings":[] #warning symbols spawned 
         }
+        #NOTE - while I would preload the warnings, for some reason that created a bug where they just wouldn't delete. It's not too bad, though. It's just a sprite.
+        for point in self.atk['points']:
+            warning=Warning(point)
+            self.atk['warnings'].append(warning)
 
     def state_attack(self,start=False):
+
         if start:
+
+            #creating the moving point index, and starting the animations
             self.atk['index'] = 0 
             self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
             self.change_anim('attack')
+            #if the warnings already existed, killing them all
+            for warning in self.atk['warnings']:warning.kill()
+            #creating the warning signs and adding them to le sprite groups
+            if not self.info['dead']:
+                self.update_warnings()
             return
         #updating position
         self.follow.update()
@@ -316,7 +334,13 @@ class B(Template): #loop-de-loop
         self.follow.speed = round(self.follow.speed*0.96,2) if self.follow.speed > 2 else 2
         #updating movement patterns
         if self.follow.finished:
+            #deleting the warning for the current position
+            if len(self.atk['warnings']) > self.atk['index']:
+                self.atk['warnings'][self.atk['index']].kill()
+            #updating current index, and adding the next warning to the screen
             self.atk['index'] += 1
+            #updating warnings
+            self.update_warnings()
             #finishing movement
             if self.atk['index'] >= len(self.atk['points']):
                 self.follow=None
@@ -327,11 +351,16 @@ class B(Template): #loop-de-loop
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
             # shooting if needed
             if random.randint(0,self.atk['shoot_chance'])==self.atk['shoot_chance']:
-                self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
+                self.shoot(type="point",info=(self.rect.center,self.player.rect.center))
+
+
 
     def state_return(self,start=False):
         if start:
             self.follow = tools.MovingPoint(self.rect.center,self.idle['full'],speed=10,check_finished=True)
+            #deleting all the warnings
+            for warning in self.atk['warnings']:
+                warning.kill()
             return
         #updating movement
         self.follow.update()
@@ -345,6 +374,35 @@ class B(Template): #loop-de-loop
         #error checking
         if self.timers['in_state'] >= 120:
             self.change_state('return')     
+
+    def kill(self,reason=None):
+        for warning in self.atk['warnings']:
+            warning.kill()
+        del self.atk['warnings'][:]
+        
+        Template.kill(self,reason=reason)
+        
+
+    #B-SPECIFIC CODE. This will add the next 3 spots as warnings, and make the nearest ones more intensely flash
+    def update_warnings(self):
+        #adds the current and next 2 warnings to the sprite groups
+        for i in range(self.info['difficulty']//3):
+            #checking for out of range, and also in range of player
+            if self.atk['index']+i < len(self.atk['warnings']) and abs(self.atk['warnings'][self.atk['index'] + i].rect.centery-self.player.rect.centery)<150 :
+                warning = self.atk['warnings'][self.atk['index'] + i]
+                self.sprites[0].add(warning)
+                self.sprites[4].add(warning)
+        #makes the current warning flash aggressively, and the next warning flash faster
+        if self.atk['index'] < len(self.atk['warnings']):
+            self.atk['warnings'][self.atk['index']].update_intensity(60)
+            # print(self.atk['warnings'][self.atk['index']].spritesheet.all_anim['idle']['FPS'])
+
+        if self.atk['index']+1 < len(self.atk['warnings']):
+            self.atk['warnings'][self.atk['index']+1].update_intensity(15)
+            # print(self.atk['warnings'][self.atk['index']].spritesheet.all_anim['idle']['FPS'])
+            
+
+
 
 
 
@@ -365,7 +423,7 @@ class C(Template): #turret
     def state_attack(self,start=False):
         if start:
             self.change_anim("attack") 
-            self.shoot(type="point",spd=5,info=(self.rect.center,self.player.rect.center))
+            self.shoot(type="point",info=(self.rect.center,self.player.rect.center))
         else:    
             self.change_state('idle')
 
@@ -404,7 +462,7 @@ class Compootr(Template): #special world 3 item
 
 
     def state_attack(self,start:bool=False):
-        if start:
+        if start and not self.info['dead']:
             Compootr.atk_count += 1
             if Compootr.atk_count > Compootr.atk_max:
                 self.atk['return'] = True
@@ -419,7 +477,7 @@ class Compootr(Template): #special world 3 item
                 self.rect.y += 10
             elif self.timers["in_state"] > 15 and self.atk['cur_shot'] <= self.atk['shots']:
                 #shooting
-                self.shoot(type="angle",spd=5,info=(self.rect.center,30*self.atk['cur_shot']))
+                self.shoot(type="angle",info=(self.rect.center,30*self.atk['cur_shot']))
                 self.atk['cur_shot'] += 1
             else:
                 #exit code
@@ -512,58 +570,75 @@ class Sammich(Template):
             'side':0,
             0:pygame.display.play_dimensions[0]*0.01, #left position
             1:pygame.display.play_dimensions[0]*0.99, #right position
-            'momentum':0
+            'momentum':0,
+            'warning':Warning((0,0)),
         }
     def state_attack(self,start=False):
         #homes in on you from the sides, and then lunges at you
-        if start:
+        if start and not self.info['dead']:
             self.atk['side'] = random.randint(0,1) #selecting whether COMING FROM the right or left
+            self.sprites[0].add(self.atk['warning'])
+            self.sprites[4].add(self.atk['warning'])
+            self.atk['warning'].update_pos(self.player.rect.center)
         #homing in
         elif self.timers['in_state'] < 90:
             self.rect.centery = self.player.rect.centery - 10
             self.rect.centerx = self.atk[self.atk['side']]
+            self.atk['warning'].update_pos(self.player.rect.center)
         #stopping movement to show you where it's about to aim
         elif self.timers['in_state'] < 120:
             self.rect.center = self.rect.center
         #lunging at player
         elif self.timers['in_state'] < 150:
+            self.atk['warning'].kill()
             self.rect.x = self.rect.x - self.atk['momentum'] if self.atk['side'] == 1 else self.rect.x + self.atk['momentum'] if self.atk['side'] == 0 else self.rect.x
             self.atk['momentum'] += 2
         else:
             self.change_state('idle')
             self.atk['momentum'] = 0 
 
-
         
     def state_return(self,start=False):
         ...
 
+    def kill(self,reason=None):
+        self.atk['warning'].kill()
+        Template.kill(self,reason)
 
-   
+
 
 class Nope(Template):
-    arrow:pygame.Surface = pygame.transform.scale(anim.all_loaded_images['arrow.png'],(75,75))
-    arrow_rect:pygame.Rect = arrow.get_rect()
     def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)
         self.atk = {}
         self.info['atk'] = True
-    def state_attack(self,start=False):
-        if start:
-            self.atk = {
+        self.atk = {
             'vert':0,
             'horiz':0,
             'REVERSEvert':False,
             'REVERSEhoriz':False,
             'speed':0,
             'angle':0,
-            'arrow_rect':Nope.arrow.get_rect(),
-            'pos':list(self.rect.center)
-        }
+            'pos':list(self.rect.center),
+            'warning':Warning((0,0)),}
+    def state_attack(self,start=False):
+        if start:
+            self.atk['vert'] = 0
+            self.atk['horiz'] = 0
+            self.atk['REVERSEhoriz'] = False
+            self.atk['REVERSEvert'] = False
+            self.atk['speed'] = 0 
+            self.atk['angle'] = 0
+            self.atk['pos'] = list(self.rect.center)
+            if not self.info['dead']:
+                self.sprites[0].add(self.atk['warning'])
+                self.sprites[4].add(self.atk['warning'])
+                self.atk['warning'].update_pos(self.player.rect.center)
         elif self.timers['in_state'] < 120:
             self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
-            self.atk['arrow_rect'].center = self.rect.center
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
+            self.atk['warning'].update_pos(self.player.rect.center)
+
         elif self.timers['in_state'] < 180:
             #finally deciding where to go, but locking on for a second
             self.atk['speed'] = 25
@@ -571,6 +646,11 @@ class Nope(Template):
             self.atk['horiz'] = cos(self.atk['angle'])
             self.atk['vert'] = sin(self.atk['angle'])
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
+            self.atk['warning'].update_intensity(30)
+
+        elif self.timers['in_state'] == 180:
+            self.atk['warning'].kill()
+
         elif self.atk['speed'] > 0:
             #moving, with extra code on for bouncing n shit
             self.atk['pos'][0] += self.atk['horiz'] * self.atk['speed'] * (-1 if self.atk['REVERSEhoriz'] else 1)
@@ -606,6 +686,10 @@ class Nope(Template):
         
         else:
             self.change_state('return')
+
+    def kill(self,reason=None):
+        Template.kill(self,reason)
+        self.atk['warning'].kill()
         
 
 
@@ -655,29 +739,39 @@ class Lumen(Template):
         self.atk = {
             'angle':0,
             'laser':None,
-            'end_pos':(0,0),
+            'warning':None,
         }
+        
     def state_attack(self,start=False):
-        if start:
-            ...
+        if start and not self.info['dead']:
+            if self.atk['warning'] is not None:
+                self.atk['warning'].kill()
+                del self.atk['warning']
+            self.atk['warning'] = Warning(self.player.rect.center)
+            self.sprites[0].add(self.atk['warning'])
+            self.sprites[4].add(self.atk['warning'])
         elif self.timers['in_state'] < 120:
             #locking on, moving based on where you are
             self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
-            self.atk['end_pos'] = self.player.rect.center
-        elif self.timers['in_state'] < 240:
+            self.atk['warning'].update_pos(self.player.rect.center)
+        elif self.timers['in_state'] < 180:
             #waiting for a second to make it fair
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle'])) 
-        elif self.timers['in_state'] == 240:
+        elif self.timers['in_state'] == 180:
             laser = Laser(start_pos = self.rect.center,angle=degrees(self.atk['angle'])) #shooting the laser
             self.sprites[0].add(laser)
             self.sprites[2].add(laser)
         else:
+            self.atk['warning'].kill()
             self.change_state('idle')
         #no matter what, maintaining positioning
         self.rect.center = self.idle['full']
-
     
+    def kill(self,reason=None):
+        if type(self.atk['warning']) == Warning: self.atk['warning'].kill()
+        Template.kill(self,reason=None)
+        
 
 
 ##SAVING ASSETS IN A DICTIONARY TO BE USED LATER
@@ -754,7 +848,7 @@ class Confetti(pygame.sprite.Sprite):
 
 #EXTRA ASSETS -- SPECIAL LUMEN LASER
 class Laser(pygame.sprite.Sprite):
-    def __init__(self,start_pos=(0,0),angle=45,length=800):
+    def __init__(self,start_pos=(0,0),angle=45,length=1000):
         pygame.sprite.Sprite.__init__(self)
         #laser image code
         self.image = pygame.Surface(pygame.display.play_dimensions,pygame.SRCALPHA).convert_alpha() #a rect that spans the ENTIRE SCREEN, as only the mask is used for collision
@@ -787,8 +881,34 @@ class Laser(pygame.sprite.Sprite):
             collided.hurt()
 
 
+#EXTRA ASSETS -- WARNING SIGN
+class Warning(pygame.sprite.Sprite):
+    image = anim.all_loaded_images['warn_temp.png']
+    arrow = anim.all_loaded_images['arrow.png']
+    def __init__(self,pos,resize=None,arrow_pos=None):
+        pygame.sprite.Sprite.__init__(self)
+        #spritesheet info
+        self.spritesheet = anim.Spritesheet('warning',current_anim='idle')
+        self.spritesheet.all_anim['idle'] = self.spritesheet.all_anim['idle'].copy()
+        self.image = self.spritesheet.image
+        self.arrow = Warning.arrow.copy()
+        self.rect = self.image.get_rect()
+        self.rect.center = pos 
 
+        self.arrow_rect = self.arrow.get_rect()
+        self.arrow_rect.center = self.rect.center
+    def update(self):
+        self.spritesheet.update()
+        self.image = self.spritesheet.image
+    def update_pos(self,pos):
+        self.rect.center = pos
+    def update_intensity(self,fps:int):
+        self.spritesheet.all_anim['idle']['FPS'] = 60/fps
+        # print('changed',fps,self.spritesheet.all_anim['idle']['FPS'])
+        self.update()
+        # print('after',fps,self.spritesheet.all_anim['idle']['FPS'])
 
+    
 
 ########OLD
 

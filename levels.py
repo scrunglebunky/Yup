@@ -45,6 +45,7 @@ def fetch_level_info(
             alldata.update(worlds[world_force])
         else:
             alldata.update(worlds[campaigns[campaign_world[0]][campaign_world[1]]])
+        
     except KeyError:
         alldata = worlds["default.json"]
     

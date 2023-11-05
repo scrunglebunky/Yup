@@ -52,7 +52,7 @@ with open("./data/anim_loadlist.json","r") as raw:
     anim_loadlist = json.load(raw)
 
 
-#06/01/2023 - REVAMP OF OLD CODE
+#06/01/2023 - REVAMP OF OLD CODE - LOADING THE ANIM LOADLIST
 for directory,filelist in anim_loadlist.items():
     #There is no longer a break if there's no json, as the list contains all the json files needed without any scraping
     for filename in filelist:
@@ -91,11 +91,7 @@ for directory,filelist in img_loadlist.items():
             all_loaded_images[str(filename[0])] = pygame.transform.scale(all_loaded_images[str(filename[0])],filename[1])
         continue
     for filename in filelist:
-        if "ui" in directory:
-            all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert_alpha()
-        else:
-            all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert()
-              
+        all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert_alpha()
 
 
 """
@@ -138,7 +134,7 @@ class Spritesheet():
         #DEFINITIONS
         self.name = name
         self.all_loaded_spritesheets = all_loaded_spritesheets #for external use
-        self.all_anim = all_loaded_spritesheets[name][0]["anim"] #self-explanatory
+        self.all_anim = dict(all_loaded_spritesheets[name][0]["anim"].copy()) #self-explanatory
         self.current_anim = current_anim #current animation played
         self.current_anim_loop = 0 #amount of loops
         self.current_anim_frame = 0 #frame of animation; NOTE THIS IS THE INDEX OF THE all_anim["frames"] TUPLE, NOT SPRITESHEETS
@@ -191,7 +187,7 @@ class Spritesheet():
             if self.resize is not None: self.image = pygame.transform.scale(self.image,self.resize)
             self.changed = False #resetting
 
-                
+        
     
     def change_anim(self,new:str,overwrite:bool=False):
         #checking for if the animation even exists

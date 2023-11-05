@@ -35,7 +35,7 @@ class State():
             for i in range(2):
                 if self.play_state.background.speed[i] <= 150:
                     self.play_state.background.speed[i] *= 1.05
-        #changing background
+        #changing the play_state stored world
         if self.frames == 150:
             State.sprites.empty()
             self.play_state.new_world()
@@ -44,7 +44,7 @@ class State():
         if self.frames > 300:
             self.next_state = "play"
 
-        self.play_state.player.invincibility_counter = 10
+        self.play_state.player.invincibility_counter = 60
 
         self.play_state.update()
 

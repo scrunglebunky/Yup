@@ -1,7 +1,6 @@
 {
-    "NAME": "./images/characters/img/hack_D",
-    "ANIM": "hack_D_anim.json",
-    "PATH": "./hack_D/",
+    "NAME": "./images/characters/img/warning",
+    "ANIM": "warning_anim.json",
     "SHEET_SIZE": [
         200,
         50
@@ -15,10 +14,11 @@
         4
     ],
     "colorkey": [
-        128,
-        255,
-        255
+        0,
+        0,
+        0
     ],
     "scale": 1.0,
-    "anim": {}
+    "anim": {
+    }
 }

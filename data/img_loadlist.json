@@ -1,6 +1,6 @@
 
 {
-    "./images/":["arrow.png"],
+    "./images/":[],
     "./images/characters/":[],
     "./images/ui/":[
         "placeholder.bmp",
@@ -9,10 +9,13 @@
         "config_menu.png","on.png","off.png","paused.png","pauseborder.png",
         "high_scores.png","hiscore.png","hiscore_name.png",
         "gameover.png","gameover_score.png","gameover_level.png","gameover_rank.png","gameover_return.png",
-        "levelcomplete.png","demo.png"],
+        "levelcomplete.png","demo.png",
+        "arrow.png","warn_temp.png"],
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
-        "home.png","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufo.png","ship.png"],
+        "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufo.png","ship.png",
+        "hack_form.png",
+        "happy_floor.png","nope_floor.png","water_floor.png"],
     "resize":[
         ["config_menu.png",[400,150]],
         ["logo.png",[200,150]],

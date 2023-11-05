@@ -7,6 +7,11 @@
     "bg_size":[600,800],
     "bg_speed":[0,0],
     
+    "formation_img":null,
+    "floor_img":null,
+    "floor_size":[600,300],
+    "floor_move":[0,0.1],
+    
     "levels":3,
 
     "char_distance_x":35, 
@@ -78,7 +83,7 @@
     "boss_name":"ufo",
 
 
-    "events":{
-        "0":[false,["level",2],"print('hello world!')"]
-    }
+    "events":[
+        [false,["level",2],"print('hello world!')"]
+    ]
 }

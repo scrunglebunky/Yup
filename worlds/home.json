@@ -2,7 +2,7 @@
     "world_name":"HOME PLANET",
     "ui_type":"default",
     "song":"cabbage.mp3",
-    "bg":"home.png",
+    "bg":"home.bmp",
 
     "levels":3,
 

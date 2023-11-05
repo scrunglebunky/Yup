@@ -4,6 +4,7 @@ import pygame,anim,options
 #06/23/2023 - WHAT IS A BACKGROUND
 # The background is a class that stores an image and a position
 # This may be a little overkill for an entire class, but it works for organization purposes in my opinion
+
 class Background():
     def __init__(self,img:str,resize:list,speed:list,border_size:tuple=pygame.display.play_dimensions,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
@@ -73,3 +74,19 @@ class Background():
              window.blit( 
                 self.image,blit
                 )
+
+
+
+class Floor():
+    def __init__(self,image:str,player:pygame.sprite.Sprite,window:pygame.Surface,move:list=(0,0),scale:tuple=None,):
+        self.image = anim.all_loaded_images[image] if scale is None else pygame.transform.scale(anim.all_loaded_images[image],scale)
+        self.rect = self.image.get_rect()
+        self.centerx = (window.get_width()//2)
+        self.centery = window.get_height()
+        self.move = move
+        self.player=player
+
+    def draw(self,surf:pygame.Surface) -> None:
+        self.rect.centerx = self.centerx + (self.centerx-self.player.rect.x)*self.move[0] #stays centered
+        self.rect.centery = self.centery - (self.player.rect.centery - self.player.bar[1])*self.move[1] #moves with the player's y-velocity
+        surf.blit(self.image,self.rect)

@@ -11,19 +11,21 @@ class State():
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
             3:pygame.sprite.Group(), #BULLET SPRITES
+            4:pygame.sprite.Group(), #UI SPRITES
         }
     demo_sprites = { #sprites exclusively for the demo state
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with characters the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
             3:pygame.sprite.Group(), #BULLET SPRITES
+            4:pygame.sprite.Group(), #UI SPRITES
         }
 
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 5,
-                 level:int = 99999,
+                 world:int = 0,
+                 level:int = 0,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -64,6 +66,7 @@ class State():
         self.level = level #the total amount of levels passed, usually used for intensities or score
         self.level_in_world = level_in_world #the amount of levels completed in the world currently 
         self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
+
         #updating based on intensity
         if self.world_data["dynamic_intensity"]:
             levels.update_intensities(self.level,self.world_data)
@@ -80,7 +83,8 @@ class State():
 
         #06/03/2023 - Loading in the background
         self.background = backgrounds.Background(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
-
+        #also loading in the floor if it exists
+        self.floor = backgrounds.Floor(image=self.world_data['floor_img'],player=self.player,window=self.window,move=self.world_data['floor_move'],scale=self.world_data['floor_size']) if self.world_data['floor_img'] is not None else None
 
 
         #relating to advance sprite
@@ -102,9 +106,12 @@ class State():
 
         #Updating sprites
         self.background.update()
-        self.background.draw(self.window)
+        self.background.draw(self.window) #displaying the background  
+        if self.floor is not None: self.floor.draw(self.window)
+        self.formation.draw_img(window=self.window) #displaying a special formation image if necessary
         (self.sprites if not self.is_demo else self.demo_sprites)[0].update()
         (self.sprites if not self.is_demo else self.demo_sprites)[0].draw(self.window)
+        (self.sprites if not self.is_demo else self.demo_sprites)[4].draw(self.window)
         self.formation.update()
         #DEBUG PURPOSES ONLY - REMOVE AFTER USE
         # for sprite in State.sprites[0]:pygame.draw.rect(self.window, 'red', sprite.rect, width=1)
@@ -168,7 +175,8 @@ class State():
             levels.update_intensities(self.level,self.world_data)
         #changing bg
         self.background.change(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
-
+        #changing floor
+        self.floor = backgrounds.Floor(image=self.world_data['floor_img'],player=self.player,window=self.window,move=self.world_data['floor_move'],scale=self.world_data['floor_size']) if self.world_data['floor_img'] is not None else None
 
 
     def event_handler(self,event):

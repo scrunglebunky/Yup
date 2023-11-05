@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 11/01/23: added WARNING SIGNS for enemies to use to notify the player where they're going to go
 - 10/29/23: added new bullets, all spawning patterns exist in game, all enemies have skins, unique entrance patterns per world
 - 10/20/23: added a bunch more spawning patterns, and fixed some more difficulty scaling issues
 - 10/20/23: added unique spawn patterns for the home world, somehow added a new bug in gameover, plans to optimize the vectors
@@ -65,26 +66,24 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
-- NOTE - in the AQUA world - the jellyfish special D type will only be able to be killed by jumping on him. he checks this through a special check run through jellyfish's on_collide function - they will have a special idle state where they camp below the formation and do nothing else - in order to kill the other ones, you either have to jump on them at the start, or wait to kill them when they attack later - due to this, the aqua formation will not move down
-- [ ] Re-orderable spawn character orders (instead of in the order they are first spawned)
-- [ ] Store all movement values between points immediately so repeated calculations aren't needed - using movingpoints
+- [] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
+- [] Add IntroEvent for levels: new text after each level is complete, between levels not worlds  -- fleshes out levels and makes them feel longedr
+- [] Add events usable in levels called IntroEvent, which pulls from a new file to be created
+- [] Add a floor that moves with the player's y-velocity
+- [FIXED] THERE IS A BUG WITH THE B-CLASS ENEMIES WHERE THEY WILL SPAWN UNUSED WARNINGS IF YOU KILL THEM WHILE THEY ARE ATTACKING, FIRST FRAME [I THINK I FIXED IT]
+- [x] in the AQUA world - the jellyfish special D type will only be able to be killed by jumping on him. he checks this through a special check run through jellyfish's on_collide function they will have a special idle state where they camp below the formation and do nothing else - in order to kill the other ones, you either have to jump on them at the start, or wait to kill them when they attack later - due to this, the aqua formation will not move down
+- [x] Re-orderable spawn character orders (instead of in the order they are first spawned)
+- [x] Store all movement values between points immediately so repeated calculations aren't needed - using movingpoints
 - [ ] Executable events, only use of exec() function
-- [ ] Unique formations per world
+- [x] Unique formations per world
 - [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
-- [ ] Enemy replacements, specifically for D and E but it'll work with anything
+- [x] Enemy replacements, specifically for D and E but it'll work with anything
 - [x] unique entrances per world
 - [x] Fix gameover bug
 - [ ] Add bonuses after completing a world
 - [x] Add enemy skins per world
 - [ ] Add backgrounds per world
-- [ ][ ][ ][ ][ ][ ] Program FINAL world
-- [x][x][ ] Program VAPOR world
-- [x][x][ ] Program HAPPY world
-- [x][ ][ ] Program AQUA world
-- [x][ ][ ] Program CODE world
-- [x][ ][ ] Program NOPE world
-- [x][ ][ ] Program HOME world
-- [ ][ ][ ] Add shooting during enemy entry states, based off of the difficulty value
+- [ ] Program FINAL world
 - [x] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
 - [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 
@@ -92,7 +91,6 @@
 - [x] sending characters into attack mode
 - [x] starting a new level when the formation is empty
 - [x] figure out what makes bg lag so bad
-- [ ] actually implement background changes in speed
 - [x] Contain more background info, like speeds, changes in speed, 
 - [x] Loading all JSON files
 - [x] Loading a "world order" file in the levels folder (ignored by the level loader) that says what order the files go into 

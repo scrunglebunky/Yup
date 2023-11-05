@@ -3,6 +3,8 @@
     "ui_type":"default",
     "song":"cabbage.mp3",
     "bg":"hack.png",
+    "formation_img":"hack_form.png",
+
 
     "char_distance_x":30, 
     "char_distance_y":40,
