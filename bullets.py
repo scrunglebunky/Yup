@@ -114,7 +114,7 @@ class TripleBullet(Bullet):
     ...
 
 
-class Item(pygame.sprite.Sptite):
+class Item(pygame.sprite.Sprite):
     def __init__(self):...
 
 LOADED = [
