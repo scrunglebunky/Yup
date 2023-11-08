@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio,tools
+import pygame,os,player,text,random,characters,levels,json,formation,anim,backgrounds,audio,tools,events
 from emblems import Emblem as Em
 #05/28/2023 - STATE IMPLEMENTATION
 # instead of everything being handled in main, states handle every specific thing
@@ -67,6 +67,11 @@ class State():
         self.level_in_world = level_in_world #the amount of levels completed in the world currently 
         self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
 
+
+        #event data - an event that plays over all else.
+        self.event = events.NewLevelEvent(level=self.level,window=self.window) if not self.is_demo else None
+        
+
         #updating based on intensity
         if self.world_data["dynamic_intensity"]:
             levels.update_intensities(self.level,self.world_data)
@@ -103,29 +108,40 @@ class State():
 
     
     def update(self, draw=True):
+        #Drawing previous gameplay frame to the window -- don't ask why, it just does. 
+        if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
-        #Updating sprites
+
+        #Updating backgrounds - drawing to window
         self.background.update()
-        self.background.draw(self.window) #displaying the background  
+        self.background.draw(self.window)
         if self.floor is not None: self.floor.draw(self.window)
         self.formation.draw_img(window=self.window) #displaying a special formation image if necessary
+
+
+        #updating all individual sprites, with the fourth group having special priority.
         (self.sprites if not self.is_demo else self.demo_sprites)[0].update()
         (self.sprites if not self.is_demo else self.demo_sprites)[0].draw(self.window)
         (self.sprites if not self.is_demo else self.demo_sprites)[4].draw(self.window)
+
+        #ending function early if event playing
+        if self.event is not None and self.event.playing:
+            self.event.update()
+            return
+
+
+        #only updating the formation after checking for events, to prevent the level starting beforehand.
         self.formation.update()
-        #DEBUG PURPOSES ONLY - REMOVE AFTER USE
-        # for sprite in State.sprites[0]:pygame.draw.rect(self.window, 'red', sprite.rect, width=1)
 
         #print debug positions
         for pos in self.debug[0]:
             self.window.blit(pygame.transform.scale(anim.all_loaded_images["placeholder.bmp"],(10,10)),pos)
 
-        #06/23/2023 - Drawing gameplay window to full window
-        if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        
 
         #ending function early if advancing
         if self.in_advance: return 
-
+        
         #calling collision
         self.collision()
         
@@ -143,12 +159,15 @@ class State():
                     levels.update_intensities(self.level,self.world_data)
                 self.formation.empty()
                 #checking to start the advance state
+            #restarting the formation
             self.formation.__init__(
                 world_data = self.world_data,
                 level=self.level,
                 level_in_world=self.level_in_world, 
                 sprites=(self.sprites if not self.is_demo else self.demo_sprites),
                 player=self.player,window=self.window)
+            #restarting the new level event
+            if self.event is not None: self.event.__init__(window=self.window,level=self.level)
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
             self.next_state = "gameover"

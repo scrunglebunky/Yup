@@ -199,7 +199,7 @@ class Player(pygame.sprite.Sprite):
 
     def bounce(self):
         #make the player bounce
-        self.movement[0]=-7.5
+        self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
         self.movement[3]=True
         self.change_anim("jump")
         

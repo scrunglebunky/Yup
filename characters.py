@@ -1,4 +1,5 @@
 import pygame,anim,random,score,bullets,tools
+from audio import play_sound as ps
 from emblems import Emblem as Em
 from math import sin,cos,atan2,degrees
 from player import Player
@@ -17,7 +18,7 @@ class Template(pygame.sprite.Sprite):
         # entrance_shoot:list=[],
         # sprites:pygame.sprite.Group = None,
         # player:pygame.sprite.Sprite = None,
-        # trip:list=(999,)
+        # trip:list=(999 ,)
         kwargs:dict):
         pygame.sprite.Sprite.__init__(self)
         self.idle={ #information about the idle state
@@ -43,15 +44,15 @@ class Template(pygame.sprite.Sprite):
             "return":self.state_return,
         }
         self.atk_basic = {
-            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<9 else 2),
+            "shoot_chance":(10 - self.info['difficulty'] if self.info['difficulty']<=9 else 1),
             "start_shoot_chance":(5 - self.info['difficulty'] if self.info['difficulty']<4 else 1),
             "trip":kwargs['trip'],
             }
         
         
         #image values, including spritesheets
-        self.spritesheet = anim.Spritesheet(kwargs['skin'],current_anim='idle') if kwargs['skin'] is not None else None
-        self.image = Template.image if self.spritesheet is None else self.spritesheet.image
+        self.autoimage = anim.AutoImage(name = kwargs['skin'], current_anim = 'idle')
+        self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center = self.idle["full"]
 
@@ -74,13 +75,8 @@ class Template(pygame.sprite.Sprite):
     def update(self): #this should be run the same no matter what
         
 
-        #updating spritesheet
-        if type(self.spritesheet) == anim.Spritesheet:
-            self.spritesheet.update()
-            self.image = self.spritesheet.image
-            self.mask = self.spritesheet.mask
-        else:
-            self.image = Template.image
+        self.autoimage.update()
+        self.image = self.autoimage.image
         
 
         #updating timers
@@ -105,7 +101,7 @@ class Template(pygame.sprite.Sprite):
                 self.info['state'] = 'idle'
             #shooting based off the follow values
             if self.follow.trip and self.follow.cur_target in self.atk_basic["trip"]:
-                if random.randint(0,self.atk_basic['start_shoot_chance'])==self.atk_basic['start_shoot_chance']:
+                if random.randint(0,5)>self.atk_basic['start_shoot_chance']:
                     self.shoot(type="point",info=(self.rect.center,self.player.rect.center))
                 self.follow.trip = False
     def state_idle(self,start=False):
@@ -130,8 +126,7 @@ class Template(pygame.sprite.Sprite):
 
     #############SPECIAL###############
     def change_anim(self,animation):
-        if type(self.spritesheet) == anim.Spritesheet:
-            self.spritesheet.change_anim(animation)
+        self.autoimage.change_anim(anim=animation)
 
     def change_state(self,state):
         self.timers['in_state'] = 0 
@@ -178,7 +173,7 @@ class Template(pygame.sprite.Sprite):
     def hurt(self):
         self.info['health'] -= 1
         self.change_anim("hurt")
-        self.sprites[0].add(Em(im=None,coord=self.rect.center,isCenter=True,animated=True,animation_name="die",animation_resize=None,animation_killonloop=True))
+        self.sprites[0].add(Em(im='die',coord=self.rect.center,isCenter=True,animation_killonloop=True))
 
     def formationUpdate(self,
         new_pos:tuple #location of the formation, not including offset
@@ -254,7 +249,7 @@ class A(Template): #geurilla warfare
         #checking to turn around to next value
         if abs(self.rect.center[0]-self.atk['turn_vals'][self.atk['turn_cur']]) < self.atk['terminal'] * 2:
             # print("FINISHED:",self.atk['turn_cur'],'OF',len(self.atk['turn_vals']),self.atk['turn_vals'][self.atk['turn_cur']])
-
+            ps("rizz.mp3")
             #updating values
             self.atk['turn_cur'] += 1
             self.atk['direct'] = not self.atk['direct']
@@ -341,11 +336,14 @@ class B(Template): #loop-de-loop
             self.atk['index'] += 1
             #updating warnings
             self.update_warnings()
+            #boing sound
+            ps("boing.mp3")
             #finishing movement
             if self.atk['index'] >= len(self.atk['points']):
                 self.follow=None
                 self.atk['index'] = 0
                 self.change_state('return')
+                
             #updating if not finished
             else: 
                 self.follow = tools.MovingPoint(self.rect.center,self.atk['points'][self.atk['index']],speed=self.atk['speed'],check_finished=True,ignore_speed=True)
@@ -395,11 +393,9 @@ class B(Template): #loop-de-loop
         #makes the current warning flash aggressively, and the next warning flash faster
         if self.atk['index'] < len(self.atk['warnings']):
             self.atk['warnings'][self.atk['index']].update_intensity(60)
-            # print(self.atk['warnings'][self.atk['index']].spritesheet.all_anim['idle']['FPS'])
 
         if self.atk['index']+1 < len(self.atk['warnings']):
             self.atk['warnings'][self.atk['index']+1].update_intensity(15)
-            # print(self.atk['warnings'][self.atk['index']].spritesheet.all_anim['idle']['FPS'])
             
 
 
@@ -512,7 +508,7 @@ class Jelle(Template): #special jellyfish
     def update(self):
         Template.update(self)
         #keeping the sprite mask locked so it doesn't bounce and accidentally kill the player
-        self.mask = self.spritesheet.all_loaded_spritesheets[self.spritesheet.name][2][0]
+        self.mask = self.autoimage.spritesheet.all_loaded_spritesheets[self.autoimage.spritesheet.name][2][0]
 
     def state_idle(self,start=False):
         self.rect.center = self.idle['full']
@@ -554,9 +550,13 @@ class Jelle(Template): #special jellyfish
                 collided.hurt()
                 #cutesy animation
                 self.change_anim("attack")
+                #playing sound
+                ps('zap.mp3',channel=30)
         elif collide_type == 3:
             collided.hurt()
             self.change_anim("attack")
+            #playing sound
+            ps('zap.mp3',channel=30)
 
 
 
@@ -589,6 +589,7 @@ class Sammich(Template):
         elif self.timers['in_state'] < 120:
             self.rect.center = self.rect.center
         #lunging at player
+        elif self.timers['in_state'] == 150: ps("rizz.mp3")
         elif self.timers['in_state'] < 150:
             self.atk['warning'].kill()
             self.rect.x = self.rect.x - self.atk['momentum'] if self.atk['side'] == 1 else self.rect.x + self.atk['momentum'] if self.atk['side'] == 0 else self.rect.x
@@ -724,10 +725,16 @@ class Yippee(Template):
                     self.sprites[0].add(confetti)
                     self.sprites[2].add(confetti)
                 self.atk['points'].pop(0)
+                ps('yippee.mp3',channel=random.randint(25,28))
                 #animation
                 self.change_anim('attack')
         else:
             self.change_state('return')
+
+    def kill(self,reason=None):
+        if reason == 'health': ps('waah.mp3')
+        Template.kill(self,reason=reason)
+        
 
 
 
@@ -754,7 +761,7 @@ class Lumen(Template):
             #locking on, moving based on where you are
             self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle']))
-            self.atk['warning'].update_pos(self.player.rect.center)
+            if self.atk['warning'] is not None: self.atk['warning'].update_pos(self.player.rect.center)
         elif self.timers['in_state'] < 180:
             #waiting for a second to make it fair
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle'])) 
@@ -763,7 +770,7 @@ class Lumen(Template):
             self.sprites[0].add(laser)
             self.sprites[2].add(laser)
         else:
-            self.atk['warning'].kill()
+            if self.atk['warning'] is not None: self.atk['warning'].kill()
             self.change_state('idle')
         #no matter what, maintaining positioning
         self.rect.center = self.idle['full']
@@ -888,9 +895,9 @@ class Warning(pygame.sprite.Sprite):
     def __init__(self,pos,resize=None,arrow_pos=None):
         pygame.sprite.Sprite.__init__(self)
         #spritesheet info
-        self.spritesheet = anim.Spritesheet('warning',current_anim='idle')
-        self.spritesheet.all_anim['idle'] = self.spritesheet.all_anim['idle'].copy()
-        self.image = self.spritesheet.image
+        self.autoimage = anim.AutoImage('warning',current_anim='idle')
+        self.autoimage.spritesheet.all_anim['idle'] = self.autoimage.spritesheet.all_anim['idle'].copy()
+        self.image = self.autoimage.image
         self.arrow = Warning.arrow.copy()
         self.rect = self.image.get_rect()
         self.rect.center = pos 
@@ -898,15 +905,14 @@ class Warning(pygame.sprite.Sprite):
         self.arrow_rect = self.arrow.get_rect()
         self.arrow_rect.center = self.rect.center
     def update(self):
-        self.spritesheet.update()
-        self.image = self.spritesheet.image
+        self.autoimage.update()
+        self.image = self.autoimage.image
     def update_pos(self,pos):
         self.rect.center = pos
     def update_intensity(self,fps:int):
-        self.spritesheet.all_anim['idle']['FPS'] = 60/fps
-        # print('changed',fps,self.spritesheet.all_anim['idle']['FPS'])
+        self.autoimage.spritesheet.all_anim['idle']['FPS'] = 60/fps
         self.update()
-        # print('after',fps,self.spritesheet.all_anim['idle']['FPS'])
+        # print('after',fps,self.spriteshet.all_anim['idle']['FPS'])
 
     
 

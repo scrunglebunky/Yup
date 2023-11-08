@@ -7,6 +7,8 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 11/07/23: little jingle that happens when you start a new level, sounds begin to play now (LOUD, BE CAREFUL), and more plans down the line
+- 11/06/23: added a moving floor, fixed warning signs, created AutoImage so all values can potentially be animated, explosion effect when shot 
 - 11/01/23: added WARNING SIGNS for enemies to use to notify the player where they're going to go
 - 10/29/23: added new bullets, all spawning patterns exist in game, all enemies have skins, unique entrance patterns per world
 - 10/20/23: added a bunch more spawning patterns, and fixed some more difficulty scaling issues
@@ -66,10 +68,12 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
-- [] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
-- [] Add IntroEvent for levels: new text after each level is complete, between levels not worlds  -- fleshes out levels and makes them feel longedr
-- [] Add events usable in levels called IntroEvent, which pulls from a new file to be created
-- [] Add a floor that moves with the player's y-velocity
+- [ ] Add varying level intros that are weird or do dumb things
+- [ ] Make the advance state create a little menu -- very similar to the game over state
+- [NEVERMIND] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
+- [x] Add IntroEvent for levels: new text after each level is complete, between levels not worlds  -- fleshes out levels and makes them feel longedr
+- [NEVERMIND] Add events usable in levels called IntroEvent, which pulls from a new file to be created
+- [x] Add a floor that moves with the player's y-velocity
 - [FIXED] THERE IS A BUG WITH THE B-CLASS ENEMIES WHERE THEY WILL SPAWN UNUSED WARNINGS IF YOU KILL THEM WHILE THEY ARE ATTACKING, FIRST FRAME [I THINK I FIXED IT]
 - [x] in the AQUA world - the jellyfish special D type will only be able to be killed by jumping on him. he checks this through a special check run through jellyfish's on_collide function they will have a special idle state where they camp below the formation and do nothing else - in order to kill the other ones, you either have to jump on them at the start, or wait to kill them when they attack later - due to this, the aqua formation will not move down
 - [x] Re-orderable spawn character orders (instead of in the order they are first spawned)

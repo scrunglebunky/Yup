@@ -42,27 +42,27 @@ class Border():
         Border.sprites.empty()
         Border.emblems = [
             Em(
-                im = img["logo.png"],
+                im = "logo.png",
                 coord = (
                     pygame.display.dimensions[0] - ( pygame.display.dimensions[0] - (pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0])),
                     pygame.display.dimensions[1]*0.15 - (anim.all_loaded_images['logo.png'].get_height()/2))), #LOGO
             Em(
-                im=img["score.png"],
+                im="score.png",
                 coord = (
                     pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0] + 25,
                     pygame.display.dimensions[1]*0.4)), #SCORE
             Em(
-                im=img["debug.png"],
+                im="debug.png",
                 coord=(
                     pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0] + 25,
                     pygame.display.dimensions[1]*0.53)), #DEBUG
             Em(
-                im=img["lives.png"],
+                im="lives.png",
                 coord=(
                     pygame.display.dimensions[0]*0.016,
                     pygame.display.dimensions[1] - anim.all_loaded_images['lives.png'].get_height() - 10)), #LIVES
             Em(
-                im=img["weapon.png"],
+                im="weapon.png",
                 coord=(
                     pygame.display.dimensions[0] - anim.all_loaded_images['weapon.png'].get_width() - 10,
                     pygame.display.dimensions[1] - anim.all_loaded_images['weapon.png'].get_height() - 10,)), #WEAPON

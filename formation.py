@@ -89,8 +89,7 @@ class Formation():
         #     for column in range(len(self.spawn_list[row])):
         #         print("|",(row,column),self.spawn_offsets[row][column],end='')
         #     print('\n')
-            
-            
+               
         # for k,v in self.spawn_organized.items():
         #     print(k,v)
         
@@ -99,18 +98,17 @@ class Formation():
         self.spawning_key = 0  #the key of spawn_organized
         self.spawning_value = 0 #the index of spawn_organized
 
-
         #########################################
 
         #figuring out sizes and positioning based on spawn_list size
         self.pos[0] = (pygame.display.play_dimensions[0]/2) - ((len(self.spawn_list[0])*self.world_data["char_distance_x"])/2)
 
         #difficulty calculations
-        self.difficulty = self.level//3
+        self.difficulty = self.level//2
         self.attack={
             #throwdown amount = how many characters are thrown down in an attack stance #goes up once every 10 levels
-            "amount":(self.difficulty+1) if (self.difficulty < 14) else 15,
-            "max":3+(self.difficulty//2),
+            "amount":((self.difficulty//3)+1) if (self.difficulty <= 6) else 3,
+            "max":3+(self.difficulty*2),
         }
         self.timer['atk'] = (100 - (self.difficulty*4)) if self.difficulty < 25 else 1
         #timer["atk"] = how often characters are thrown down to attack #goes down a frame every level
@@ -258,13 +256,13 @@ class Formation():
     
 
     def make_attack(self,idle_count:list):
-        for i in range(self.difficulty):
+        for i in range(self.attack['amount']):
             index = random.randint(0,(len(idle_count)-1))
             choice = idle_count[index]
             if self.spawned_list[choice].info['state'] != 'attack':
                 self.spawned_list[choice].change_state('attack')
             idle_count.pop(index)
-            if len(idle_count) <= 0:
+            if len(idle_count) < 1: 
                 break
         return
 

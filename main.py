@@ -31,7 +31,7 @@ tools.debug = True
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title"
+state = "play"
 states["play"] = state_play.State(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = state_pause.State(window=window,play_state=states["play"])
@@ -39,7 +39,7 @@ states["title"] = state_title.State(window=window,border=border)
 states["gameover"] = state_gameover.State(window=window,play_state=states["play"])
 states["advance"] = state_advance.State(window=window,play_state=states["play"])
 
-#07/23/2023 - SWITCHING STATES
+#07/23/2023 - SWITCHING STATExzS
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
 # States now have a method called "on_start" that will remedy this, which will be called in a function here
 # All states need to have a value called "next state", too, which will make it able to tell if the state is finished or not
@@ -57,6 +57,9 @@ def state_switch(
         cur_state.on_end(); cur_state.next_state = None
         cur_state = states[state[0].lower()]
         cur_state.on_start(return_state = state[1])
+    else:
+        global run
+        run = False
     return cur_state,state
     
 

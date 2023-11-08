@@ -12,7 +12,7 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    max = 3
+    max = 4
 
     def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True,**kwargs):
         
@@ -57,7 +57,7 @@ class Bullet(pygame.sprite.Sprite):
     def kill(self):
         pygame.sprite.Sprite.kill(self)
         Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
-        
+
 class HurtBullet(pygame.sprite.Sprite):
     #DEFAULT IMAGE - rendered by pygame draw function
     image = pygame.Surface((10, 10), pygame.SRCALPHA)
@@ -110,8 +110,12 @@ class HurtBullet(pygame.sprite.Sprite):
         self.health -= 1
 
 
+class TripleBullet(Bullet):
+    ...
 
 
+class Item(pygame.sprite.Sptite):
+    def __init__(self):...
 
 LOADED = [
     Bullet,

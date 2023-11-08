@@ -191,7 +191,7 @@ class Spritesheet():
     
     def change_anim(self,new:str,overwrite:bool=False):
         #checking for if the animation even exists
-        if self.current_anim not in self.all_anim.keys():return
+        if new not in self.all_anim.keys():return
         #checking for if the animation is "interruptable" - for the record, you are able to add "interruptable" to an animation and mark it False to make no other animation take priority over it
         if "interrupt" in self.all_anim[self.current_anim].keys() and not self.all_anim[self.current_anim]["interrupt"] and not overwrite:return
         #resets all frames, changes current animation
@@ -199,3 +199,46 @@ class Spritesheet():
         self.current_anim_frame = 0
         self.current_anim_frame_len = 0
         self.current_anim_loop = 0 
+
+
+
+
+#AUTOIMAGE CLASS
+# A LOT of entity classes in this game have to manually check for animations and such, or if it's just using a static image
+# However, this class is going to streamline it, by doing all the checking for spritesheets on its own
+class AutoImage():
+    def __init__(self,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None):
+        self.name = name
+        self.spritesheet = None
+        self.image = None
+        #figuring out what kind of asset to use
+        self.type = AutoImage.fetch_info(name=self.name)
+        if self.type == 'img':
+            self.image = all_loaded_images[self.name]
+        elif self.type == 'anim':
+            self.spritesheet = Spritesheet(name=self.name,current_anim=current_anim)
+            self.image = self.spritesheet.image
+        elif force_surf is not None:
+            self.image = force_surf
+        else:
+            self.image = all_loaded_images['placeholder.bmp']
+    
+    def update(self):
+        if self.spritesheet is not None: 
+            self.spritesheet.update()
+            self.image = self.spritesheet.image
+
+    def change_anim(self,anim:str,overwrite:bool=False):
+        if self.spritesheet is not None:
+            self.spritesheet.change_anim(anim,overwrite=overwrite)
+
+
+    @staticmethod
+    def fetch_info(name:str = "placeholder.bmp") -> str:
+        #checking to see if the name is an image
+        if name in all_loaded_images.keys():
+            return 'img'
+        elif name in all_loaded_spritesheets.keys():
+            return 'anim'
+        else:
+            return 'err'

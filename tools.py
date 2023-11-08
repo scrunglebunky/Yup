@@ -1,20 +1,5 @@
 from math import sqrt,atan2,sin,cos,radians
 
-"""USE IT BEFORE YOU LOSE IT!
-from math import sin, cos, atan2
-
-target_x, target_y = ...
-player_x, player_y = ...
-
-# Get the angle in radians between target and player coords
-angle = atan2(target_y - player_y, target_x - player_x)
-
-# Move the player in the direction X pixels
-player_x += cos(angle) * X
-player_y += sin(angle) * X
-# TO USE JUST AN ANGLE, math.radians()
-"""
-
 
 #a moving point class that calculates the distances and how much to move
 class MovingPoint():
@@ -62,6 +47,8 @@ class MovingPoint():
                 ((pointB[0]-pointA[0])**2) + 
                 ((pointB[1]-pointA[1])**2)
             ) 
+
+
 
 class MovingPoints(MovingPoint):
     def __init__(self,pos:tuple,points:list,speed:int=1,final_pos:list=None):

@@ -29,7 +29,7 @@ class State():
     def update(self):
         self.frames += 1
         #adding some emblems for now, will update to be better later
-        if self.frames==1: State.sprites.add(Em(im=img["levelcomplete.png"],coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
+        if self.frames==1: State.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
         #speeding everything up
         if self.frames < 150:
             for i in range(2):
@@ -39,7 +39,9 @@ class State():
         if self.frames == 150:
             State.sprites.empty()
             self.play_state.new_world()
-            self.kaboom(coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]/2+pygame.display.play_pos[1]),animation_resize=(500,500))
+            self.kaboom(
+                coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]/2+pygame.display.play_pos[1]),
+                animation_resize=(500,500))
         #ending
         if self.frames > 300:
             self.next_state = "play"
@@ -59,10 +61,7 @@ class State():
     def kaboom(self,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
             (State.sprites if not play else self.play_state.sprites[0]).add(
             Em(
-                im=None,
+                im='kaboom',
                 coord=coord,
                 isCenter=True,
-                animated=True,
-                animation_resize=animation_resize, 
-                animation_killonloop=True,
                 ))

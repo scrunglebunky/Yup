@@ -5,10 +5,17 @@
         "gameover.mp3"
     ],
     "sounds":[
-        "honk.wav",
+        "beepboop.mp3",
+        "boing.mp3",
+        "boom_small.mp3",
         "ouch.mp3",
-        "quack.mp3",
-        "shoot.mp3",
-        "death.mp3"
+        "pop.mp3",
+        "rizz.mp3",
+        "scream.mp3",
+        "waah.mp3",
+        "yeah.mp3",
+        "yippee.mp3",
+        "zap.mp3",
+        "tada.mp3"
     ]
 }

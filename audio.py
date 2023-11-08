@@ -1,10 +1,15 @@
 import pygame,json
-pygame.mixer.init()
+DISABLED = False
+try:
+    pygame.mixer.init()
+    pygame.mixer.set_num_channels(32)
+except:
+    DISABLED = True
 
 songs = []
 sounds = {}
 
-DISABLED = False
+
 
 type_channels = {}
 PATH_songs:str = "./songs/"
@@ -37,7 +42,7 @@ def load_all_songs():
             return
 
 def play_sound(name,category:str = None,channel:int = None):
-    if not DISABLED:
+    if not DISABLED and name in sounds.keys():
         if category in type_channels.keys():
             pygame.mixer.Channel(type_channels[category]).play(sounds[name])
         elif type(channel) == int:

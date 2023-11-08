@@ -49,7 +49,7 @@ class State():
 
         #high score information
         self.name=""
-        self.scoregraphic=Em(im=score.generate_graphic(score.score,""),coord=(0,0),isCenter=True)
+        self.scoregraphic=Em(force_surf=score.generate_graphic(score.score,""),coord=(0,0),isCenter=True)
 
     def on_start(self):
         #kabooming the player 
@@ -61,7 +61,9 @@ class State():
 
 
 
-    def on_end(self):...
+    def on_end(self):
+        pygame.mixer.music.stop()
+
     def update(self):
         self.events_func[self.state]() #running each function
 
@@ -135,25 +137,22 @@ class State():
 
         #spawning in the game over logo
         if self.timer == 400:
-            State.sprites.add(Em(im=img["gameover.png"],coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True))
+            State.sprites.add(Em(im="gameover.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True))
         #icons
         if self.timer == 500:
-            State.sprites.add(Em(im=img["gameover_score.png"],coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.35),isCenter=True))
+            State.sprites.add(Em(im="gameover_score.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.35),isCenter=True))
         if self.timer == 650:
-            State.sprites.add(Em(im=img["gameover_level.png"],coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
+            State.sprites.add(Em(im="gameover_level.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
         if self.timer == 800:
-            State.sprites.add(Em(im=img["gameover_rank.png"],coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
+            State.sprites.add(Em(im="gameover_rank.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
         #numbers
         if self.timer == 530:
-            State.sprites.add(Em(im=None,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.32),isCenter=False,
-                numerical=True,number=score.score,number_fontsize=40))
+            State.sprites.add(Em(force_surf = text.load_text(text=str(score.score),size=40) ,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.32),isCenter=False))
         if self.timer == 680:
-            State.sprites.add(Em(im=None,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.42),isCenter=False,
-                numerical=True,number=self.play_state.level,number_fontsize=40))
+            State.sprites.add(Em(force_surf = text.load_text(text=str(self.play_state.level),size=40),coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.42),isCenter=False,))
         #rank
         if self.timer == 830:
-            State.sprites.add(Em(im=None,coord=(pygame.display.rect.center[0],pygame.display.rect.height*0.90),isCenter=True,
-                numerical=True,number=self.generate_rank(),number_fontsize=40))
+            State.sprites.add(Em(force_surf = text.load_text(text=self.generate_rank(),size=40),coord=(pygame.display.rect.center[0],pygame.display.rect.height*0.90),isCenter=True,))
         
         #either high score screen or telling game to kill itself
         if self.timer == 1000:
@@ -163,7 +162,7 @@ class State():
                 self.kaboom(coord=pygame.display.rect.center,animation_resize=(3000,3000))
                 return
             else:
-                sp = Em(im=img["gameover_return.png"],coord=(pygame.display.rect.width*0.75,pygame.display.rect.center[1]),isCenter=True)
+                sp = Em(im="gameover_return.png",coord=(pygame.display.rect.width*0.75,pygame.display.rect.center[1]),isCenter=True)
                 sp.pattern="sine"
                 State.sprites.add(sp)
                 self.exit_ok = True
@@ -181,18 +180,18 @@ class State():
             #speeding up bg
             self.background.speed=[-7,-7]
             #high score image 
-            sp = Em(im=img["hiscore.png"],coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True)
+            sp = Em(im="hiscore.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True)
             sp.pattern = "jagged";State.sprites.add(sp)
         if self.timer == 1260:
             #showing the high scores, showing yours, and telling you to input
             State.sprites.add(
-                Em(im=score.scoreboard,coord=(pygame.display.rect.width*0.75,pygame.display.rect.height*0.5),isCenter=True)
+                Em(force_surf=score.scoreboard,coord=(pygame.display.rect.width*0.75,pygame.display.rect.height*0.5),isCenter=True)
             )
             #scoregraphic
             State.sprites.add(self.scoregraphic)
             self.scoregraphic.change_pos(pos=(pygame.display.rect.width*0.25,pygame.display.rect.height*0.4),isCenter=True)
             #telling you
-            x = Em(im=img["hiscore_name.png"],coord=(pygame.display.rect.width*0.25,pygame.display.rect.height*0.5),isCenter=True) ; x.pattern = "sine"
+            x = Em(im="hiscore_name.png",coord=(pygame.display.rect.width*0.25,pygame.display.rect.height*0.5),isCenter=True) ; x.pattern = "sine"
             State.sprites.add(x)
         #stopping it from advancing if you don't enter your name in time
         if self.timer >= 1490 and self.timer < 1500: self.timer = 1300
@@ -205,7 +204,7 @@ class State():
             #updating the new scoreboard
             score.scores = score.add_score(score=score.score,name=self.name,scores=score.scores)
             score.scoreboard = score.generate_scoreboard()
-            State.sprites.add(Em(im=score.scoreboard,coord=pygame.display.rect.center,isCenter=True))
+            State.sprites.add(Em(force_surf=score.scoreboard,coord=pygame.display.rect.center,isCenter=True))
 
         if self.timer >= 1740:
             self.finish()
@@ -217,7 +216,7 @@ class State():
             if self.timer >= 1260:
                 if event.key == pygame.K_BACKSPACE:
                     self.hiscore_updatename(backspace=True)
-                elif event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN and self.timer > 1500:
                     self.timer = 1500 #finishing it all off
                 else:
                     self.hiscore_updatename(pygame.key.name(event.key))
@@ -272,11 +271,9 @@ class State():
     def kaboom(self,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
             (State.sprites if not play else self.play_state.sprites[0]).add(
             Em(
-                im=None,
+                im="kaboom",
                 coord=coord,
                 isCenter=True,
-                animated=True,
-                animation_resize=animation_resize, 
                 animation_killonloop=True,
                 ))
 

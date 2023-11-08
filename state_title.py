@@ -70,3 +70,5 @@ class State():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 self.next_state = "play"
+            if event.key == pygame.K_ESCAPE:
+                self.next_state = "quit"
