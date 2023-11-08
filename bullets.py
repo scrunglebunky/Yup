@@ -1,5 +1,6 @@
 #Program by Andrew Church 5/26/23
 import pygame,audio,tools
+from anim import AutoImage as AImg
 
 # 5/26/23 - This is the default bullet.
 # It is rather similar to the previous version's bullet, but that's because of how simple it is
@@ -14,11 +15,12 @@ class Bullet(pygame.sprite.Sprite):
     count = 0
     max = 4
 
-    def __init__(self,pos:tuple=(0,0),sound:str="shoot.mp3",speed:int=15,is_default:bool = True,**kwargs):
+    def __init__(self,pos:tuple=(0,0),speed:int=15,is_default:bool = True,texture:str = None,**kwargs):
         
         pygame.sprite.Sprite.__init__(self)
         
-        self.image = Bullet.image
+        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image)
+        self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center=pos
         self.health = 1
@@ -35,11 +37,14 @@ class Bullet(pygame.sprite.Sprite):
                 self.kill_on_spawn = True
                 return
         
-        #06/24/2023 - playing sound
-        audio.play_sound(sound,category="bullet",)
         
 
     def update(self):
+        #updating anim
+        self.autoimage.update()
+        self.image = self.autoimage.image
+
+        #updating collision
         if not self.on_screen() or self.health <= 0 or self.kill_on_spawn:
             self.kill()
         self.rect.y -= self.speed
@@ -69,7 +74,7 @@ class HurtBullet(pygame.sprite.Sprite):
     count = 0
     max = 1000
 
-    def __init__(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)),image:pygame.Surface=None):
+    def __init__(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)),texture:str=None):
         #FOR AN ANGLE, the info is (pointa,angle)
         pygame.sprite.Sprite.__init__(self)
         
@@ -85,16 +90,15 @@ class HurtBullet(pygame.sprite.Sprite):
         self.health = 1
         
         #setting image
-        if image is not None:
-            self.image = pygame.transform.scale(image,(10,10))
-        else:
-            self.image = HurtBullet.image
+        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image)
+        self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center = self.move.position
         
     def update(self):
         self.move.update()
         self.rect.center = self.move.position
+        self.autoimage.update(); self.image = self.autoimage.image
         if not Bullet.on_screen(self) or self.health <= 0 or self.killonstart: 
             self.kill()
             HurtBullet.count = HurtBullet.count - 1 if HurtBullet.count > 0 else 0 

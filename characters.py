@@ -32,6 +32,7 @@ class Template(pygame.sprite.Sprite):
             "difficulty":kwargs['difficulty'],
             "state":"enter",
             "atk":False, #this is important -- it marks if the enemy can attack or not
+            'bullet_texture':kwargs['bullet_texture']
         }
         self.timers = { #counters to use to check how long something is there for
             "exist":0,
@@ -133,9 +134,10 @@ class Template(pygame.sprite.Sprite):
         self.info['state'] = state
         self.states[self.info['state']](start=True) #the start value initializes a variable that has to be started up first
 
-    def kill(self,reason=None) -> int:
+    def kill(self,reason=None,play_sound = True) -> int:
         if reason == "health":
             score.score += self.info["score"]
+            if play_sound: ps('dead.mp3',channel=0)
         pygame.sprite.Sprite.kill(self)
         self.info['dead'] = True
 
@@ -186,7 +188,7 @@ class Template(pygame.sprite.Sprite):
     def shoot(self,type:str="point",spd:int=7,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False) -> bullets.HurtBullet:
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
-            bullet = bullets.HurtBullet(type=type,spd=spd,info=info)
+            bullet = bullets.HurtBullet(type=type,spd=spd,info=info,texture=self.info['bullet_texture'])
             self.sprites[0].add(bullet)
             self.sprites[2].add(bullet)
         return bullet
@@ -733,7 +735,7 @@ class Yippee(Template):
 
     def kill(self,reason=None):
         if reason == 'health': ps('waah.mp3')
-        Template.kill(self,reason=reason)
+        Template.kill(self,reason=reason,play_sound = False)
         
 
 

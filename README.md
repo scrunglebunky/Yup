@@ -7,6 +7,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 11/08/23: added bullet textures, more sounds, etc. 
 - 11/07/23: little jingle that happens when you start a new level, sounds begin to play now (LOUD, BE CAREFUL), and more plans down the line
 - 11/06/23: added a moving floor, fixed warning signs, created AutoImage so all values can potentially be animated, explosion effect when shot 
 - 11/01/23: added WARNING SIGNS for enemies to use to notify the player where they're going to go
@@ -68,8 +69,14 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+- [x] Add sound effects for jumping, fastfalling, crouching, shooting, and enemy deaths.
 - [ ] Add varying level intros that are weird or do dumb things
 - [ ] Make the advance state create a little menu -- very similar to the game over state
+- - [ ] Add bonuses after completing a world
+- [ ] Executable events, only use of exec() function
+- [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
+- [ ] Program FINAL world
+
 - [NEVERMIND] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
 - [x] Add IntroEvent for levels: new text after each level is complete, between levels not worlds  -- fleshes out levels and makes them feel longedr
 - [NEVERMIND] Add events usable in levels called IntroEvent, which pulls from a new file to be created
@@ -78,16 +85,12 @@
 - [x] in the AQUA world - the jellyfish special D type will only be able to be killed by jumping on him. he checks this through a special check run through jellyfish's on_collide function they will have a special idle state where they camp below the formation and do nothing else - in order to kill the other ones, you either have to jump on them at the start, or wait to kill them when they attack later - due to this, the aqua formation will not move down
 - [x] Re-orderable spawn character orders (instead of in the order they are first spawned)
 - [x] Store all movement values between points immediately so repeated calculations aren't needed - using movingpoints
-- [ ] Executable events, only use of exec() function
 - [x] Unique formations per world
-- [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
 - [x] Enemy replacements, specifically for D and E but it'll work with anything
 - [x] unique entrances per world
 - [x] Fix gameover bug
-- [ ] Add bonuses after completing a world
 - [x] Add enemy skins per world
-- [ ] Add backgrounds per world
-- [ ] Program FINAL world
+- [x] Add backgrounds per world
 - [x] Instead of having values stored in MAIN to be passed down into states, instead have the passable items in their own file for everything to use freely. For example, instead of having Formation instances in PlayState, just give the formation.py file a value called "current_formation" that any state can pull from and use normally. 
 - [x] Make text and logos able to become its own state - used for the bar, and all the states - These will be able to be animated and move from place to place.
 - [x] A second value that can be added to the state, specifically for options to know what to return to. 

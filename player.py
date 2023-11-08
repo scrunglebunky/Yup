@@ -106,14 +106,20 @@ class Player(pygame.sprite.Sprite):
                 #crouching
                 self.change_anim("crouch")
                 self.movement[4] = True
+                audio.play_sound("boowomp.mp3",channel=2)
+
                 
 
             #SHOOTING
             if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
+                
+
                 bullet=bullets.Bullet(self.rect.center,is_default=not self.demo)
                 self.sprite_groups[0].add(bullet)
                 self.sprite_groups[3].add(bullet)
-                if not bullet.kill_on_spawn: self.change_anim("shoot")
+                if not bullet.kill_on_spawn: 
+                    self.change_anim("shoot")
+                    audio.play_sound("bap.mp3",channel=1)
 
             #AUTOSHOOT
             if tools.debug:
@@ -162,6 +168,7 @@ class Player(pygame.sprite.Sprite):
                     #crouching
                     self.change_anim("crouch")
                     self.movement[4] = True
+                    audio.play_sound("boowomp.mp3",channel=2)
         
 
 
@@ -194,7 +201,7 @@ class Player(pygame.sprite.Sprite):
             self.change_anim("hurt")
             self.health -= amount
             self.invincibility_counter = 60
-            audio.play_sound("ouch.mp3" if self.health > 0 else "death.mp3",)
+            audio.play_sound("ouch.mp3" if self.health > 0 else "scream.mp3",channel=2)
             if self.health <= 0: self.kill()
 
     def bounce(self):
@@ -202,6 +209,7 @@ class Player(pygame.sprite.Sprite):
         self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
         self.movement[3]=True
         self.change_anim("jump")
+        audio.play_sound("boing.mp3",channel=2)
         
     def reset_movement(self):
         self.movement = [

@@ -4,6 +4,7 @@
     "song":"cabbage.mp3",
     "bg":"hack.png",
     "formation_img":"hack_form.png",
+    "bullet_texture":"bullet_hack",
 
 
     "char_distance_x":30, 

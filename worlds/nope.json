@@ -4,6 +4,7 @@
     "song":"cabbage.mp3",
     "bg":"nope.png",
     "floor_img":"nope_floor.png","floor_size":[700,300],"floor_move":[0.1,0.25],
+    "bullet_texture":"bullet_nope",
 
 
     "skins":{

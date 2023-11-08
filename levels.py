@@ -44,7 +44,11 @@ def fetch_level_info(
         if world_force is not None:
             alldata.update(worlds[world_force])
         else:
-            alldata.update(worlds[campaigns[campaign_world[0]][campaign_world[1]]])
+            campaign = campaigns[campaign_world[0]]
+            world_num = campaign_world[1]
+            while world_num >= len(campaign):
+                world_num -= len(campaign)
+            alldata.update(worlds[campaign[world_num]])
         
     except KeyError:
         alldata = worlds["default.json"]

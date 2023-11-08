@@ -5,6 +5,7 @@
     "bg":"water.png",
     "form_drop_speed":0,
     "floor_img":"water_floor.png","floor_size":[700,350],"floor_move":[0.025,0.25],
+    "bullet_texture":"bullet_aqua",
 
     "skins":{
         "A":"aqua_A",

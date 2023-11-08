@@ -9,7 +9,11 @@ except:
 songs = []
 sounds = {}
 
-
+"""CHANNEL RESERVATIONS 
+0 - enemy death
+1 - bullet noises
+2 - player movement noises
+"""
 
 type_channels = {}
 PATH_songs:str = "./songs/"

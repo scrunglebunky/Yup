@@ -174,7 +174,8 @@ class Formation():
                 skin=spawn_skin,
                 trip=entrance_info['shoot'] if entrance_points is not None else [999],
                 formation=self,
-                window=self.window
+                window=self.window,
+                bullet_texture=self.world_data['bullet_texture'],
             )
             #adding enemy to groups
             self.spawned_list.append(char)

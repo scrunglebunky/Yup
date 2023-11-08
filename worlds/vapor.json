@@ -3,6 +3,7 @@
     "ui_type":"default",
     "song":"cabbage.mp3",
     "bg":"vaporwave.png",
+    "bullet_texture":"bullet_vapor",
 
     "bg_size":[600,800],
     "bg_speed":[0,0],

@@ -65,7 +65,7 @@ for directory,filelist in anim_loadlist.items():
         all_loaded_spritesheets[filename] = (current_file,spritesheet,masksheet)
         #loading animation files if existent
         if current_file["ANIM"] is not None:
-            with open("./images/characters/anim/"+str(current_file["ANIM"]),"r") as raw:
+            with open(str(directory)+"anim/"+str(current_file["ANIM"]),"r") as raw:
                 anim_file = json.load(raw)
                 all_loaded_spritesheets[filename][0]["anim"] = anim_file
             #5/25/23 - FIXING ANIMATION FPSes"

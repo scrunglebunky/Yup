@@ -11,6 +11,7 @@
     "floor_img":null,
     "floor_size":[600,300],
     "floor_move":[0,0.1],
+    "bullet_texture":"bullet_def",
     
     "levels":3,
 
