@@ -1,7 +1,6 @@
 {
     "world_name":"COMPOOTR",
     "ui_type":"default",
-    "song":"cabbage.mp3",
     "bg":"hack.png",
     "formation_img":"hack_form.png",
     "bullet_texture":"bullet_hack",

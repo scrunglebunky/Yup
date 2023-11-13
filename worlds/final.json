@@ -1,7 +1,6 @@
 {
     "world_name":"FINAL",
     "ui_type":"default",
-    "song":"cabbage.mp3",
     "bg":"ufo.png",
     "bg_size":[600,800],
     "bg_speed":[0,0]

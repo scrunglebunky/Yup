@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
             False, #crouching
         ]
         #how fast the character moves
-        self.speed = 7
+        self.speed = 10
         self.crouch_speed = 3
         self.momentum = 0
 
@@ -127,6 +127,8 @@ class Player(pygame.sprite.Sprite):
                     self.autoshoot = not self.autoshoot
                 if event.key == pygame.K_3:
                     self.health += 10
+                if event.key == pygame.K_0:
+                    self.health -= 1
 
 
         #RELEASING movement
@@ -142,8 +144,8 @@ class Player(pygame.sprite.Sprite):
         
     def collision(self):
     
-        #most collision will now be done in the state, instead of by invidual characters
-        #this is so there's not a huge loop of characters colliding
+        #most collision will now be done in the state, instead of by invidual enemies
+        #this is so there's not a huge loop of enemies colliding
         #it removes a *shred* of universality, but it's fine
         if self.movement[1]:
             self.momentum = self.speed*-1 if not self.movement[4] else self.crouch_speed*-1

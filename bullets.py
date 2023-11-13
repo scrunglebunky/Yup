@@ -90,7 +90,7 @@ class HurtBullet(pygame.sprite.Sprite):
         self.health = 1
         
         #setting image
-        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image)
+        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image,resize=(20,20))
         self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center = self.move.position

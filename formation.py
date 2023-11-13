@@ -1,4 +1,4 @@
-import random,pygame,math,characters,random
+import random,pygame,math,enemies,random
 from anim import all_loaded_images as img
 
 class Formation():
@@ -19,6 +19,7 @@ class Formation():
         self.level = level
         self.level_in_world = level_in_world
         self.window = kwargs['window'] if 'window' in kwargs.keys() else None
+        self.is_demo = kwargs['is_demo'] #to tell if the game is being used in the title demo -> stops score
 
         #formation positioning
         self.pos = [pygame.display.rect.center[0],100] #positioning
@@ -42,7 +43,7 @@ class Formation():
             "grace_end": 0, #how long until the grace period ends
             "spawn":120, #how often it takes for something to spawn
             "reset":720, #when the timer resets
-            "dead":30, #how often dead characters are checked
+            "dead":30, #how often dead enemies are checked
             "atk":100, #how often an enemy will attack 
         }
         #more info on grace periods lower down near the difficulty settings
@@ -106,13 +107,13 @@ class Formation():
         #difficulty calculations
         self.difficulty = self.level//2
         self.attack={
-            #throwdown amount = how many characters are thrown down in an attack stance #goes up once every 10 levels
+            #throwdown amount = how many enemies are thrown down in an attack stance #goes up once every 10 levels
             "amount":((self.difficulty//3)+1) if (self.difficulty <= 6) else 3,
             "max":3+(self.difficulty*2),
         }
         self.timer['atk'] = (100 - (self.difficulty*4)) if self.difficulty < 25 else 1
-        #timer["atk"] = how often characters are thrown down to attack #goes down a frame every level
-        #max_characters = how many characters can be down at a time, goes up by 1 every 5 levels
+        #timer["atk"] = how often enemies are thrown down to attack #goes down a frame every level
+        #max_enemies = how many enemies can be down at a time, goes up by 1 every 5 levels
         
         #grace periods get slightly longer and start more often as the game gets harder
         self.timer['grace_start'] = (480 - self.difficulty*20) if self.difficulty < 10 else 60
@@ -166,7 +167,7 @@ class Formation():
                 type_to_spawn = self.world_data['overwrite'][type_to_spawn]
 
             #creating enemy
-            char = characters.loaded[type_to_spawn](
+            char = enemies.loaded[type_to_spawn](
                 offset=offset,
                 pos=self.pos,difficulty=self.difficulty,sprites=self.sprites,player=self.player,
                 entrance_points=entrance_points[self.enter_key] if entrance_points is not None else None,
@@ -176,6 +177,7 @@ class Formation():
                 formation=self,
                 window=self.window,
                 bullet_texture=self.world_data['bullet_texture'],
+                is_demo=self.is_demo
             )
             #adding enemy to groups
             self.spawned_list.append(char)
@@ -305,7 +307,7 @@ class Formation():
 
 
     def remove_dead(self):
-        #06/06/2023 - removing dead characters
+        #06/06/2023 - removing dead enemies
         # The formation copies the list (1), enumerates through the list (2), and deletes all dead items (3)
         if self.timer['time'] % self.timer['dead'] == 0:
             copy=[item for item in self.spawned_list] #(1)

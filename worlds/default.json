@@ -1,7 +1,7 @@
 {
     "world_name":"default",
     "ui_type":"default",
-    "song":"meowchill.mp3",
+    "song":"placeholder.mp3",
 
     "bg":"test.png",
     "bg_size":[600,800],
@@ -80,8 +80,8 @@
     "overwrite":{
     },
 
-    "boss_level":false,
-    "boss_name":"ufo",
+    "boss_levels":[1],
+    "bosses":["ufo"],
 
 
     "events":[

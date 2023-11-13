@@ -207,7 +207,7 @@ class Spritesheet():
 # A LOT of entity classes in this game have to manually check for animations and such, or if it's just using a static image
 # However, this class is going to streamline it, by doing all the checking for spritesheets on its own
 class AutoImage():
-    def __init__(self,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None):
+    def __init__(self,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None,resize=None):
         self.name = name
         self.spritesheet = None
         self.image = None
@@ -216,7 +216,7 @@ class AutoImage():
         if self.type == 'img':
             self.image = all_loaded_images[self.name]
         elif self.type == 'anim':
-            self.spritesheet = Spritesheet(name=self.name,current_anim=current_anim)
+            self.spritesheet = Spritesheet(name=self.name,current_anim=current_anim,resize=resize)
             self.image = self.spritesheet.image
         elif force_surf is not None:
             self.image = force_surf

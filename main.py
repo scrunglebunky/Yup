@@ -19,7 +19,8 @@ pygame.display.set_caption("YUP RevD")
 universal_sprite_group = pygame.sprite.Group() #This used to be a dictionary used everywhere but all groups have now been moved to their own respective states
 
 #06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import state_play,ui_border,options,state_pause,state_title,state_gameover,state_advance,score
+import options,score,ui_border
+import states as all_states
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
@@ -31,13 +32,13 @@ tools.debug = True
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "play"
-states["play"] = state_play.State(window=window,campaign="main_story.order")
+state = "title"
+states["play"] = all_states.Play(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
-states["pause"] = state_pause.State(window=window,play_state=states["play"])
-states["title"] = state_title.State(window=window,border=border)
-states["gameover"] = state_gameover.State(window=window,play_state=states["play"])
-states["advance"] = state_advance.State(window=window,play_state=states["play"])
+states["pause"] = all_states.Pause(window=window,play_state=states["play"])
+states["title"] = all_states.Title(window=window,border=border)
+states["gameover"] = all_states.GameOver(window=window,play_state=states["play"])
+states["advance"] = all_states.Advance(window=window,play_state=states["play"])
 
 #07/23/2023 - SWITCHING STATExzS
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.

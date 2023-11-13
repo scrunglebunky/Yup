@@ -10,6 +10,7 @@ class Emblem(pygame.sprite.Sprite):
     animation_killonloop:bool=False,
     pattern:str=None,
     force_surf:pygame.Surface=None,
+    resize=None
     ):
         pygame.sprite.Sprite.__init__(self)
         
@@ -21,7 +22,7 @@ class Emblem(pygame.sprite.Sprite):
         self.pattern_f = 0 #frames in a pattern
         self.pattern_offset = [0,0] #what pattern affects
 
-        self.autoimage = anim.AutoImage(im,force_surf=force_surf)
+        self.autoimage = anim.AutoImage(im,force_surf=force_surf,resize=resize)
         self.image = self.autoimage.image
         self.animation_killonloop = animation_killonloop
 

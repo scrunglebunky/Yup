@@ -4,6 +4,11 @@
 - Everything within the game is an attempt to stay modular, with each part being its own file, class, or function for me to use in other projects.
 - This is the fourth iteration of the game. In the third one, I got too obsessed with optimization and changing everything up.
 - This is my last attempt: a refresher that ensures that I make a simple, intuitive game that I do not overthink about.
+## IMPORTANT NOTE
+- A LOT OF THE SOUNDS, SONGS, ETC ARE ALL PLACEHOLDERS. 
+- I DO NOT OWN THE RIGHTS TO ANY OF THEM, AND IF THESE POSE A POTENTIAL ISSUE LATER DOWN THE LINE, I WILL REMOVE THEM.
+
+
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT

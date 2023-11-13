@@ -84,7 +84,7 @@ def generate_scoreboard(scores_graphics:list = scores_graphics, do_regenerate_gr
     full.blit(img["high_scores.png"],(0,0))
     if do_regenerate_graphics: scores_graphics = regenerate_graphics()
     for i in range(len(scores_graphics)):
-        full.blit(scores_graphics[9-i],(75,150+40*i))
+        full.blit(scores_graphics[(len(scores_graphics)-1)-i],(75,150+40*i))
     return full
 scoreboard = generate_scoreboard()
 
