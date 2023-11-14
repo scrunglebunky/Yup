@@ -85,6 +85,8 @@ class Floor():
         self.centery = window.get_height()
         self.move = move
         self.player=player
+    
+    def update(self):...
 
     def draw(self,surf:pygame.Surface) -> None:
         self.rect.centerx = self.centerx + (self.centerx-self.player.rect.x)*self.move[0] #stays centered

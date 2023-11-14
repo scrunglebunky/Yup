@@ -1,4 +1,4 @@
-import pygame,os,player,text,random,levels,json,formation,anim,audio,tools,events,pygame,random,score,audio,text,pygame,random,score,audio,text
+import pygame,os,player,text,random,levels,json,formation,anim,audio,tools,events,score,enemies,enemies_bosses
 from anim import all_loaded_images as img
 from text import loaded_text as txt
 from backgrounds import Background as Bg
@@ -18,8 +18,9 @@ class Template():
 
 
 
+
 #gameplay
-class Play():
+class Play(Template):
     sprites = { #sprites are now state-specific hahaha
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
@@ -53,7 +54,7 @@ class Play():
 
 
         #resetting the sprite groups
-        for group in (State.sprites if not self.is_demo else State.demo_sprites).values():
+        for group in (Play.sprites if not self.is_demo else Play.demo_sprites).values():
             group.empty()
 
         #06/23/2023 - SETTING THE GAMEPLAY WINDOW
@@ -116,6 +117,7 @@ class Play():
     def on_start(self,**kwargs):#__init__ v2, pretty much.
         #06/24/2023 - Playing the song
         audio.play_song(self.world_data["song"])
+        self.player.sprite_groups = (self.sprites if not self.is_demo else self.demo_sprites)
 
     def on_end(self,**kwargs): #un-init, kind of
         pygame.mixer.music.stop()
@@ -253,8 +255,11 @@ class Play():
             print(pos,pos2)
 
 
+
+
+
 #title screen
-class Title():
+class Title(Template):
     emblems = {}
     emblems_perm = {}
     sprites=pygame.sprite.Group()
@@ -265,7 +270,7 @@ class Title():
         self.next_state = None
         
 
-        self.demo_state = Pstate(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True) #this is different from the tools.demo value, as this is just to simulate a player
+        self.demo_state = Play(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True) #this is different from the tools.demo value, as this is just to simulate a player
         self.hiscoresheet = score.generate_scoreboard()
 
         #basic events that will occur during the title
@@ -333,9 +338,10 @@ class Title():
 
 
 
+
 # 08/08/2023 - THE GAME OVER STATE
 # The game over state will use the gameplay state and modify it so everything slows down and the assets disappear and a graphic shows
-class GameOver():
+class GameOver(Template):
     sprites=pygame.sprite.Group()
     def __init__(self,window,play_state):
         #08/08/2023 - PSEUDOCODE 
@@ -403,8 +409,8 @@ class GameOver():
             self.state += 1
 
         #updating any used sprites
-        State.sprites.update()
-        State.sprites.draw(self.window )
+        GameOver.sprites.update()
+        GameOver.sprites.draw(self.window )
 
 
     def event0(self): #SLOWING EVERYTHING DOWN
@@ -467,34 +473,34 @@ class GameOver():
 
         #spawning in the game over logo
         if self.timer == 400:
-            State.sprites.add(Em(im="gameover.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True))
+            GameOver.sprites.add(Em(im="gameover.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True))
         #icons
         if self.timer == 500:
-            State.sprites.add(Em(im="gameover_score.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.35),isCenter=True))
+            GameOver.sprites.add(Em(im="gameover_score.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.35),isCenter=True))
         if self.timer == 650:
-            State.sprites.add(Em(im="gameover_level.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
+            GameOver.sprites.add(Em(im="gameover_level.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
         if self.timer == 800:
-            State.sprites.add(Em(im="gameover_rank.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
+            GameOver.sprites.add(Em(im="gameover_rank.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
         #numbers
         if self.timer == 530:
-            State.sprites.add(Em(force_surf = text.load_text(text=str(score.score),size=40) ,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.32),isCenter=False))
+            GameOver.sprites.add(Em(force_surf = text.load_text(text=str(score.score),size=40) ,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.32),isCenter=False))
         if self.timer == 680:
-            State.sprites.add(Em(force_surf = text.load_text(text=str(self.play_state.level),size=40),coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.42),isCenter=False,))
+            GameOver.sprites.add(Em(force_surf = text.load_text(text=str(self.play_state.level),size=40),coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.42),isCenter=False,))
         #rank
         if self.timer == 830:
-            State.sprites.add(Em(force_surf = text.load_text(text=self.generate_rank(),size=40),coord=(pygame.display.rect.center[0],pygame.display.rect.height*0.90),isCenter=True,))
+            GameOver.sprites.add(Em(force_surf = text.load_text(text=self.generate_rank(),size=40),coord=(pygame.display.rect.center[0],pygame.display.rect.height*0.90),isCenter=True,))
         
         #either high score screen or telling game to kill itself
         if self.timer == 1000:
             if self.got_high_score():
                 self.timer = 1200
-                State.sprites.empty()
+                GameOver.sprites.empty()
                 self.kaboom(coord=pygame.display.rect.center,animation_resize=(3000,3000))
                 return
             else:
                 sp = Em(im="gameover_return.png",coord=(pygame.display.rect.width*0.75,pygame.display.rect.center[1]),isCenter=True)
                 sp.pattern="sine"
-                State.sprites.add(sp)
+                GameOver.sprites.add(sp)
                 self.exit_ok = True
 
         if self.timer > 1190:
@@ -511,30 +517,30 @@ class GameOver():
             self.background.speed=[-7,-7]
             #high score image 
             sp = Em(im="hiscore.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.center[1]*0.30),isCenter=True)
-            sp.pattern = "jagged";State.sprites.add(sp)
+            sp.pattern = "jagged";GameOver.sprites.add(sp)
         if self.timer == 1260:
             #showing the high scores, showing yours, and telling you to input
-            State.sprites.add(
+            GameOver.sprites.add(
                 Em(force_surf=score.scoreboard,coord=(pygame.display.rect.width*0.75,pygame.display.rect.height*0.5),isCenter=True)
             )
             #scoregraphic
-            State.sprites.add(self.scoregraphic)
+            GameOver.sprites.add(self.scoregraphic)
             self.scoregraphic.change_pos(pos=(pygame.display.rect.width*0.25,pygame.display.rect.height*0.4),isCenter=True)
             #telling you
             x = Em(im="hiscore_name.png",coord=(pygame.display.rect.width*0.25,pygame.display.rect.height*0.5),isCenter=True) ; x.pattern = "sine"
-            State.sprites.add(x)
+            GameOver.sprites.add(x)
         #stopping it from advancing if you don't enter your name in time
         if self.timer >= 1490 and self.timer < 1500: self.timer = 1300
 
     
     def event4(self):
         if self.timer == 1501:
-            State.sprites.empty()
+            GameOver.sprites.empty()
             self.kaboom(coord=pygame.display.rect.center,animation_resize=(1000,1000))
             #updating the new scoreboard
             score.scores = score.add_score(score=score.score,name=self.name,scores=score.scores)
             score.scoreboard = score.generate_scoreboard()
-            State.sprites.add(Em(force_surf=score.scoreboard,coord=pygame.display.rect.center,isCenter=True))
+            GameOver.sprites.add(Em(force_surf=score.scoreboard,coord=pygame.display.rect.center,isCenter=True))
 
         if self.timer >= 1740:
             self.finish()
@@ -599,7 +605,7 @@ class GameOver():
 
         
     def kaboom(self,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
-            (State.sprites if not play else self.play_state.sprites[0]).add(
+            (GameOver.sprites if not play else self.play_state.sprites[0]).add(
             Em(
                 im="kaboom",
                 coord=coord,
@@ -610,7 +616,7 @@ class GameOver():
 
     def finish(self):
         #the finishing part
-        State.sprites.empty()
+        GameOver.sprites.empty()
         score.score = 0
         self.play_state.__init__(
             window=self.play_state.fullwindow,
@@ -622,8 +628,10 @@ class GameOver():
 
 
 
+
+
 #paused
-class Pause():
+class Pause(Template):
     def __init__(self,window:pygame.Surface,play_state):
         
         self.next_state = None #Needed to determine if a state is complete
@@ -659,8 +667,10 @@ class Pause():
 
 
 
+
+
 #when a world is completed
-class Advance():
+class Advance(Template):
     sprites=pygame.sprite.Group()
     def __init__(self,window,play_state):
         #setting values
@@ -684,7 +694,7 @@ class Advance():
     def update(self):
         self.frames += 1
         #adding some emblems for now, will update to be better later
-        if self.frames==1: State.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
+        if self.frames==1: Advance.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
         #speeding everything up
         if self.frames < 150:
             for i in range(2):
@@ -692,7 +702,7 @@ class Advance():
                     self.play_state.background.speed[i] *= 1.05
         #changing the play_state stored world
         if self.frames == 150:
-            State.sprites.empty()
+            Advance.sprites.empty()
             self.play_state.new_world()
             self.kaboom(
                 coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]/2+pygame.display.play_pos[1]),
@@ -705,8 +715,8 @@ class Advance():
 
         self.play_state.update()
 
-        State.sprites.update()
-        State.sprites.draw(self.window)
+        Advance.sprites.update()
+        Advance.sprites.draw(self.window)
 
 
 
@@ -714,7 +724,7 @@ class Advance():
         pass    
     
     def kaboom(self,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
-            (State.sprites if not play else self.play_state.sprites[0]).add(
+            (Advance.sprites if not play else self.play_state.sprites[0]).add(
             Em(
                 im='kaboom',
                 coord=coord,
@@ -723,19 +733,62 @@ class Advance():
 
 
 
+
+
 #same as gameplay but there is now a boss involved
-class Boss():
-    def __init__(self,state_play):
-        self.playstate = state_play
+class Boss(Template):
+    sprites = {
+        0:pygame.sprite.Group(), #universal sprites
+        1:pygame.sprite.GroupSingle(), #player sprite
+        2:pygame.sprite.Group(), #boss's sprites
+        3:pygame.sprite.Group(), #bullet sprites
+    }
+    def __init__(self,play_state:Play):
+        Template.__init__(self)
+        #Bosses do a majority of what playstate does, except instead of a formation being in place there is a boss.
+        #Due to this, there is a new set of sprite groups: player, boss, and bullet
+        #Mostly everything is super simplified. 
+        self.playstate = play_state
+        self.is_demo = self.playstate.is_demo
+
+        self.window = self.playstate.window
+        self.fullwindow = self.playstate.fullwindow
         
         self.player = self.playstate.player
+        Boss.sprites[0].add(self.player);Boss.sprites[1].add(self.player)
+
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
         self.formation = self.playstate.formation
-        self.boss = None
+        self.boss = enemies_bosses.UFO(sprites=Boss.sprites)
 
-    def on_start(self):...
-    def on_end(self):...
-    def event_handler(self,event):...
+    def on_start(self):
+        audio.play_song('golden_inst.mp3')
+        self.player.sprite_groups = Boss.sprites
+
+    def on_end(self):
+        pygame.mixer.music.stop()
+
+    def update(self,draw=True): 
+        #Drawing previous gameplay frame to the window -- don't ask why, it just does. 
+        if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+
+        
+
+        #updating backgrounds
+        self.background.update()
+        self.background.draw(self.window)
+        #updating floor
+        if self.floor is not None:
+            self.floor.update()
+            self.floor.draw(self.window)
+        #updating all 
+        Boss.sprites[0].update()
+        Boss.sprites[0].draw(self.window)
+        #updating boss
+        self.boss.update()
+
+    def event_handler(self,event):
+        Play.event_handler(self,event)
 

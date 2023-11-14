@@ -1,7 +1,7 @@
 
 {
     "./images/":[],
-    "./images/characters/":[],
+    "./images/characters/":["ufo.png"],
     "./images/ui/":[
         "placeholder.bmp",
         "logo.png","score.png","debug.png",
@@ -13,7 +13,7 @@
         "arrow.png","warn_temp.png"],
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
-        "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufo.png","ship.png",
+        "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufos.png","ship.png",
         "hack_form.png",
         "happy_floor.png","nope_floor.png","water_floor.png"],
     "resize":[
