@@ -227,6 +227,7 @@ class AutoImage():
         if self.spritesheet is not None: 
             self.spritesheet.update()
             self.image = self.spritesheet.image
+            self.mask = self.spritesheet.mask
 
     def change_anim(self,anim:str,overwrite:bool=False):
         if self.spritesheet is not None:

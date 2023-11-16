@@ -4,6 +4,7 @@ from text import loaded_text as txt
 from backgrounds import Background as Bg
 from backgrounds import Floor as Fl
 from emblems import Emblem as Em
+from bullets import emptyBulletMax as eBM
 
 #basic template for states to go off of
 class Template():
@@ -25,14 +26,12 @@ class Play(Template):
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
-            3:pygame.sprite.Group(), #BULLET SPRITES
             4:pygame.sprite.Group(), #UI SPRITES
         }
     demo_sprites = { #sprites exclusively for the demo state
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
-            3:pygame.sprite.Group(), #BULLET SPRITES
             4:pygame.sprite.Group(), #UI SPRITES
         }
 
@@ -40,8 +39,8 @@ class Play(Template):
                  window:pygame.display,
                  campaign:str = "main_story.order",
                  world:int = 0,
-                 level:int = 0,
-                 level_in_world:int = 0,
+                 level:int = 1,
+                 level_in_world:int = 1,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -118,10 +117,13 @@ class Play(Template):
         #06/24/2023 - Playing the song
         audio.play_song(self.world_data["song"])
         self.player.sprite_groups = (self.sprites if not self.is_demo else self.demo_sprites)
+        eBM()
+
 
     def on_end(self,**kwargs): #un-init, kind of
         pygame.mixer.music.stop()
         if tools.debug: print(self.debug.values())
+        eBM()
 
     
     def update(self, draw=True):
@@ -166,16 +168,23 @@ class Play(Template):
         
         #06/18/2023 - Starting a new level
         if self.formation.cleared:
-            if self.level_in_world+1 > self.world_data["levels"]:
+            #checking to start the advance state
+            if self.level_in_world >= self.world_data["levels"]:
                 self.next_state = "advance"
                 return
+            #checking to see if the next world should be a boss intermission -- does not update levels
+            elif self.level_in_world + 1 in self.world_data['boss_levels']:
+                self.next_state = "boss"
+                self.level_in_world += 1
+                return
+            #if not, updating everything
             else:
                 self.level += 1
                 self.level_in_world += 1
                 if self.world_data["dynamic_intensity"]:
                     levels.update_intensities(self.level,self.world_data)
                 self.formation.empty()
-                #checking to start the advance state
+                
             #restarting the formation
             self.formation.__init__(
                 world_data = self.world_data,
@@ -194,13 +203,9 @@ class Play(Template):
     def collision(self):
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[1],(self.sprites if not self.is_demo else self.demo_sprites)[2],False,False,collided=pygame.sprite.collide_mask)
-        collidelist2=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[2],(self.sprites if not self.is_demo else self.demo_sprites)[3],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             key.on_collide(2,value[0])
             value[0].on_collide(1,key)
-        for key,value in collidelist2.items():
-            key.on_collide(3,value[0])
-            value[0].on_collide(2,key)    
 
 
     def new_world(self):
@@ -729,6 +734,8 @@ class Advance(Template):
                 im='kaboom',
                 coord=coord,
                 isCenter=True,
+                animation_killonloop=True,
+                resize=(200,200)
                 ))
 
 
@@ -739,9 +746,8 @@ class Advance(Template):
 class Boss(Template):
     sprites = {
         0:pygame.sprite.Group(), #universal sprites
-        1:pygame.sprite.GroupSingle(), #player sprite
+        1:pygame.sprite.Group(), #player sprite
         2:pygame.sprite.Group(), #boss's sprites
-        3:pygame.sprite.Group(), #bullet sprites
     }
     def __init__(self,play_state:Play):
         Template.__init__(self)
@@ -760,15 +766,31 @@ class Boss(Template):
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
+        self.playstate.curBossName="ufo"
         self.formation = self.playstate.formation
-        self.boss = enemies_bosses.UFO(sprites=Boss.sprites)
+        self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player)
 
     def on_start(self):
         audio.play_song('golden_inst.mp3')
+        
+        #killing all previous sprites
+        eBM()
+        for group in Boss.sprites.values():
+            group.empty()
+
+        #player code
         self.player.sprite_groups = Boss.sprites
+        Boss.sprites[0].add(self.player);Boss.sprites[1].add(self.player)
+
+        #redoing what was done in __init__
+        self.__init__(play_state = self.playstate)
+
 
     def on_end(self):
+        eBM() #emptying bullet max
         pygame.mixer.music.stop()
+        for group in Boss.sprites.values():
+            group.empty()
 
     def update(self,draw=True): 
         #Drawing previous gameplay frame to the window -- don't ask why, it just does. 
@@ -789,6 +811,30 @@ class Boss(Template):
         #updating boss
         self.boss.update()
 
+        #collision
+        self.collision()
+
+        #death - somewhat broken atm
+        if self.player.dead:
+            self.next_state = "gameover"
+        #figuring out what to do when the boss dies
+        if self.boss.info['ENDBOSSEVENT']:
+            self.next_state = "play"
+
     def event_handler(self,event):
         Play.event_handler(self,event)
+
+
+    def collision(self):
+        #between player and enemy
+        collidelist=pygame.sprite.groupcollide(
+            Boss.sprites[1],
+            Boss.sprites[2],
+            False,False,collided=pygame.sprite.collide_mask)
+        #telling the assets that stuff collided
+        for key,value in collidelist.items():
+            key.on_collide(2,value[0])
+            value[0].on_collide(1,key)
+        
+
 

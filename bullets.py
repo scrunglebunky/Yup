@@ -63,55 +63,6 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.kill(self)
         Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
 
-class HurtBullet(pygame.sprite.Sprite):
-    #DEFAULT IMAGE - rendered by pygame draw function
-    image = pygame.Surface((10, 10), pygame.SRCALPHA)
-    pygame.draw.circle(image, "#AA0000", (5, 5), 5)
-    pygame.draw.circle(image, "red", (5, 5), 4)
-    screen_rect = pygame.Rect(0, 0, 450, 600)
-
-    #limits so the game doesnt lag
-    count = 0
-    max = 1000
-
-    def __init__(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)),texture:str=None):
-        #FOR AN ANGLE, the info is (pointa,angle)
-        pygame.sprite.Sprite.__init__(self)
-        
-        #checking for max bullet count
-        HurtBullet.count += 1
-        self.killonstart = True if HurtBullet.count > HurtBullet.max else False
-
-        #setting number values
-        if type == "point":
-            self.move = tools.MovingPoint(pointA=info[0],pointB=info[1],speed=spd)
-        elif type == "angle":
-            self.move = tools.AnglePoint(pointA=info[0],angle=info[1],speed=spd)
-        self.health = 1
-        
-        #setting image
-        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image,resize=(20,20))
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
-        self.rect.center = self.move.position
-        
-    def update(self):
-        self.move.update()
-        self.rect.center = self.move.position
-        self.autoimage.update(); self.image = self.autoimage.image
-        if not Bullet.on_screen(self) or self.health <= 0 or self.killonstart: 
-            self.kill()
-            HurtBullet.count = HurtBullet.count - 1 if HurtBullet.count > 0 else 0 
-    
-    def on_collide(self,collide_type,collided):
-        #5/26/23 - This is usually explained elsewhere
-        #collision with enemy types
-        if collide_type == 1:
-            self.hurt()
-            collided.hurt()
-    
-    def hurt(self):
-        self.health -= 1
 
 
 class TripleBullet(Bullet):
@@ -120,6 +71,11 @@ class TripleBullet(Bullet):
 
 class Item(pygame.sprite.Sprite):
     def __init__(self):...
+
+
+def emptyBulletMax():
+    for item in LOADED:
+        item.count = 0 
 
 LOADED = [
     Bullet,

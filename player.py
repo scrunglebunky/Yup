@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
             False, #crouching
         ]
         #how fast the character moves
-        self.speed = 10
+        self.speed = 8
         self.crouch_speed = 3
         self.momentum = 0
 
@@ -78,7 +78,7 @@ class Player(pygame.sprite.Sprite):
             bullet=bullets.Bullet(self.rect.center)
             bullets.Bullet.count-=1
             self.sprite_groups[0].add(bullet)
-            self.sprite_groups[3].add(bullet)
+            self.sprite_groups[1].add(bullet)
 
         #demo
         if self.demo:
@@ -116,7 +116,7 @@ class Player(pygame.sprite.Sprite):
 
                 bullet=bullets.Bullet(self.rect.center,is_default=not self.demo)
                 self.sprite_groups[0].add(bullet)
-                self.sprite_groups[3].add(bullet)
+                self.sprite_groups[1].add(bullet)
                 if not bullet.kill_on_spawn: 
                     self.change_anim("shoot")
                     audio.play_sound("bap.mp3",channel=1)

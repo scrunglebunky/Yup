@@ -2,6 +2,7 @@ import pygame,anim,random,score,bullets,tools
 from audio import play_sound as ps
 from emblems import Emblem as Em
 from math import sin,cos,atan2,degrees
+from anim import AutoImage as AImg
 from player import Player
 
 class Template(pygame.sprite.Sprite):
@@ -52,7 +53,7 @@ class Template(pygame.sprite.Sprite):
         
         
         #image values, including spritesheets
-        self.autoimage = anim.AutoImage(name = kwargs['skin'], current_anim = 'idle')
+        self.autoimage = AImg(name = kwargs['skin'], current_anim = 'idle')
         self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center = self.idle["full"]
@@ -79,6 +80,7 @@ class Template(pygame.sprite.Sprite):
 
         self.autoimage.update()
         self.image = self.autoimage.image
+        self.mask = self.autoimage.mask 
         
 
         #updating timers
@@ -163,12 +165,12 @@ class Template(pygame.sprite.Sprite):
                 #bouncing the player up
                 collided.bounce()
                 #making the player invincible for six frames to prevent accidental damage
-                collided.invincibility_counter = 6
+                collided.invincibility_counter = 18
             else:
                 collided.hurt()
             #damaging the enemy either way
             self.hurt()
-        elif collide_type == 3:
+        elif collide_type == 1:
             #I SAID damaging the enemy either way
             self.hurt()
             collided.hurt()
@@ -186,10 +188,10 @@ class Template(pygame.sprite.Sprite):
             (new_pos[0] + self.idle["offset"][0]),
             (new_pos[1] + self.idle["offset"][1])]
         
-    def shoot(self,type:str="point",spd:int=7,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False) -> bullets.HurtBullet:
+    def shoot(self,type:str="point",spd:int=7,info:tuple=((0,0),(100,100)), shoot_if_below:bool=False):
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
-            bullet = bullets.HurtBullet(type=type,spd=spd,info=info,texture=self.info['bullet_texture'])
+            bullet = HurtBullet(type=type,spd=spd,info=info,texture=self.info['bullet_texture'])
             self.sprites[0].add(bullet)
             self.sprites[2].add(bullet)
         return bullet
@@ -434,6 +436,7 @@ class C(Template): #turret
 
 
 
+
 class D(Template): #special -- uses special value to inherit from that character instead 
     def __init__(self,**kwargs):
         #placeholder value
@@ -450,7 +453,7 @@ class D(Template): #special -- uses special value to inherit from that character
 class Compootr(Template): #special world 3 item
     #Limits for how many can be attacking at once
     atk_count = 0
-    atk_max = 3
+    atk_max = 2
     def __init__(self,**kwargs):
         Template.__init__(self,kwargs=kwargs)
         self.info['atk'] = True
@@ -559,7 +562,7 @@ class Jelle(Template): #special jellyfish
                 self.change_anim("attack")
                 #playing sound
                 ps('zap.mp3',channel=30)
-        elif collide_type == 3:
+        elif collide_type == 1:
             collided.hurt()
             self.change_anim("attack")
             #playing sound
@@ -854,7 +857,7 @@ class Confetti(pygame.sprite.Sprite):
             collided.hurt()
             #damaging the enemy either way
             self.kill()
-        elif collide_type == 3:
+        elif collide_type == 1:
             #I SAID damaging the enemy either way
             self.kill()
             collided.hurt()
@@ -891,7 +894,7 @@ class Laser(pygame.sprite.Sprite):
         #if colliding with an enemy, either hurt or bounce based on positioning
         if type(collided) == Player :
             collided.hurt()
-        elif collide_type == 3:
+        elif collide_type == 1:
             collided.hurt()
 
 
@@ -902,7 +905,7 @@ class Warning(pygame.sprite.Sprite):
     def __init__(self,pos,resize=None,arrow_pos=None,time:int=-1):
         pygame.sprite.Sprite.__init__(self)
         #spritesheet info
-        self.autoimage = anim.AutoImage('warning',current_anim='idle')
+        self.autoimage = AImg('warning',current_anim='idle')
         self.autoimage.spritesheet.all_anim['idle'] = self.autoimage.spritesheet.all_anim['idle'].copy()
         self.image = self.autoimage.image
         self.arrow = Warning.arrow.copy()
@@ -929,7 +932,58 @@ class Warning(pygame.sprite.Sprite):
         self.update()
         # print('after',fps,self.spriteshet.all_anim['idle']['FPS'])
 
+
+#EXTRA ASSETS -- HURTBULLET
+class HurtBullet(pygame.sprite.Sprite):
+    #DEFAULT IMAGE - rendered by pygame draw function
+    image = pygame.Surface((10, 10), pygame.SRCALPHA)
+    pygame.draw.circle(image, "#AA0000", (5, 5), 5)
+    pygame.draw.circle(image, "red", (5, 5), 4)
+    screen_rect = pygame.Rect(0, 0, 450, 600)
+
+    #limits so the game doesnt lag
+    count = 0
+    max = 1000
+
+    def __init__(self,type:str="point",spd:int=2,info:tuple=((0,0),(100,100)),texture:str=None):
+        #FOR AN ANGLE, the info is (pointa,angle)
+        pygame.sprite.Sprite.__init__(self)
+        
+        #checking for max bullet count
+        HurtBullet.count += 1
+        self.killonstart = True if HurtBullet.count > HurtBullet.max else False
+
+        #setting number values
+        if type == "point":
+            self.move = tools.MovingPoint(pointA=info[0],pointB=info[1],speed=spd)
+        elif type == "angle":
+            self.move = tools.AnglePoint(pointA=info[0],angle=info[1],speed=spd)
+        self.health = 1
+        
+        #setting image
+        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = HurtBullet.image ,resize=(20,20))
+        self.image = self.autoimage.image
+        self.rect = self.image.get_rect()
+        self.rect.center = self.move.position
+        
+    def update(self):
+        self.move.update()
+        self.rect.center = self.move.position
+        self.autoimage.update(); self.image = self.autoimage.image
+        if not bullets.Bullet.on_screen(self) or self.health <= 0 or self.killonstart: 
+            self.kill()
+            HurtBullet.count = HurtBullet.count - 1 if HurtBullet.count > 0 else 0 
     
+    def on_collide(self,collide_type,collided):
+        #5/26/23 - This is usually explained elsewhere
+        #collision with enemy types
+        if type(collided) == Player:
+            self.hurt()
+            collided.hurt()
+    
+    def hurt(self):
+        self.health -= 1
+ 
 
 ########OLD
 
