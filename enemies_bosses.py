@@ -197,10 +197,14 @@ class UFO(Boss):
     def state_die(self,start=False):
         if start:
             self.atk_info['angle'] = 2
+            self.atk_info['movepoint'] = MovingPoint(pointA = self.attributes['body'].rect.center,pointB=(300,100),speed=10,check_finished=True)
         else:
             #movement
-            self.attributes['body'].rect.centerx += random.randint(-5,5)
-            self.attributes['body'].rect.centery += random.randint(-5,5)
+            if not self.atk_info['movepoint'].finished: self.atk_info['movepoint'].update()
+            self.attributes['body'].rect.center = self.atk_info['movepoint'].position
+
+            self.attributes['body'].rect.centerx += random.randint(-15,15)
+            self.attributes['body'].rect.centery += random.randint(-15,15)
             #explosion
             if self.timers['in_state'] % 5 == 0:
                 self.sprites[0].add(Em(
