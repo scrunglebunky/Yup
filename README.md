@@ -13,6 +13,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 11/20/23: Bosses work now, but there a bug after game-overing where the player isn't reset. Every time playstate restarts, reinstate the boss state player.
 - 11/08/23: added bullet textures, more sounds, etc. 
 - 11/07/23: little jingle that happens when you start a new level, sounds begin to play now (LOUD, BE CAREFUL), and more plans down the line
 - 11/06/23: added a moving floor, fixed warning signs, created AutoImage so all values can potentially be animated, explosion effect when shot 
