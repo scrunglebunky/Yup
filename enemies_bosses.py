@@ -45,11 +45,14 @@ class Boss():
         #various unorganized values
         self.player = kwargs['player']
     def update(self):
+        #timer update
         self.timers['total'] += 1
         self.timers['in_state'] += 1
+        #state and health update
         self.states[self.info['state']]()
         if self.info['health'] <= 0 and self.info['state'] != "die":
             self.change_state("die")
+        
 
     def collision_master(self,collidername,collide_type,collided):
         #first value -> attribute that found collision #second value -> type of sprite the attribute collided with #third value -> the actual item
@@ -61,6 +64,7 @@ class Boss():
 
     #STATE DEFINITIONS
     #Just like how any enemy will work
+    def state_enter(self,start:bool=False):...
     def state_start(self,start:bool=False):...
     def state_idle(self,start:bool=False):...
     def state_attack(self,start:bool=False):...
@@ -107,7 +111,10 @@ class BossAttribute(pygame.sprite.Sprite):
         self.healthProtected = False
     def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
         self.host.collision_master(self,collide_type,collided)
-    def update(self):...
+    def update(self):
+        #graphic update
+        self.autoimage.update()
+        self.image = self.autoimage.image
     def shoot(self, type: str="point", spd: int=7, info: tuple=((0,0),(100,100)), shoot_if_below: bool=True):
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
@@ -119,22 +126,53 @@ class BossAttribute(pygame.sprite.Sprite):
         
 
 
+
+#UFO
 class UFO(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
-        self.addAttribute(name='body' , attribute = UfoBody(host=self,sprites=self.sprites))
-        self.info['health'] = 50
 
-        self.atk_info["angle"]=0 #what angle the enemy is shooting at
-        self.atk_info["when"]=random.randint(60,120) #when the enemy should convert to an attack
-        self.atk_info['types']=1 #the enemy has two attacks
-        self.atk_info['movepoint']= MovingPoint(pointA=self.attributes['body'].rect.center,pointB=self.player.rect.center,speed=5)
+        self.info['health'] = 100
 
-        self.info['invincible'] = False
+        #setting attack info
+        self.atk_info['when'] = random.randint(60,360)
+        self.atk_info['pinch'] = False #if the boss is angry
+        self.atk_info['types'] = 2 #chad spam, succ, chad kaboom
+        #atk1 info
+        self.atk_info['1_angle'] = 0 #during the first bullet spam, what angle is done
+        #atk2 info
+        self.atk_info['2_direction'] = 'l' #is the enemy coming from the left or the right during succ?
+        self.atk_info['2_x'] = 0 #x velocity
+        self.atk_info['2_y'] = 0 #when the enemy is getting lifted off the ground. 
+        self.atk_info['2_state'] = 0 # 0: moving off to one side (l or r) ; 1: slowly speeding to the other side ; 2 - slowing back down and raising back to the 
+        self.atk_info['2_swingpoint'] = 0 # 0: moving off to one side (l or r) ; 1: slowly speeding to the other side ; 2 - slowing back down and raising back to the 
+        #atk3 info
+        self.atk_info['3_move'] = None #tools.MovingPoint to a random position
+        self.atk_info['3_bullets'] = [ ] #where all the bullets are stored
+        self.atk_info['3_counter'] = 4 #how many points the boss moves to, based on health
+        self.atk_info['3_count'] = 0 #what point the boss is currently at
+        self.atk_info['3_wait'] = 0 #when the boss waits before moving again
+        self.atk_info['3_spd'] = 15 #how fast the boss moves
+
+        #creating
+        self.addAttribute(name='body',attribute=BossAttribute(host=self,sprites=self.sprites,image="boss_ufo",name='body',pos=(300,100)))
+        self.addAttribute(name='succ',attribute=BossAttribute(host=self,sprites=self.sprites,image="boss_ufo_succ",name='succ'))
+        #hiding attributes
+        self.attributes['succ'].rect.center = (-1000,-1000)
+
+        #the enemy will begin the enter state now
+        self.change_state('enter')
+
+    #generally updating everything, including animations
+    def update(self):
+        Boss.update(self)
+        # for attribute in self.attributes.values():
+        #     attribute.update()
+
     
-    #a master collision function that checks based off which item is being collided with 
+    #managing collision
     def collision_master(self,collider,collide_type,collided):
-        if collider.name == 'UfoBody':
+        if collider.name == 'body':
             if type(collided) == Player:
                 if ((collider.rect.centery) > collided.rect.bottom-collided.movement[0]):
                     #bouncing the player up
@@ -142,96 +180,266 @@ class UFO(Boss):
                     #making the player invincible for six frames to prevent accidental damage
                     collided.invincibility_counter = 18
                     #taking damage
-                    self.hurt()
+                    if self.info['state'] != 'die': self.hurt()
+                #killing bullet
                 collided.hurt()
             elif collide_type == 1:
                 collided.hurt()
-                self.hurt()
+                if self.info['state'] != 'die': self.hurt()
+        elif collider.name == 'succ':
+            if type(collided) == Player:
+                collided.movement[0] = -3
 
-    def state_enter(self,start=False):
-        if start:...
-        self.change_state('idle')
 
-    def state_idle(self,start=False):
-        self.attributes['body'].shoot(type='angle',spd=6,info=(self.attributes['body'].rect.center, self.atk_info['angle']),shoot_if_below=True)
-        self.attributes['body'].rect.centerx = 300 + sin(self.timers['total']/15)*100
-        self.attributes['body'].rect.centery = 100 + sin(self.timers['total']/5)*25
-        self.atk_info['angle'] += 13
 
-        #figuring out when to go into the attack phase
-        if self.timers['in_state'] >= self.atk_info['when']: self.change_state('attack')
+    #the whole swaying movement
+    def idle_move(self) -> None:
+        self.attributes['body'].rect.center = (
+                300 + 200*sin(self.timers['in_state']/20),
+                200 + 50*sin(self.timers['in_state']/10)
+            )
 
-    def state_attack(self,start=False):
+
+
+    #idle state, moving from side to side
+    def state_idle(self,start:bool=False):
+        #figuring out when to attack
+        if start:
+            self.atk_info['when'] = random.randint(60,300)
+        #attacking when time is met
+        elif self.timers['in_state'] % self.atk_info['when'] == 0:
+            self.change_state('attack')
+        #movement
+        self.idle_move()
+
+
+        
+    #enter state teehee
+    def state_enter(self,start:bool=False):
+        if start:
+            self.attributes['body'].rect.centerx = pygame.display.play_dimensions[0]//2
+            self.attributes['body'].rect.centery = -200
+        #slowly lowering down to the screen
+        elif abs(self.attributes['body'].rect.centery-200) > 25:
+            self.attributes['body'].rect.centery = (self.timers['in_state']*3 + 10*sin(self.timers['in_state']/7)) - 200
+        #bobbing up and down until enter state finished
+        elif self.timers['in_state'] < 360:
+            self.attributes['body'].rect.centery = 200 + 10*sin(self.timers['in_state']/10)
+        #exit state
+        else:
+            self.change_state('idle')
+
+
+
+    #attack state
+    def state_attack(self,start:bool=False):
+        #selecting what attack to do
         if start:
             self.atk_info['type'] = random.randint(0,self.atk_info['types'])
-            self.atk_info['movepoint']= MovingPoint(pointA=self.attributes['body'].rect.center,pointB=self.player.rect.center,speed=5)
-
+            #changing animation
+            self.attributes['body'].autoimage.change_anim('chad' if (self.atk_info['type'] == 0 or self.atk_info['type'] == 2) else "succ" if self.atk_info['type'] == 1 else 'idle')
+            #startup info per attack
+            if self.atk_info['type'] == 1:
+                self.atk_info['2_direction'] = random.choice(('l','r'))
+                # self.atk_info['2_direction'] = 'r' #REMOVE THIS
+        
+        
+        #spinning shoot
         elif self.atk_info['type'] == 0:
-            #updating direction
-            if self.timers['in_state']%10 == 0: self.atk_info['movepoint'].change_all(pointB=self.player.rect.center)
-            #moving
-            self.atk_info['movepoint'].update()
-            self.attributes['body'].rect.center = self.atk_info['movepoint'].position
-            #finishing:
-            if self.timers['in_state']>360:
-                self.change_state('return')
-
-        elif self.atk_info['type'] == 1:
-            #aggressively shooting
-            self.attributes['body'].shoot(type="point",spd=random.randint(5,12),info=(self.attributes['body'].rect.center,self.player.rect.center))
-            if self.timers['in_state']>70:
-                self.change_state('return')
-            
-    def state_return(self,start=False):
-        if start:
-            #setting how to return to home base
-            self.atk_info['movepoint'] = MovingPoint(pointA = self.attributes['body'].rect.center,pointB=(300,100),speed=10,check_finished=True)
-        else:
-            #returning to home base
-            self.atk_info['movepoint'].update()
-            self.attributes['body'].rect.center = self.atk_info['movepoint'].position
-            if self.atk_info['movepoint'].finished:
-                self.change_state('idle')
-
-
-    def state_die(self,start=False):
-        if start:
-            self.atk_info['angle'] = 2
-            self.atk_info['movepoint'] = MovingPoint(pointA = self.attributes['body'].rect.center,pointB=(300,100),speed=10,check_finished=True)
-        else:
             #movement
-            if not self.atk_info['movepoint'].finished: self.atk_info['movepoint'].update()
-            self.attributes['body'].rect.center = self.atk_info['movepoint'].position
+            self.idle_move()
+            #changing angle
+            self.atk_info['1_angle'] += 15
+            self.attributes['body'].shoot("angle",7,info=(self.attributes['body'].rect.center,self.atk_info['1_angle']))
+            #returning (changing animation)
+            if self.timers['in_state'] >= 180:
+                self.atk_info['type'] = 'leave' #just so code ain't repeated, it moves to the final end statement
+        
+        #static shoot
+        elif self.atk_info['type'] == 2:
+            #adding a new spot to move to, if either the first time or
+            if (type(self.atk_info['3_move']) != tools.MovingPoint) or (self.atk_info['3_spd'] == 0 and self.atk_info['3_wait'] >= 15):
+                self.atk_info['3_move'] = tools.MovingPoint(pointA=self.attributes['body'].rect.center,pointB=(random.randint(0,600),random.randint(0,600)),speed=15,ignore_speed=True,check_finished=False)
+                self.atk_info['3_spd'] = self.atk_info['3_move'].speed #how fast the boss moves
+                self.atk_info['3_wait'] = 0 #resetting wait itmer
+                self.atk_info['3_count'] += 1 #updating counter
+                #checking to exit
+                if self.atk_info['3_count'] > self.atk_info['3_counter']:
+                    self.atk_info['type'] = 'leave' 
+                    self.atk_info['3_count'] = 0
+            #waiting 
+            elif self.atk_info['3_spd'] == 0:
+                self.atk_info['3_wait'] += 1
+                #doing a shoot spam based on movement
+                if self.atk_info['3_wait'] % 3 == 0:
+                    for i in range(30):
+                        self.attributes['body'].shoot(type="angle",spd=7,info=(self.attributes['body'].rect.center,i*15))
+            #moving
+            else:
+                #updating speed
+                self.atk_info['3_spd'] = round(self.atk_info['3_spd']*0.925,3) if self.atk_info['3_spd'] > 0.25 else 0
+                self.atk_info['3_move'].speed = self.atk_info['3_spd'] 
+                #updating movement values
+                self.atk_info['3_move'].update()
+                self.attributes['body'].rect.center = self.atk_info['3_move'].position
 
-            self.attributes['body'].rect.centerx += random.randint(-15,15)
-            self.attributes['body'].rect.centery += random.randint(-15,15)
-            #explosion
-            if self.timers['in_state'] % 5 == 0:
-                self.sprites[0].add(Em(
+
+
+
+        #succin ya up
+        elif self.atk_info['type'] == 1:
+
+            #moving off to the left
+            if self.atk_info['2_state'] == 0:
+                self.attributes['body'].rect.x += (5 if self.atk_info['2_direction'] == 'r' else -5)
+                if self.attributes['body'].rect.right < 0 or self.attributes['body'].rect.left > pygame.display.play_dimensions[0]:
+                    #preparing the swing to the left
+                    self.atk_info['2_state'] = 1
+                    #telling the boss when to swing upwards
+                    self.atk_info['2_swingpoint'] = pygame.display.play_dimensions[0]-200 if self.atk_info['2_direction'] == 'l' else 200
+                    self.atk_info['2_x'] = 0
+                    self.atk_info['2_y'] = -3
+                    self.attributes['body'].rect.centery = pygame.display.play_dimensions[1] - 200
+
+
+            #speeding to the sides
+            elif self.atk_info['2_state'] == 1:
+
+                #NOTE - l means it COMES FROM the left, and moves to the right, vice versa with r
+                if self.atk_info['2_x'] < 15 and self.atk_info['2_x'] > -15: 
+                    self.atk_info['2_x'] += 0.1 if self.atk_info['2_direction'] == 'l' else -0.1
+                self.attributes['body'].rect.x += self.atk_info['2_x']
+
+                #swinging upwards up and away wahoo
+                if abs(self.attributes['body'].rect.centerx - self.atk_info['2_swingpoint']) < 30:
+                    self.atk_info['2_state'] = 2
+
+                #positioning the succinator
+                self.attributes['succ'].rect.center = self.attributes['body'].rect.center
+
+
+            #swinging back up
+            elif self.atk_info['2_state'] == 2:
+                # print("---------------------SWING BACK")
+                #updating velocities
+                self.atk_info['2_x'] -= (1.5 if self.atk_info['2_direction'] == 'l' else -1.5)
+                self.atk_info['2_y'] += 2
+                #moving
+                self.attributes['body'].rect.x += self.atk_info['2_x']
+                self.attributes['body'].rect.y -= self.atk_info['2_y']
+                #checking to finish
+                if self.attributes['body'].rect.centery < 300:
+                    self.atk_info['type'] = 'finish'
+                    self.atk_info['2_x'] = self.atk_info['2_y'] = self.atk_info['2_state'] = self.atk_info['2_swingpoint'] = 0
+                
+                #succ effect disappearance
+                self.attributes['succ'].rect.centerx = self.attributes['body'].rect.centerx
+                self.attributes['succ'].rect.centery += self.atk_info['2_y']
+
+
+                
+     
+            
+        else:
+            #changing animation and returning
+            self.attributes['body'].autoimage.change_anim('idle')
+            self.change_state('idle')
+
+        #spazzing out effect
+        if self.atk_info['type'] == 0 or self.atk_info['type'] == 2:
+            self.attributes['body'].rect.centerx += random.randint(-5,5)
+            self.attributes['body'].rect.centery += random.randint(-5,5)
+        
+
+    
+    #dying state
+    def state_die(self,start:bool=False):
+        if start:
+            self.attributes['body'].autoimage.change_anim('dead')
+
+        #jittering around
+        self.attributes['body'].rect.centerx += random.randint(-25,25)
+        self.attributes['body'].rect.centery += random.randint(-25,25)
+
+        #borders
+        if self.attributes['body'].rect.bottom > 600:
+            self.attributes['body'].rect.y -= 25
+
+        #increasing score
+        score.score += 30
+
+        
+        #kaboom
+        if self.timers['in_state'] % 3 == 0:
+            self.sprites[0].add(Em(
                     im='kaboom',
                     coord=(random.randint(0,600),random.randint(0,500)),
                     isCenter=True,
                     animation_killonloop=True,
                     resize=(100,100)
                     ))
-            #shooting
-            self.atk_info['angle'] *= 1.1
-            self.attributes['body'].shoot(type='angle',spd=5,info=(self.attributes['body'].rect.center, self.atk_info['angle']),shoot_if_below=True)
-            #score
-            score.score += 10
-            #finihsing
-            if self.timers['in_state'] > 360:
-                Boss.state_die(self)
 
 
-class UfoBody(BossAttribute):
-    def __init__(self,host,sprites):
-        BossAttribute.__init__(self,host=host,sprites=sprites,name="UfoBody",image="ufo.png",pos=(300,100))
+        #ending
+        if self.timers['in_state'] > 240:
+            self.info['ENDBOSSEVENT'] = True
+
+
+
+    #hurting but with a cute animation
+    def hurt(self,amount=1):
+        Boss.hurt(self,amount)
+        if self.info['health'] % 5 == 0:
+            self.attributes['body'].autoimage.change_anim(
+                'hurt' +  ("CHAD" if (self.info['state'] == 'attack' and (self.atk_info['type'] == 2 or self.atk_info['type'] == 0)) else "SUCC" if (self.info['state'] == 'attack' and self.atk_info['type'] == 1) else "" )
+            )
+
+
+
+
+
+
+
+
+#NOPE
+class Nope(Boss):
+    def __init__(self,**kwargs):
+        Boss.__init__(self,kwargs=kwargs)
+        self.info['health'] = 100
+        self.addAttribute("intro",attribute=NopeIntro(host=self,sprites=self.sprites))
+        self.addAttribute("body",attribute=BossAttribute(host=self,sprites=self.sprites,name="body",image="boss_nope",pos=(-1000,-1000)))
     
+    def update(self):
+        Boss.update(self)
+        # for attribute in self.attributes.values():
+        #     attribute.update()
 
+class NopeIntro(BossAttribute):
+    def __init__(self,host,sprites):
+        BossAttribute.__init__(self,host=host,sprites=sprites,name="UFOBody",image="placeholder.bmp",pos=(pygame.display.play_dimensions[0]/2,-100))
+        self.state = 'enter'
+        self.health = 5
+        self.enter_y_momentum = 5
+        self.states = {'enter':self.state_enter,'wait':self.state_wait}
+    
+    def update(self):
+        BossAttribute.update(self)
+        try: self.states[self.state]()
+        except ValueError: self.kill()
+        print('haha me update')
+    def state_enter(self):
+        self.rect.centery += self.enter_y_momentum
+        self.enter_y_momentum = round(self.enter_y_momentum*0.99,3)
+        if self.enter_y_momentum < 1:
+            self.state='wait'
+    def state_wait(self):
+        ...
 
+ 
+    
 
 loaded = {
     "ufo":UFO,
+    "nope":Nope,
 }
     

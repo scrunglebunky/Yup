@@ -110,7 +110,8 @@ class Play(Template):
         #relating to advance sprite
         self.in_advance:bool = False #if true, will not update much besides the background and player
 
-        
+        #what boss the boss state pulls from
+        self.currBossName = "ufo"
    
     
     def on_start(self,**kwargs):#__init__ v2, pretty much.
@@ -766,7 +767,7 @@ class Boss(Template):
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
-        self.playstate.curBossName="ufo"
+        self.playstate.curBossName="nope"
         self.formation = self.playstate.formation
         self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player)
 

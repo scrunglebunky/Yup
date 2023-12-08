@@ -13,6 +13,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 12/07/23: UFO Bosses Work. Nope promised beore 12/14/23
 - 11/20/23: Bosses work now, but there a bug after game-overing where the player isn't reset. Every time playstate restarts, reinstate the boss state player.
 - 11/08/23: added bullet textures, more sounds, etc. 
 - 11/07/23: little jingle that happens when you start a new level, sounds begin to play now (LOUD, BE CAREFUL), and more plans down the line
@@ -76,11 +77,75 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+## bosses
+### UFO
+- The hat yup hiding within a mechanical body
+- [x] Idle: swinging back and forth in a double-sine position
+- [x] Attack 1: does idle animation but shooting now
+- [x] Attack 2: goes from place to place and shoots
+- [x] Attack 3: goes down and tries to suck you up with the generic ufo sucker, and swings back upward in a quick motion
+- [ ] Death: Generic explosions all around. UFO spazzes out until he flies offscreen and the boss ends
+## NOPE
+- A larger version of the usual nope, now angrier and with pupils.
+- [ ] Intro: A small Nope alone in the formation, getting visibly more pissed every time you shoot him until he flings onscreen and becomes the boss. 
+- [ ] Idle: consists of the Nope flying back and forth from different ends of the screen, horizontally. 
+- [ ] Attack 1: Moving from place to place and consistently shooting in the same pattern, like a touhou bullet rain
+- [ ] Attack 2: Locking onto yup from above and bouncing down, causing a particle effect where you have to dodge the stars.
+- [ ] Attack 3: An aggressive spammy pattern, but now aimed at you. Can be paired with the particle rain to make a really difficult dodger
+- [ ] There can be a pinch mode where the bullets come out more often.
+## CRT
+- A more endurance battle, a crt screen in the background that shows faces
+- [ ] Idle: consists of the crt doing random animations in the background while an inferno of bullets spin. There is nothing to shoot except a control panel at the top center. 
+- [ ] Intro: The windows background bluescreens, and the background zooms out to show a powered off CRT. It then powers on again, but now with an angry face. the background represents a server room. 
+- [ ] Attack 1: Bullets stop, and robotic arms on the side attempt to luneg at and grab you. Either one arm or two. 
+- [ ] Attack 2: The control panel you shoot glitches out and starts zapping random spots that are marked. 
+- [ ] Attack 3: More of a final phase. The CRT jumps off the background and comes down in replacement of the control panel. Bullet patterns are shot out like in the idle state but will occasionally change to aim at you.
+- [ ] Death: The crt screen cracks, and with an electric shock, all the power in the facility goes out. The screen goes dark, and yup flies off.
+## CRUSTACEAN
+- A boss similar to the nope, but with far less bullets and far more dumb shennanigans
+- The seafloor background changes to a rushing one, with rippling water in the middle and hoards of seashells on the side.
+- [ ] Idle: The boss idly sits static in the center, making him an easy target during his idle state.
+- [ ] Intro: Crustacean waddles on in from the side of the screen, in the background on the floors in the distance, and then pushes really hard to lunge you into the boss background screen.
+- [ ] Attack 1: Fish will spawn, and will aim at you and slowly chomp. Shooting them will push them back, but they have a lot of health. Only goes away if killed.
+- [ ] Attack 2: Crustacean spawns random shells that sit and wait a moment, before lunging at you. Note there are two animations: flying out from the boss's body, then lunging at you. They are rather large too, so they're big targets that cannot be killed.
+- [ ] Attack 3: (Last phase) Crustacean's tentacles spread out and go offscreen, before coming out the borders of the screen and swiping at you. Dodge these tentacles and the other attacks.
+- [ ] Death: The shell breaks open and crustacean effin explodes lol
+## THE SUN
+- Do I have to explain it? 
+- [ ] Intro: The background becomes more animated, and the sun's expression becomes angrier. It lowers to the bottom of the screen. 
+- [ ] Idle: Similar to CRT, with a similar inferno of bullets but now faster and more sporatic. Different rain patterns as well. Occasionally, a cloud or meme will fall from the sky. All attacks are just to break the monotony. 
+- [ ] Attack 1: Confetti rapidly rains down like the D enemy does, but with far more to dodge or shoot. 
+- [ ] Attack 2: A realistic arm comes out of the sun, and will try to punch at you horizontally. Distract it by jumping and fast-falling for it to miss. Otherwise, move to the opposite of the screen.
+- [ ] Attack 3: A line of bullets shoots down from the top, excluding one small space where you have to fit through. This can happen multiple times at once.
+- [ ] Attack 4: The sun spits out a random confusing meme, which will bounce along the screen aggressively like the Nope world's D enemies. Can happen multiple times at once.
+- [ ] Attack 5: A solar flare may occur, in which you have to reach a certain part of the screen to shield it.
+- [ ] Death: As the game progresses, the sun's face will slowly get angrier and angrier, but in the last few it starts to get tired. Survive long enough, and the sun burns out. Shooting the sun speeds up this process. Eventually, the sun burns out, and all goes black. Unlike the CRT boss, however, there are a few brief frames of everything becoming stupidly generically creepy (like creepypasta stuff) like a jumpscare before the end world screen comes up.
+## EVIL-EYE (biblica)
+- A biblically-accurate angel. More specifically one large eye surrounded by rings of smaller eyes. Wings are hard to animate.
+- [ ] Idle: biblica spazzes out with its eye looking around panicked, while her wings aggressively flap, causing a rain of feathers (bullets) to fall from the sky. The bullets are floaty.
+- [ ] Attack 1: Eyes are sent at you, akin to attack 2 of Crustacean
+- [ ] Attack 2: A belt of eyes surround the screen. Whenever one passes the center, it shoots a circle of bullets.
+- [ ] Attack 3: Wings go offscreen, akin to Crustacean's tentacles, but instead of constantly being there it gives a pattern of lefts and rights you have to follow. The wings slam down to the bottom of the screen based on it. 
+- [ ] Pinch phase: The idle feathers come down at you during all the attacks instead of stopping. The eye is bloodshot. 
+- [ ] Death: The eye pops. The scrolling vaporwave screen stops. 
+## BIG UFO (ufo2)
+- A larger version of the original UFO. You pretty much fight the bottom of it the entire time.
+- Similar to crt, there is a glass panel up top you are trying to shoot inside. 
+- [ ] Idle: large ship opening up to release a random enemy from any world, with like 10 health each. It will do this every 60 seconds or so. 
+- [ ] Attack 1: state consists of a laser beam coming down out of the release hole (you have to move out the way) with particle effects raining down from it (dodge those too)
+- [ ] Pinch: Bullet rain begins coming from the bottom on occasion, as a dripping effect
+## FINAL BOSS hatYUP
+- Inside of the mothership you came into before.
+- [ ] Intro: The ship scrolling stops as you reach the top. Another yup turns around to face you at the end, and takes a bite of your sandwich.
+- [ ] Idle: The yup moving around at the top of the screen, like you would at the bottom. It will shoot at you with the default bullet.
+- [ ] Attack 1: 
+
+
+## 
 - [x] Add sound effects for jumping, fastfalling, crouching, shooting, and enemy deaths.
 - [ ] Add varying level intros that are weird or do dumb things
 - [ ] Make the advance state create a little menu -- very similar to the game over state
 - - [ ] Add bonuses after completing a world
-- [ ] Executable events, only use of exec() function
 - [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
 - [ ] Program FINAL world
 

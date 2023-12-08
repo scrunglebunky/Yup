@@ -9,6 +9,7 @@
         "home_A","home_B","home_C","home_D",
         "aqua_A","aqua_B","aqua_C","aqua_D",
         "YUP",
+        "boss_nope","boss_ufo","boss_ufo_succ",
         "kaboom","warning","die"
     ],
     "./images/ui/":[],

@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
             False, #crouching
         ]
         #how fast the character moves
-        self.speed = 8
+        self.speed = 6
         self.crouch_speed = 3
         self.momentum = 0
 
@@ -98,9 +98,9 @@ class Player(pygame.sprite.Sprite):
 
 
             #STARTING THE JUMPS
-            if event.key == pygame.K_UP and not self.movement[3]:
+            if event.key == pygame.K_UP and self.movement[0] == 0:
                 self.bounce()
-            if event.key == pygame.K_DOWN and self.movement[3]:
+            if event.key == pygame.K_DOWN and self.movement[0] != 0:
                 self.movement[0]=25
             elif event.key == pygame.K_DOWN:
                 #crouching
@@ -156,21 +156,23 @@ class Player(pygame.sprite.Sprite):
 
         #jumping code
         #doing y momentum stuffystuff
-        if self.movement[3]:
-            self.rect.y += self.movement[0]
-            self.movement[0] += .3
-            if self.rect.center[1]>self.bar[1]:
-                #finishing the jump, including stopping values
-                self.rect.center = (self.rect.center[0],self.bar[1])
-                self.movement[3] = False
-                self.movement[0] = 0
-                self.change_anim("land")
-                #AUTO CROUCH
-                if pygame.key.get_pressed()[pygame.K_DOWN]:
-                    #crouching
-                    self.change_anim("crouch")
-                    self.movement[4] = True
-                    audio.play_sound("boowomp.mp3",channel=2)
+        self.rect.y += self.movement[0]
+        self.movement[0] += .3 if self.movement[0] != 0 else 0
+        if self.rect.center[1]>self.bar[1] and self.movement[0] != 0:
+            #finishing the jump, including stopping values
+            self.rect.center = (self.rect.center[0],self.bar[1])
+            self.movement[0] = 0
+            self.change_anim("land")
+            #AUTO CROUCH
+            if pygame.key.get_pressed()[pygame.K_DOWN]:
+                #crouching
+                self.change_anim("crouch")
+                self.movement[4] = True
+                audio.play_sound("boowomp.mp3",channel=2)
+
+            
+            
+                
         
 
 
@@ -209,7 +211,6 @@ class Player(pygame.sprite.Sprite):
     def bounce(self):
         #make the player bounce
         self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
-        self.movement[3]=True
         self.change_anim("jump")
         audio.play_sound("boing.mp3",channel=2)
         
