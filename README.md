@@ -13,6 +13,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 12/08/23: I lied Nope works now
 - 12/07/23: UFO Bosses Work. Nope promised beore 12/14/23
 - 11/20/23: Bosses work now, but there a bug after game-overing where the player isn't reset. Every time playstate restarts, reinstate the boss state player.
 - 11/08/23: added bullet textures, more sounds, etc. 
@@ -87,12 +88,12 @@
 - [ ] Death: Generic explosions all around. UFO spazzes out until he flies offscreen and the boss ends
 ## NOPE
 - A larger version of the usual nope, now angrier and with pupils.
-- [ ] Intro: A small Nope alone in the formation, getting visibly more pissed every time you shoot him until he flings onscreen and becomes the boss. 
-- [ ] Idle: consists of the Nope flying back and forth from different ends of the screen, horizontally. 
-- [ ] Attack 1: Moving from place to place and consistently shooting in the same pattern, like a touhou bullet rain
-- [ ] Attack 2: Locking onto yup from above and bouncing down, causing a particle effect where you have to dodge the stars.
-- [ ] Attack 3: An aggressive spammy pattern, but now aimed at you. Can be paired with the particle rain to make a really difficult dodger
-- [ ] There can be a pinch mode where the bullets come out more often.
+- [x] Intro: A small Nope alone in the formation, getting visibly more pissed every time you shoot him until he flings onscreen and becomes the boss. 
+- [x] Idle: consists of the Nope flying back and forth from different ends of the screen, horizontally. 
+- [x] Attack 1: Moving from place to place and consistently shooting in the same pattern, like a touhou bullet rain
+- [x] Attack 2: Locking onto yup from above and bouncing down, causing a particle effect where you have to dodge the stars.
+- [x] Attack 3: An aggressive spammy pattern, but now aimed at you. Can be paired with the particle rain to make a really difficult dodger
+- [x] There can be a pinch mode where the bullets come out more often.
 ## CRT
 - A more endurance battle, a crt screen in the background that shows faces
 - [ ] Idle: consists of the crt doing random animations in the background while an inferno of bullets spin. There is nothing to shoot except a control panel at the top center. 

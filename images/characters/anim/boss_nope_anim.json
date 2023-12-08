@@ -19,8 +19,8 @@
         "frames":[
             8,9,10,11
         ],
-        "FPS":24, 
-        "loop":0, 
+        "FPS":12, 
+        "loop":1, 
         "return_to":"idle"
         },
     "scream":{
@@ -31,7 +31,7 @@
         "loop":0, 
         "return_to":"scream"
         },
-    "ouch":{
+    "hurt":{
         "frames":[
             21,22,23,24,25,26,27,28,29,30
         ],
