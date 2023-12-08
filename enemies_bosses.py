@@ -406,6 +406,8 @@ class Nope(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
         self.info['health'] = 100
+        self.info['state'] = 'intro'
+        self.states['intro'] = self.state_intro
         self.addAttribute("intro",attribute=NopeIntro(host=self,sprites=self.sprites))
         self.addAttribute("body",attribute=BossAttribute(host=self,sprites=self.sprites,name="body",image="boss_nope",pos=(-1000,-1000)))
     
@@ -414,26 +416,76 @@ class Nope(Boss):
         # for attribute in self.attributes.values():
         #     attribute.update()
 
+
+    def collision_master(self,collider,collide_type,collided):
+        #collision for the decoy, 
+        if collider.name == 'intro':
+            #hurting player
+            if type(collided) == Player:
+                collided.hurt()
+            #hurting self and bullet
+            elif collide_type == 1:
+                collider.hurt()
+                collided.hurt()
+                # if self.info['state'] != 'die': self.hurt()
+
+    def state_intro(self,start:bool=False):
+        ...
+        #using this for explanation purposes.
+        #the start of the boss has a decoy attribute called 'intro' which is a placeholder nope enemy, and the boss only begins when that happens
+        #so for the most part, this empty intro state plays while the decoy nope does all the coding.
+        #All that is handled internally is the collision because it has to be to look nice. 
+    
+    def state_enter(self,start:bool=False):
+        if start:
+            #explosion when first entering the screen from the decoy
+            self.attributes['body'].rect.center = self.attributes['intro'].rect.center
+            self.sprites[0].add(Em(im='kaboom',coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True,resize=(350,350)))
+        elif self.timers['in_state'] < 360:
+            #aggressive jittering
+            self.attributes['body'].rect.centery = self.attributes['intro'].rect.centery + 10*sin(self.timers['in_state']/25) + random.randint(-1,1)
+            if self.timers['in_state']%2==0:self.attributes['body'].rect.centerx = pygame.display.play_dimensions[0]/2 + random.randint(-2,2)
+        else:
+            self.change_state('attack')
+
 class NopeIntro(BossAttribute):
+    #The boss decoy, which is used as a cute little intro for a nope that got way too pissed. 
     def __init__(self,host,sprites):
-        BossAttribute.__init__(self,host=host,sprites=sprites,name="UFOBody",image="placeholder.bmp",pos=(pygame.display.play_dimensions[0]/2,-100))
+        #setting values
+        BossAttribute.__init__(self,host=host,sprites=sprites,name="intro",image="placeholder.bmp",pos=(pygame.display.play_dimensions[0]/2,-100))
         self.state = 'enter'
         self.health = 5
         self.enter_y_momentum = 5
         self.states = {'enter':self.state_enter,'wait':self.state_wait}
     
     def update(self):
+        #basic update
         BossAttribute.update(self)
         try: self.states[self.state]()
         except ValueError: self.kill()
-        print('haha me update')
+        
+        
     def state_enter(self):
+        #sliding downwards 
         self.rect.centery += self.enter_y_momentum
         self.enter_y_momentum = round(self.enter_y_momentum*0.99,3)
         if self.enter_y_momentum < 1:
             self.state='wait'
+
     def state_wait(self):
+        #doing nothing when sliding
         ...
+
+    def hurt(self):
+        #changing the boss state to enter when killed
+        self.health -= 1
+        self.sprites[0].add(Em(im='die',coord=self.rect.center,isCenter=True,animation_killonloop=True))
+        if self.health <= 0:
+            self.kill()
+            self.host.change_state('enter')
+
+        
+        
 
  
     
