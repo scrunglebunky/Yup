@@ -965,6 +965,7 @@ class HurtBullet(pygame.sprite.Sprite):
         self.image = self.autoimage.image
         self.rect = self.image.get_rect()
         self.rect.center = self.move.position
+        self.dead = False
         
     def update(self):
         self.move.update()
@@ -983,6 +984,10 @@ class HurtBullet(pygame.sprite.Sprite):
     
     def hurt(self):
         self.health -= 1
+
+    def kill(self):
+        pygame.sprite.Sprite.kill(self)
+        self.dead=True
  
 
 ########OLD

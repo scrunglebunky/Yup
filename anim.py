@@ -38,6 +38,7 @@ def generate_sprite(data):
             cur_img = get_image(sheet=raw,wh=data["TILE_SIZE"],
                     xy=(data["TILE_SIZE"][0]*column,data["TILE_SIZE"][1]*row),
                     scale=data["scale"],colorkey=data["colorkey"],).convert()
+            cur_img = pygame.transform.flip(cur_img,flip_x=data['flipx'],flip_y=data['flipy'])
             spritesheet.append(cur_img)
     return spritesheet
 
@@ -50,6 +51,9 @@ def generate_masks(spritesheet):
 #06/01/2023 - USING ANIM_LOADLIST TO FIND OUT WHAT TO LOAD
 with open("./data/anim_loadlist.json","r") as raw:
     anim_loadlist = json.load(raw)
+#12/15/2023 - TAKING DEFAULT FILE
+with open("./images/default.json") as raw:
+    default = json.load(raw)
 
 
 #06/01/2023 - REVAMP OF OLD CODE - LOADING THE ANIM LOADLIST
@@ -57,12 +61,16 @@ for directory,filelist in anim_loadlist.items():
     #There is no longer a break if there's no json, as the list contains all the json files needed without any scraping
     for filename in filelist:
         with open(directory+filename+".json") as raw:
-            current_file = json.load(raw)
+            current_file = default.copy()
+            current_file.update(json.load(raw))
+
         #generating spritesheet
         spritesheet = generate_sprite(current_file)
         masksheet = generate_masks(spritesheet)
         #adding to main directory, generating a spritesheet
         all_loaded_spritesheets[filename] = (current_file,spritesheet,masksheet)
+
+
         #loading animation files if existent
         if current_file["ANIM"] is not None:
             with open(str(directory)+"anim/"+str(current_file["ANIM"]),"r") as raw:
@@ -71,6 +79,7 @@ for directory,filelist in anim_loadlist.items():
             #5/25/23 - FIXING ANIMATION FPSes"
             for animation in anim_file.keys():
                 anim_file[animation]["FPS"] = 60/anim_file[animation]["FPS"]
+        #default image
         else:
             with open("./images/characters/anim/default.json","r") as raw:
                 anim_file = json.load(raw)
@@ -199,6 +208,9 @@ class Spritesheet():
         self.current_anim_frame = 0
         self.current_anim_frame_len = 0
         self.current_anim_loop = 0 
+        #automatically changing the image so it works (only noticeable with low FPS)
+        self.image = all_loaded_spritesheets[self.name][1][self.image_displayed]
+
 
 
 
@@ -215,11 +227,13 @@ class AutoImage():
         self.type = AutoImage.fetch_info(name=self.name)
         if self.type == 'img':
             self.image = all_loaded_images[self.name]
+            if resize is not None: self.image = pygame.transform.scale(self.image,resize)
         elif self.type == 'anim':
             self.spritesheet = Spritesheet(name=self.name,current_anim=current_anim,resize=resize)
             self.image = self.spritesheet.image
         elif force_surf is not None:
             self.image = force_surf
+            if resize is not None: self.image = pygame.transform.scale(self.image,resize)
         else:
             self.image = all_loaded_images['placeholder.bmp']
     
@@ -243,3 +257,34 @@ class AutoImage():
             return 'anim'
         else:
             return 'err'
+
+
+
+#a white flashing effect
+#it flashes white what else do you want me to say 
+class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a surface to it, slowly disappearing
+    def __init__(self,surface:pygame.Surface,start_val:float=255,end_val:float=0,spd:float=10.0,img:str=None,color:str="#FFFFFF"):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.vals=[start_val,end_val,spd]
+
+        #figuring out the image, whether it be a blank color or a predefined image 
+        if img == None: 
+            self.autoimage = None
+            self.image = pygame.Surface(surface.get_size(),pygame.SRCALPHA).convert_alpha()
+            self.image.fill(color=color)
+        else:
+            self.autoimage = anim.AutoImage(name=img,resize=surface.get_size())
+            self.image = self.autoimage.image.convert_alpha()
+        #setting the current transparency
+        self.image.set_alpha(self.vals[0])
+        self.rect=self.image.get_rect()
+        
+    def update(self):
+        #slowing lowering the transparency values
+        self.vals[0] -= self.vals[2]
+        if self.vals[0] < self.vals[1]: 
+            self.kill()
+        #setting the alpha
+        self.image.set_alpha(self.vals[0])
+        

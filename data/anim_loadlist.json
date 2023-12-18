@@ -10,8 +10,10 @@
         "aqua_A","aqua_B","aqua_C","aqua_D",
         "YUP",
         "boss_nope","boss_ufo","boss_ufo_succ",
+		"boss_crt_ctrl","boss_crt_arm","boss_crt_armFLIP",
         "kaboom","warning","die"
     ],
     "./images/ui/":[],
+    "./images/bg/":["boss_crt_bg"],
     "./images/bullets/":["bullet_def","bullet_nope","bullet_hack","bullet_aqua","bullet_happy","bullet_vapor"]
 }

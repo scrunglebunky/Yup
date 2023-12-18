@@ -105,7 +105,7 @@ class Formation():
         self.pos[0] = (pygame.display.play_dimensions[0]/2) - ((len(self.spawn_list[0])*self.world_data["char_distance_x"])/2)
 
         #difficulty calculations
-        self.difficulty = self.level//2
+        self.difficulty = self.level//1
         self.attack={
             #throwdown amount = how many enemies are thrown down in an attack stance #goes up once every 10 levels
             "amount":((self.difficulty//3)+1) if (self.difficulty <= 6) else 3,

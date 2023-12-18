@@ -13,7 +13,7 @@
     "floor_move":[0,0.1],
     "bullet_texture":"bullet_def",
     
-    "levels":5,
+    "levels":2,
 
     "char_distance_x":35, 
     "char_distance_y":40,
@@ -80,7 +80,7 @@
     "overwrite":{
     },
 
-    "boss_levels":[3],
+    "boss_levels":[2],
     "bosses":["ufo"],
 
 

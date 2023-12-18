@@ -138,5 +138,8 @@ class Clock(): # a redo of pygame.clock to add more values
 
 
 
+
+
+
 demo = False #tools is just globals
 debug = False

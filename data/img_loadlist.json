@@ -1,7 +1,8 @@
 
 {
     "./images/":[],
-    "./images/characters/":["ufo.png"],
+    "./images/placeholders/":["ufo.png","crt.png","crt2.png"],
+    "./images/characters/":[],
     "./images/ui/":[
         "placeholder.bmp",
         "logo.png","score.png","debug.png",
@@ -14,7 +15,7 @@
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
         "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufos.png","ship.png",
-        "hack_form.png",
+        "hack_form.png","bluescreen.png",
         "happy_floor.png","nope_floor.png","water_floor.png"],
     "resize":[
         ["config_menu.png",[400,150]],

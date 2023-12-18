@@ -6,7 +6,6 @@ import tools
 clock = tools.Clock(pygame.time.Clock())
 run=True; cur_state = None
 
-
 defaultcolor = "#AAAAAA"
 window = pygame.display.get_surface() 
 pygame.display.rect = pygame.display.get_surface().get_rect()
@@ -27,7 +26,7 @@ border = ui_border.Border()
 
 tools.debug = True
 
-# 7/02/2023 - ADDING SPECIFIC STATES
+# 7/02/2023 - ADDING SPECIFIC STATESx
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class

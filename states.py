@@ -40,7 +40,7 @@ class Play(Template):
                  campaign:str = "main_story.order",
                  world:int = 0,
                  level:int = 0,
-                 level_in_world:int = 0,
+                 level_in_world:int = 3,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -217,7 +217,7 @@ class Play(Template):
         if self.world_data["dynamic_intensity"]:
             levels.update_intensities(self.level,self.world_data)
         #changing bg
-        self.background.change(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
+        self.background.__init__(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
         #changing floor
         self.floor = Fl(image=self.world_data['floor_img'],player=self.player,window=self.window,move=self.world_data['floor_move'],scale=self.world_data['floor_size']) if self.world_data['floor_img'] is not None else None
 
@@ -232,8 +232,6 @@ class Play(Template):
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"
             if tools.debug: 
-                if event.key == pygame.K_2:
-                    self.formation.cleared = True
                 if event.key == pygame.K_b:
                     (self.sprites if not self.is_demo else self.demo_sprites)[0].add(
                         Em(
@@ -762,17 +760,16 @@ class Boss(Template):
         self.fullwindow = self.playstate.fullwindow
         
         self.player = self.playstate.player
-        Boss.sprites[0].add(self.player);Boss.sprites[1].add(self.player)
 
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
-        self.playstate.curBossName="nope"
-        self.formation = self.playstate.formation
-        self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player)
+        self.playstate.curBossName="ufo" if self.playstate.world == 1 else "nope" if self.playstate.world == 2 else random.choice(('ufo','nope'))
+        self.playstate.curBossName="crt"
+        self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player,window=self.playstate.window,state=self)
 
     def on_start(self):
-        audio.play_song('golden_inst.mp3')
+        audio.play_song('twisted_inst.mp3')
         
         #killing all previous sprites
         eBM()
@@ -808,9 +805,10 @@ class Boss(Template):
             self.floor.draw(self.window)
         #updating all 
         Boss.sprites[0].update()
-        Boss.sprites[0].draw(self.window)
         #updating boss
         self.boss.update()
+        #draw
+        Boss.sprites[0].draw(self.window)
 
         #collision
         self.collision()

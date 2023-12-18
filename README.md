@@ -7,13 +7,14 @@
 ## IMPORTANT NOTE
 - A LOT OF THE SOUNDS, SONGS, ETC ARE ALL PLACEHOLDERS. 
 - I DO NOT OWN THE RIGHTS TO ANY OF THEM, AND IF THESE POSE A POTENTIAL ISSUE LATER DOWN THE LINE, I WILL REMOVE THEM.
-- PLACEHOLDER SONGS ARE FROM KIWIQUEST. THEY ARE NOT MINE, AND I DO NOT ASSOCIATE WITH THEM IN ANY WAY SHAPE OR FORM.
-- THESE SONGS WILL NOT BE USED IN THE FINAL PRODUCT. 
+- Sonic the hedgehog sounds: SEGA
+- Golden: kiwiquest
+- Twisted: Nayumre
 
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
-- 12/08/23: I lied Nope works now
+- 12/08/23: I lied Nope works now. Working on CRT... gonna take a while I'd say around 12/21/23
 - 12/07/23: UFO Bosses Work. Nope promised beore 12/14/23
 - 11/20/23: Bosses work now, but there a bug after game-overing where the player isn't reset. Every time playstate restarts, reinstate the boss state player.
 - 11/08/23: added bullet textures, more sounds, etc. 
@@ -85,7 +86,7 @@
 - [x] Attack 1: does idle animation but shooting now
 - [x] Attack 2: goes from place to place and shoots
 - [x] Attack 3: goes down and tries to suck you up with the generic ufo sucker, and swings back upward in a quick motion
-- [ ] Death: Generic explosions all around. UFO spazzes out until he flies offscreen and the boss ends
+- [x] Death: Generic explosions all around. UFO spazzes out until he flies offscreen and the boss ends
 ## NOPE
 - A larger version of the usual nope, now angrier and with pupils.
 - [x] Intro: A small Nope alone in the formation, getting visibly more pissed every time you shoot him until he flings onscreen and becomes the boss. 
@@ -96,7 +97,7 @@
 - [x] There can be a pinch mode where the bullets come out more often.
 ## CRT
 - A more endurance battle, a crt screen in the background that shows faces
-- [ ] Idle: consists of the crt doing random animations in the background while an inferno of bullets spin. There is nothing to shoot except a control panel at the top center. 
+- [x] Idle: consists of the crt doing random animations in the background while an inferno of bullets spin. There is nothing to shoot except a control panel at the top center. 
 - [ ] Intro: The windows background bluescreens, and the background zooms out to show a powered off CRT. It then powers on again, but now with an angry face. the background represents a server room. 
 - [ ] Attack 1: Bullets stop, and robotic arms on the side attempt to luneg at and grab you. Either one arm or two. 
 - [ ] Attack 2: The control panel you shoot glitches out and starts zapping random spots that are marked. 

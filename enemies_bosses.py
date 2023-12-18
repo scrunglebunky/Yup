@@ -3,11 +3,11 @@ from player import Player
 from anim import all_loaded_images as img
 from anim import AutoImage as AImg
 from emblems import Emblem as Em
-from math import sin
+from math import sin,atan2,degrees
 from bullets import * 
-from enemies import Template,HurtBullet
+from enemies import Template,HurtBullet,Warning
 from tools import MovingPoint
-
+from anim import WhiteFlash
 
 #a boss contains a collection of autoimages and hitboxes in order to check for very specific collision
 class Boss():
@@ -43,7 +43,12 @@ class Boss():
         }
 
         #various unorganized values
+        self.bullets = [] # an unorganized list of bullets, will not be removed when dead, has to be manually removed
+        self.bullets_del_list = []
         self.player = kwargs['player']
+        self.window = kwargs['window']
+        self.boss_state = kwargs['state'] #this is so certain values can be modified                                        
+    
     def update(self):
         #timer update
         self.timers['total'] += 1
@@ -52,6 +57,9 @@ class Boss():
         self.states[self.info['state']]()
         if self.info['health'] <= 0 and self.info['state'] != "die":
             self.change_state("die")
+        #removing dead bullets
+        if self.timers['total'] % 60 == 0:
+            self.remove_dead_bullets()
         
 
     def collision_master(self,collidername,collide_type,collided):
@@ -84,7 +92,16 @@ class Boss():
         self.info['health'] -= amount
         self.sprites[0].add(Em(im='die',coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True))
 
-        
+    #removing dead bullets
+    def remove_dead_bullets(self):
+        #thank you stackoverflow 
+        del self.bullets_del_list[:]
+        for i in range(len(self.bullets)):
+            if self.bullets[i].dead:
+                self.bullets_del_list.append(i)
+        for i in sorted(self.bullets_del_list,reverse=True):
+            del self.bullets[i]
+
 
 #a piece of a boss. think of the boss as some sort of hand controlling a bunch of puppets.
 class BossAttribute(pygame.sprite.Sprite):
@@ -115,12 +132,13 @@ class BossAttribute(pygame.sprite.Sprite):
         #graphic update
         self.autoimage.update()
         self.image = self.autoimage.image
-    def shoot(self, type: str="point", spd: int=7, info: tuple=((0,0),(100,100)), shoot_if_below: bool=True):
+    def shoot(self, type: str="point", spd: int=7, info: tuple=((0,0),(100,100)), shoot_if_below: bool=True, texture:str=None):
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
-            bullet = HurtBullet(type=type,spd=spd,info=info,texture=None)
+            bullet = HurtBullet(type=type,spd=spd,info=info,texture=texture)
             self.sprites[0].add(bullet)
             self.sprites[2].add(bullet)
+            self.host.bullets.append(bullet)
         return bullet
 
         
@@ -520,6 +538,8 @@ class Nope(Boss):
             elif self.atk_info['type'] == 0:
                 self.attributes['body'].autoimage.change_anim('scream')
 
+
+
         if self.atk_info['type'] == 0:
             #shooting attack
             if (self.timers['in_state'] % 3 == 0) or (self.info['health'] < 50):
@@ -537,7 +557,9 @@ class Nope(Boss):
                 self.atk_info['type'] = 9999 #this makes the end code run, anything outside of the defined values
         
 
+
         elif self.atk_info['type'] == 1:
+    
             #following attack 
             if self.atk_info['2_state'] == 0:
                 #indicating player the fall
@@ -581,10 +603,13 @@ class Nope(Boss):
     def state_die(self,start:bool=False):
         if start:
             self.attributes['body'].autoimage.change_anim("dead")
+        
+        #shaking in the center
         elif self.timers['in_state'] < 80:
             self.attributes['body'].rect.center = (300,100)
             self.attributes['body'].rect.x += random.randint(-5,5); self.attributes['body'].rect.y += random.randint(-3,3)
 
+        #exploding
         elif self.timers['in_state'] == 80:
             self.sprites[0].add(Em(
                     im='kaboom',
@@ -595,6 +620,7 @@ class Nope(Boss):
                     ))
             self.attributes['body'].kill()
 
+        #finishing
         elif self.timers['in_state'] > 240:
             self.info['ENDBOSSEVENT'] = True
 
@@ -607,7 +633,7 @@ class Nope(Boss):
         if self.info['health'] % 5 == 0 and not self.info['state'] == 'attack':
             self.attributes['body'].autoimage.change_anim('hurt')
 
-
+#DECOY NOPE
 class NopeIntro(BossAttribute):
     #The boss decoy, which is used as a cute little intro for a nope that got way too pissed. 
     def __init__(self,host,sprites):
@@ -650,11 +676,267 @@ class NopeIntro(BossAttribute):
         
         
 
- 
+#CRT
+class CRT(Boss):
+    def __init__(self,**kwargs):
+        Boss.__init__(self,kwargs)
+        self.states['intro'] = self.state_intro
+        self.states['switch'] = self.state_switch
+        self.info['health'] = 75
+        self.info['controlhealth'] = 75
+        self.info['state'] = 'intro'
+        #idle attack
+        self.atk_info['angle'] = 0
+        self.atk_info['wait'] = 360
+        self.atk_info['type'] = 0 
+        self.atk_info['types'] = 1
+        #pinch mode
+        self.info['pinch']:bool = False 
+        self.info['switch_state'] = 0 
+        #attack definitions are now written in the attack state
+
+
+
+        #ADDING ATTRIBUTES
+        self.addAttribute(name="ctrl",attribute=BossAttribute(host=self,sprites=self.sprites,name="ctrl",image="boss_crt_ctrl",pos=(-1000,-100)))
+        self.addAttribute(name="body",attribute=BossAttribute(host=self,sprites=self.sprites,name="body",image="crt.png",pos=(-1000,-1000)))
+        self.addAttribute(name="body2",attribute=BossAttribute(host=self,sprites=self.sprites,name="body2",image="crt2.png",pos=(pygame.display.play_dimensions[0]/2,-200)))
+        self.addAttribute(name="Larm",attribute=BossAttribute(host=self,sprites=self.sprites,name="Larm",image="boss_crt_arm",pos=(-1000,-1000)))
+        self.addAttribute(name="Rarm",attribute=BossAttribute(host=self,sprites=self.sprites,name="Rarm",image="boss_crt_armFLIP",pos=(-1000,-1000)))
+
     
+    def collision_master(self,collider,collide_type,collided):
+        #damaging the control panel, and changing the state if it dies
+        if collider.name == 'ctrl':
+            if collide_type == 1 and not self.info['pinch']:
+                collided.hurt()
+                self.sprites[0].add(Em(im='die',coord=self.attributes['ctrl'].rect.center,isCenter=True,animation_killonloop=True))
+                self.info['controlhealth'] -= 1
+                if self.info['controlhealth']%5 == 0:
+                    self.attributes['ctrl'].autoimage.change_anim('hurt')
+
+                if self.info['controlhealth'] <= 0:
+                    self.change_state('switch')
+
+        if collider.name == 'body2' :
+            if collide_type == 1 and self.info['pinch']:
+                collided.hurt()
+                self.sprites[0].add(Em(im='die',coord=self.attributes['body2'].rect.center,isCenter=True,animation_killonloop=True))
+                self.info['health'] -= 1
+                if self.info['health']%5 == 0:
+                    self.attributes['body2'].autoimage.change_anim('hurt')
+                if self.info['health'] <= 0:
+                    self.change_state('die')
+
+        if collider.name == 'Larm' or collider.name == 'Rarm' :
+            if type(collided) == Player:
+                collided.hurt()
+            if collide_type == 1 and self.info['pinch']:
+                collided.hurt()
+
+
+    def state_intro(self):
+        if self.timers['in_state'] == 10:
+            self.boss_state.playstate.background.autoimage.__init__(name="boss_crt_bg",resize=(600,800),current_anim="0")
+        # if self.timers['in_state'] % 30 == 0:
+        #     self.sprites[0].add(WhiteFlash(surface=self.window))
+        if self.timers['in_state'] == 180:
+            self.boss_state.playstate.background.autoimage.change_anim('1')
+            self.sprites[0].add(WhiteFlash(surface=self.window))
+        if self.timers['in_state'] == 210:
+            self.boss_state.playstate.background.autoimage.change_anim('2')
+            self.sprites[0].add(WhiteFlash(surface=self.window,start_val=255,spd=20.0))
+        if self.timers['in_state'] > 240:
+            self.boss_state.playstate.background.autoimage.change_anim('3')
+            self.sprites[0].add(WhiteFlash(surface=self.window,spd=2.5))
+            self.change_state('idle')
+
+
+    def state_idle(self,start:bool=False):
+
+        if start:
+            #moving attributes to be visible
+            self.attributes['ctrl'].rect.center = (pygame.display.play_dimensions[0]/2,25)
+            self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,pygame.display.play_dimensions[1]/2)
+            self.attributes['Larm'].rect.left = -10; self.attributes['Larm'].rect.centery = 300;
+            self.attributes['Rarm'].rect.right = 610; self.attributes['Rarm'].rect.centery = 300;
+            #changing timer
+            self.atk_info['wait'] = random.randint(240,360) if not self.info['pinch'] else 60
+            
+        else:
+            if self.timers['in_state'] % 30 == 0: 
+                if not self.info['pinch']:
+                    #switching shoot direction
+                    for i in range(7):
+                        self.attributes["ctrl"].shoot("angle",spd=4,info=((0,i*200),random.randint(40,65)),texture="bullet_hack")
+                        self.attributes["ctrl"].shoot("angle",spd=4,info=((200*i,0),random.randint(40,65)),texture="bullet_hack")
+                else:
+                    for i in range(5):
+                        self.attributes["ctrl"].shoot("angle",spd=7,info=((0,i*250),random.randint(40,65)),texture="bullet_hack")
+                        self.attributes["ctrl"].shoot("angle",spd=7,info=((250*i,0),random.randint(40,65)),texture="bullet_hack")
+            
+            #swinging the arms back and forth for no reason
+            self.attributes['Larm'].rect.centery = sin(self.timers['in_state']/15)*200 + 600
+            self.attributes['Rarm'].rect.centery = sin(self.timers['in_state']/20)*200 + 600
+
+            #starting attack
+            if self.timers['in_state'] > self.atk_info['wait']:
+                self.change_state('attack')
+
+ 
+    def state_attack(self,start:bool=False):
+        if start:
+            #figuring out which attack to go with
+            self.sprites[0].add(WhiteFlash(surface=self.window))
+            self.atk_info['type'] = random.randint(0,self.atk_info['types'])
+            #definitions for the first attack -> explosions
+            if self.atk_info['type'] == 0:
+                if not self.info['pinch']:
+                    for bullet in self.bullets:
+                        bullet.kill()
+                #attack 1: kabooms
+                self.atk_info['1_warnings'] = [ ] #warning.rect.center will provide as the coordinates. no need for dupe values
+                self.timers['1'] = 0 #period between warnings and explosions: 120 frames currently
+                self.atk_info['1_amount'] = 30 #will increase based on health
+                self.atk_info['1_explosions'] = [ ] #the explosions occurring at any given time. 
+                self.atk_info['1_state'] = 0 #0 is warnings, 1 is the wait, 2 is the shooting, and then it ends
+                self.atk_info['1_count'] = 0 #current explosion being created
+
+
+            #definition for second attack -> arms
+            if self.atk_info['type'] == 1:
+                for bullet in self.bullets:
+                    bullet.kill()
+                #attack 2: arms - values
+                self.atk_info['2_arm']:int = 0 #0 -> L, 1 -> R
+                self.atk_info['2_Lpos'] = self.atk_info['2_Rpos'] = 0 
+                self.atk_info['2_Lwarn'] = Warning((-1000,-1000))
+                self.atk_info['2_Rwarn'] = Warning((-1000,-1000))
+                self.timers['2'] = 0 #a timer that will reset on occasion
+                #adding the warning symbols
+                self.sprites[0].add(self.atk_info['2_Lwarn'],self.atk_info['2_Rwarn'])
+                self.atk_info['2_Lwarn'].rect.center = self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
+
+        if self.atk_info['type'] == 1:
+            self.timers['2'] += 1
+
+            if self.timers['2'] < 90:
+                self.attributes["Larm"].rect.centery = self.player.rect.centery
+                self.attributes["Rarm"].rect.centery = self.player.rect.centery
+                self.atk_info['2_Lwarn'].rect.center = self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
+
+            elif self.timers['2'] >= 90 and self.timers['2'] < 120:
+                self.attributes["Rarm"].rect.centery = self.player.rect.centery
+                self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
+            
+            elif self.timers['2'] == 120:
+                self.atk_info['2_Lwarn'].kill()
+                self.attributes["Larm"].autoimage.change_anim("atk")
+
+            elif self.timers['2'] == 160:
+                self.atk_info['2_Rwarn'].kill()
+                self.attributes["Rarm"].autoimage.change_anim("atk")
+            
+            elif self.timers['2'] > 240:
+                self.sprites[0].add(WhiteFlash(surface=self.window))
+                self.change_state('idle')
+
+        elif self.atk_info['type'] == 0:
+            #select a bunch of random coordinates, place warnings respectively in order
+            #when they are all placed, cause explosions in the order they were placed
+            if self.atk_info['1_state'] == 0 :
+                if self.timers['in_state'] % 10 == 0:
+                    warn = Warning(pos=(random.randint(0,600),random.randint(0,800)))
+                    self.atk_info['1_warnings'].append(warn)
+                    self.sprites[0].add(warn) 
+                    if len(self.atk_info['1_warnings']) > self.atk_info['1_amount']:
+                        self.atk_info['1_state'] = 1    
+            #starting warnings
+            elif self.atk_info['1_state'] == 1 :
+                self.timers['1'] += 1      
+                if self.timers['1'] > 60:
+                    self.atk_info['1_state'] = 2     
+            #exploisons
+            elif self.atk_info['1_state'] == 2 :
+                if self.timers['in_state'] % 2 == 0:
+                    if len(self.atk_info['1_warnings']) > 0:
+                        kaboom=CRT_explosion(coord=self.atk_info['1_warnings'][0].rect.center)
+                        self.sprites[0].add(kaboom);self.sprites[2].add(kaboom)
+                        self.atk_info['1_warnings'][0].kill()
+                        del self.atk_info['1_warnings'][0]  
+                    else:
+                        self.atk_info['1_state'] = 3
+            #end
+            else:
+                self.sprites[0].add(WhiteFlash(surface=self.window))
+                self.change_state('idle')      
+
+        #DOING THE EVIL IDLE BULLETS IF PINCH MODE
+        if self.info['pinch']:
+            if self.timers['in_state'] % 45 == 0: 
+                #switching shoot direction
+                for i in range(4):
+                    self.attributes["ctrl"].shoot("angle",spd=7,info=((0,i*300),random.randint(40,65)),texture="bullet_hack")
+                    self.attributes["ctrl"].shoot("angle",spd=7,info=((300*i,0),random.randint(40,65)),texture="bullet_hack")
+
+
+    def state_switch(self,start:bool=False):
+        if start: 
+            #kaboom up top, have the control panel fall off screen
+            self.info['pinch'] = True
+            self.sprites[0].add(CRT_explosion(self.attributes['ctrl'].rect.center,(250,250)))
+            self.attributes['ctrl'].y_momentum = -5
+            #arms ouchie
+            self.attributes['Larm'].autoimage.change_anim("hurtloop")
+            self.attributes['Rarm'].autoimage.change_anim("hurtloop")
+            #whiteflash
+            self.sprites[0].add(WhiteFlash(surface=self.window,spd=30))
+
+        elif self.info['switch_state'] == 0:
+            #the control panel falling
+            self.attributes['ctrl'].rect.y += self.attributes['ctrl'].y_momentum
+            self.attributes['ctrl'].y_momentum += 0.25
+            #the crt falling upwards
+            if self.attributes['body'].rect.bottom > 0: 
+                self.attributes['body'].rect.y -= self.timers['in_state']/5
+            #ending falling
+            if self.attributes['ctrl'].rect.y > pygame.display.play_dimensions[1] or self.attributes['ctrl'].y_momentum > 50 or self.timers['in_state'] > 480:
+                self.attributes['body'].kill()
+                self.attributes['ctrl'].kill()
+                self.info['switch_state'] = 1
+
+
+        elif self.info['switch_state'] == 1:
+            #moving down new control panel
+            self.attributes['body2'].rect.y += 2
+            if self.attributes['body2'].rect.y > -5 or self.timers['in_state'] > 640:
+                #switching animations and changing state
+                self.attributes['Larm'].autoimage.change_anim("idle")
+                self.attributes['Rarm'].autoimage.change_anim("idle")
+                self.sprites[0].add(WhiteFlash(surface=self.window))
+                self.change_state('idle')
+            
+        
+
+
+
+class CRT_explosion(Em):
+    def __init__(self,coord:tuple,resize:tuple=(125,125)):
+        Em.__init__(self,im="kaboom",coord=coord,isCenter=True,animation_killonloop=True,resize=(125,125))
+    def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
+        if type(collided) == Player:
+            collided.hurt()
+                
+
+            
+
+
+
+
+
 
 loaded = {
     "ufo":UFO,
     "nope":Nope,
+    "crt":CRT,
 }
-    
