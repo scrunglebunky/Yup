@@ -24,6 +24,7 @@ class Boss():
             'ENDBOSSEVENT':False, #a check to see if the boss state should end
             "phase":0, #this can be a variety of factors but is usually handled specifically by the inheritors of this class, as the amount of phases varies based off boss
             'invincible':False, #a global check for invincibility. each individual asset also has invincibility. 
+            'ENDWORLD' : False,
         }
         self.atk_info = {
             "when":120, #after how many frames in idle should I attack? 
@@ -150,7 +151,7 @@ class UFO(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
 
-        self.info['health'] = 100
+        self.info['health'] = 50
 
         #setting attack info
         self.atk_info['when'] = random.randint(60,360)
@@ -276,7 +277,7 @@ class UFO(Boss):
         #static shoot
         elif self.atk_info['type'] == 2:
             #adding a new spot to move to, if either the first time or
-            if (type(self.atk_info['3_move']) != tools.MovingPoint) or (self.atk_info['3_spd'] == 0 and self.atk_info['3_wait'] >= 15):
+            if (type(self.atk_info['3_move']) != tools.MovingPoint) or (self.atk_info['3_spd'] == 0 and self.atk_info['3_wait'] >= 1):
                 self.atk_info['3_move'] = tools.MovingPoint(pointA=self.attributes['body'].rect.center,pointB=(random.randint(0,600),random.randint(0,600)),speed=15,ignore_speed=True,check_finished=False)
                 self.atk_info['3_spd'] = self.atk_info['3_move'].speed #how fast the boss moves
                 self.atk_info['3_wait'] = 0 #resetting wait itmer
@@ -289,9 +290,8 @@ class UFO(Boss):
             elif self.atk_info['3_spd'] == 0:
                 self.atk_info['3_wait'] += 1
                 #doing a shoot spam based on movement
-                if self.atk_info['3_wait'] % 3 == 0:
-                    for i in range(30):
-                        self.attributes['body'].shoot(type="angle",spd=7,info=(self.attributes['body'].rect.center,i*15))
+                for i in range(30):
+                    self.attributes['body'].shoot(type="angle",spd=7,info=(self.attributes['body'].rect.center,i*15))
             #moving
             else:
                 #updating speed
@@ -424,7 +424,7 @@ class Nope(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
         #setting basic info
-        self.info['health'] = 150
+        self.info['health'] = 100
         self.info['state'] = 'intro'
         self.states['intro'] = self.state_intro
         #adding attributes
@@ -505,7 +505,7 @@ class Nope(Boss):
 
     def state_idle(self,start:bool=False):
         #in the idle state, moving from point to point at random
-        if self.atk_info['idle_move'].speed < (0.5 if self.info['health'] > 50 else 5):
+        if self.atk_info['idle_move'].speed < (0.5 if self.info['health'] > 30 else 5):
             self.atk_info['idle_move'] = tools.MovingPoint(pointA=self.attributes['body'].rect.center,pointB=(random.randint(0,600),random.randint(0,400)),ignore_speed=True,speed=10)
             #shooting
             for i in range(15): self.attributes['body'].shoot(type="angle",spd=7,info=(self.attributes['body'].rect.center,i*24))
@@ -546,7 +546,7 @@ class Nope(Boss):
                 self.attributes['body'].shoot(type="angle",spd=5,info=(self.attributes['body'].rect.center,self.timers['in_state']*13))
             if (self.timers['in_state'] % 45 == 0) or (self.info['health']<50 and self.timers['in_state'] % 35 == 0):
                 self.attributes['body'].shoot(spd=10,info=(self.attributes['body'].rect.center,self.player.rect.center))
-                if self.info['health'] < 50:
+                if self.info['health'] < 30:
                     for i in range(5):
                         self.attributes['body'].shoot(spd=random.randint(7,10),info=(self.attributes['body'].rect.center,(self.player.rect.centerx+random.randint(-25,25),self.player.rect.centery+random.randint(-25,25))))
 
@@ -719,7 +719,7 @@ class CRT(Boss):
                     self.change_state('switch')
 
         if collider.name == 'body2' :
-            if collide_type == 1 and self.info['pinch']:
+            if collide_type == 1 and self.info['pinch'] and self.info['state'] != 'die':
                 collided.hurt()
                 self.sprites[0].add(Em(im='die',coord=self.attributes['body2'].rect.center,isCenter=True,animation_killonloop=True))
                 self.info['health'] -= 1
@@ -764,7 +764,7 @@ class CRT(Boss):
             self.atk_info['wait'] = random.randint(240,360) if not self.info['pinch'] else 60
             
         else:
-            if self.timers['in_state'] % 30 == 0: 
+            if self.timers['in_state'] % 45 == 0: 
                 if not self.info['pinch']:
                     #switching shoot direction
                     for i in range(7):
@@ -789,12 +789,15 @@ class CRT(Boss):
             #figuring out which attack to go with
             self.sprites[0].add(WhiteFlash(surface=self.window))
             self.atk_info['type'] = random.randint(0,self.atk_info['types'])
+            if not self.info['pinch']: 
+                for bullet in self.bullets: bullet.kill()
             #definitions for the first attack -> explosions
             if self.atk_info['type'] == 0:
-                if not self.info['pinch']:
-                    for bullet in self.bullets:
-                        bullet.kill()
                 #attack 1: kabooms
+                if '1_warnings' in self.atk_info.keys():
+                    for warning in self.atk_info['1_warnings']:
+                        warning.kill()
+                    del self.atk_info['1_warnings'][:]
                 self.atk_info['1_warnings'] = [ ] #warning.rect.center will provide as the coordinates. no need for dupe values
                 self.timers['1'] = 0 #period between warnings and explosions: 120 frames currently
                 self.atk_info['1_amount'] = 30 #will increase based on health
@@ -805,9 +808,10 @@ class CRT(Boss):
 
             #definition for second attack -> arms
             if self.atk_info['type'] == 1:
-                for bullet in self.bullets:
-                    bullet.kill()
                 #attack 2: arms - values
+                if '2_Lwarn' in self.atk_info.keys():
+                    self.atk_info['2_Lwarn'].kill()
+                    self.atk_info['2_Rwarn'].kill()
                 self.atk_info['2_arm']:int = 0 #0 -> L, 1 -> R
                 self.atk_info['2_Lpos'] = self.atk_info['2_Rpos'] = 0 
                 self.atk_info['2_Lwarn'] = Warning((-1000,-1000))
@@ -883,6 +887,7 @@ class CRT(Boss):
     def state_switch(self,start:bool=False):
         if start: 
             #kaboom up top, have the control panel fall off screen
+            self.info['switch_state'] = 0
             self.info['pinch'] = True
             self.sprites[0].add(CRT_explosion(self.attributes['ctrl'].rect.center,(250,250)))
             self.attributes['ctrl'].y_momentum = -5
@@ -891,6 +896,11 @@ class CRT(Boss):
             self.attributes['Rarm'].autoimage.change_anim("hurtloop")
             #whiteflash
             self.sprites[0].add(WhiteFlash(surface=self.window,spd=30))
+            #removing all warnings
+            if '1_warnings' in self.atk_info.keys():
+                for warning in self.atk_info['1_warnings']:
+                    warning.kill()
+                del self.atk_info['1_warnings'][:]
 
         elif self.info['switch_state'] == 0:
             #the control panel falling
@@ -916,8 +926,38 @@ class CRT(Boss):
                 self.sprites[0].add(WhiteFlash(surface=self.window))
                 self.change_state('idle')
             
-        
+    def state_die(self,start:bool=False):
+        if start:
+            #graphical effects
+            self.sprites[0].add(WhiteFlash(surface=self.window,spd=5.0)) #white flash
+            newbg=pygame.Surface(pygame.display.play_dimensions);newbg.fill('black')
+            self.boss_state.playstate.background.autoimage.__init__(force_surf=newbg)
+            #defining movement
+            self.info['die_state'] = 0 
+            self.sprites[0].add(CRT_explosion(self.attributes['body2'].rect.center,(350,350)))
+            self.attributes['body2'].y_momentum = -10
+            self.attributes['body2'].rotate = 0 
+            #killing attributes
+            for k,v in self.attributes.items():
+                if k != 'body2':v.kill()
+            #warnings
+            if '2_Lwarn' in self.atk_info.keys():
+                self.atk_info['2_Lwarn'].kill()
+                self.atk_info['2_Rwarn'].kill()
+            #more warnings
+            if '1_warnings' in self.atk_info.keys():
+                for warning in self.atk_info['1_warnings']:
+                    warning.kill()
 
+        #kaboom falling
+        elif self.info['die_state'] == 0:
+            if self.attributes['body2'].rect.top < pygame.display.play_dimensions[1]:
+                self.attributes['body2'].rect.y += self.attributes['body2'].y_momentum
+                self.attributes['body2'].y_momentum += .5
+                self.attributes['body2'].rotate += 25
+                self.attributes['body2'].image = pygame.transform.rotate(self.attributes['body2'].image,self.attributes['body2'].rotate)
+            elif self.timers['in_state'] > 360:
+                self.info['ENDWORLD'] = self.info['ENDBOSSEVENT'] = True                
 
 
 class CRT_explosion(Em):
@@ -928,7 +968,54 @@ class CRT_explosion(Em):
             collided.hurt()
                 
 
+
+
+
+#CRUSTACEAN
+class Crustacean(Boss):
+    def __init__(self,**kwargs):
+        Boss.__init__(self,kwargs=kwargs)
+        self.info['health'] = 50
+        self.info['shellhealth'] = 200
+        self.atk_info['enter_time'] = 0 
+        self.state = 'enter'
+
+        self.addAttribute('shell',BossAttribute(host=self,sprites=self.sprites,name="shell",pos=(-100,100)))
+        self.addAttribute('body',BossAttribute(host=self,sprites=self.sprites,name="body",pos=(-100,100)))
+
+    def state_enter(self,start=False):
+        #positioning
+        if start:
+            self.attributes['body'].rect.center = (-100,100)
+        
+        elif self.timers['in_state'] < 240:
+            #waddling onscreen
+            if abs(self.attributes['body'].rect.centerx - pygame.display.play_dimensions[0]/2) > 10:
+                self.attributes['body'].rect.centerx += 2.5 +(sin(self.timers['in_state']/5))
             
+        elif self.timers['in_state'] == 240:
+            #play hold animation
+            self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,100)
+            self.attributes['body'].autoimage.change_anim('start_hold')
+        
+        elif self.timers['in_state'] == 330:
+            #play push animation, change bg, new scrolling effect
+            self.sprites[0].add(WhiteFlash(surface=self.window))
+            self.attributes['body'].autoimage.change_anim('start_push')
+            #change bg, like completely initialize it and make the scroll speed QUICK
+
+        elif self.timers['in_state'] == 390:
+            #new idle animation, begin idle state
+            self.change_state('idle')
+        
+        else:
+            pass
+
+            
+    def state_idle(self,start=False):
+        ...     
+            
+
 
 
 
@@ -939,4 +1026,5 @@ loaded = {
     "ufo":UFO,
     "nope":Nope,
     "crt":CRT,
+    "crustacean":Crustacean
 }

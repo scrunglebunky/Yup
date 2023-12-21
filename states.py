@@ -40,7 +40,7 @@ class Play(Template):
                  campaign:str = "main_story.order",
                  world:int = 0,
                  level:int = 0,
-                 level_in_world:int = 3,
+                 level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -111,7 +111,7 @@ class Play(Template):
         self.in_advance:bool = False #if true, will not update much besides the background and player
 
         #what boss the boss state pulls from
-        self.currBossName = "ufo"
+        self.curBossName = "ufo"
    
     
     def on_start(self,**kwargs):#__init__ v2, pretty much.
@@ -176,14 +176,13 @@ class Play(Template):
             #checking to see if the next world should be a boss intermission -- does not update levels
             elif self.level_in_world + 1 in self.world_data['boss_levels']:
                 self.next_state = "boss"
+                self.curBossName = self.world_data['bosses'][self.world_data['boss_levels'].index(self.level_in_world + 1)]
                 self.level_in_world += 1
                 return
             #if not, updating everything
             else:
                 self.level += 1
                 self.level_in_world += 1
-                if self.world_data["dynamic_intensity"]:
-                    levels.update_intensities(self.level,self.world_data)
                 self.formation.empty()
                 
             #restarting the formation
@@ -213,9 +212,6 @@ class Play(Template):
         self.world += 1
         self.level_in_world = 0
         self.world_data = levels.fetch_level_info(campaign_world = (self.campaign,self.world))
-        #updating based on intensity
-        if self.world_data["dynamic_intensity"]:
-            levels.update_intensities(self.level,self.world_data)
         #changing bg
         self.background.__init__(self.world_data['bg'], resize = self.world_data['bg_size'], speed = self.world_data['bg_speed'])
         #changing floor
@@ -734,7 +730,7 @@ class Advance(Template):
                 coord=coord,
                 isCenter=True,
                 animation_killonloop=True,
-                resize=(200,200)
+                resize=animation_resize
                 ))
 
 
@@ -764,8 +760,8 @@ class Boss(Template):
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
-        self.playstate.curBossName="ufo" if self.playstate.world == 1 else "nope" if self.playstate.world == 2 else random.choice(('ufo','nope'))
-        self.playstate.curBossName="crt"
+        self.playstate.curBossName=self.playstate.curBossName
+        # self.playstate.curBossName="crustacean"
         self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player,window=self.playstate.window,state=self)
 
     def on_start(self):
@@ -818,7 +814,7 @@ class Boss(Template):
             self.next_state = "gameover"
         #figuring out what to do when the boss dies
         if self.boss.info['ENDBOSSEVENT']:
-            self.next_state = "play"
+            self.next_state = "play" if not self.boss.info['ENDWORLD'] else 'advance'
 
     def event_handler(self,event):
         Play.event_handler(self,event)

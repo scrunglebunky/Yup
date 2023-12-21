@@ -10,10 +10,13 @@
 - Sonic the hedgehog sounds: SEGA
 - Golden: kiwiquest
 - Twisted: Nayumre
+- Losing Results: Nintendo
+- 
 
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 12/19/23: Two days early! CRT with placeholders is done. Working on Crustacean. Will finish at 12/30/2023
 - 12/08/23: I lied Nope works now. Working on CRT... gonna take a while I'd say around 12/21/23
 - 12/07/23: UFO Bosses Work. Nope promised beore 12/14/23
 - 11/20/23: Bosses work now, but there a bug after game-overing where the player isn't reset. Every time playstate restarts, reinstate the boss state player.
@@ -106,7 +109,7 @@
 ## CRUSTACEAN
 - A boss similar to the nope, but with far less bullets and far more dumb shennanigans
 - The seafloor background changes to a rushing one, with rippling water in the middle and hoards of seashells on the side.
-- [ ] Idle: The boss idly sits static in the center, making him an easy target during his idle state.
+- [ ] Idle: The boss idly sits static in the center, making him an easy target during his idle state. However he has a TON of health. His soft side has less. 
 - [ ] Intro: Crustacean waddles on in from the side of the screen, in the background on the floors in the distance, and then pushes really hard to lunge you into the boss background screen.
 - [ ] Attack 1: Fish will spawn, and will aim at you and slowly chomp. Shooting them will push them back, but they have a lot of health. Only goes away if killed.
 - [ ] Attack 2: Crustacean spawns random shells that sit and wait a moment, before lunging at you. Note there are two animations: flying out from the boss's body, then lunging at you. They are rather large too, so they're big targets that cannot be killed.
@@ -143,15 +146,34 @@
 - [ ] Attack 1: 
 
 
-## 
-- [x] Add sound effects for jumping, fastfalling, crouching, shooting, and enemy deaths.
-- [ ] Add varying level intros that are weird or do dumb things
-- [ ] Make the advance state create a little menu -- very similar to the game over state
-- - [ ] Add bonuses after completing a world
+## AUDIO
+- **PLAYER**: [ ] Jump [ ] Fast-Fall [ ] Shoot [x] Hurt [ ] Dead
+- **ENEMIES**: [ ] Global-fall [ ] Global-die
+
+
+## CONTENT
+- [ ] Level intro indicator should have a dozen or so different effects. 
+- [ ] Advance state should behave like the gameover state. [ ] Background [ ] Bonuses [ ] Music
+- [ ] Emblems tween effect, where you place them somewhere and they stretch back to the original pos.
 - [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
 - [ ] Program FINAL world
 
-- [NEVERMIND] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
+## OPTIMIZATION
+- [ ] file called "bosses" that pulls boss file out of the bosses folder
+- [ ] file called "states" that pulls out state files out of the states folde
+- [ ] call tools Global, and condense settings, clock, display, and global values within
+- [ ] anim should be used for anything with images. put Emblems, scoreboard loading, and text inside of it.
+- [ ] make UI_Border use emblems that can be universally accessed and used. 
+- [ ] put UI_Border object inside global instead of main
+- [ ] put most main-accessible values inside global for easy modification
+## BUGS
+- [ ] Every world except the first one starts at level 1 instead of 0. This is due to the way that state_play updates levels and does not initialize every new world. Check this off when every world either starts at level 0 or the issue is understood.
+- [ ] When the boss state selectively chooses to run advance state instead of playstate, for some reason playstate begins and runs in the middle of advancestate
+- [ ] Audio will clip out and run separately in different channels. Sort that out. 
+
+
+## FEATURES
+- [ ] Add IntroEvent for worlds: plays special image cutscene -- fleshes out worlds and makes the game feel longer
 - [x] Add IntroEvent for levels: new text after each level is complete, between levels not worlds  -- fleshes out levels and makes them feel longedr
 - [NEVERMIND] Add events usable in levels called IntroEvent, which pulls from a new file to be created
 - [x] Add a floor that moves with the player's y-velocity

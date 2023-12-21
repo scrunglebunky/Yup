@@ -24,14 +24,14 @@ import states as all_states
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
 
-tools.debug = True
+tools.debug = False  
 
 # 7/02/2023 - ADDING SPECIFIC STATESx
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "boss"
+state = "title"
 states["play"] = all_states.Play(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = all_states.Pause(window=window,play_state=states["play"])

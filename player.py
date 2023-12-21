@@ -39,12 +39,12 @@ class Player(pygame.sprite.Sprite):
             False, #crouching
         ]
         #how fast the character moves
-        self.speed = 6
+        self.speed = 4
         self.crouch_speed = 3
         self.momentum = 0
 
         #HEALTH
-        self.health = 3
+        self.health = 15
         self.invincibility_counter = 0 
         self.dead = self.health < 1
 
@@ -93,8 +93,10 @@ class Player(pygame.sprite.Sprite):
             #ENGAGING the movement
             if event.key == pygame.K_LEFT:
                 self.movement[1] = True
+                self.movement[2] = False
             if event.key == pygame.K_RIGHT:
                 self.movement[2] = True
+                self.movement[1] = False
 
 
             #STARTING THE JUMPS
@@ -151,13 +153,14 @@ class Player(pygame.sprite.Sprite):
             self.momentum = self.speed*-1 if not self.movement[4] else self.crouch_speed*-1
         elif self.movement[2]: 
             self.momentum = self.speed if not self.movement[4] else self.crouch_speed
+        
 
-        self.momentum *= 0.85 if (self.momentum > 1 or self.momentum < -1) else 0
 
         #jumping code
         #doing y momentum stuffystuff
         self.rect.y += self.movement[0]
         self.movement[0] += .3 if self.movement[0] != 0 else 0
+
         if self.rect.center[1]>self.bar[1] and self.movement[0] != 0:
             #finishing the jump, including stopping values
             self.rect.center = (self.rect.center[0],self.bar[1])
@@ -168,19 +171,15 @@ class Player(pygame.sprite.Sprite):
                 #crouching
                 self.change_anim("crouch")
                 self.movement[4] = True
-                audio.play_sound("boowomp.mp3",channel=2)
-
-            
-            
-                
-        
-
-
+                audio.play_sound("boowomp.mp3",channel=2)        
         #Actually making the player move, bouncing the character off the bars if needed
         if (self.rect.center[0] + self.momentum) < self.bar[2][0] or (self.rect.center[0] + self.momentum) > self.bar[2][1]: 
             self.momentum = 0
             self.change_anim("squish")
+
         self.rect.x += self.momentum
+        self.momentum *= 0.5 if (self.momentum > 1 or self.momentum < -1) else 0
+
 
     def health_update(self):
         #HEALTH checking
