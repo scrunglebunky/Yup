@@ -11,9 +11,10 @@
         "YUP",
         "boss_nope","boss_ufo","boss_ufo_succ",
 		"boss_crt_ctrl","boss_crt_arm","boss_crt_armFLIP",
+		"tentacle","crust_fish","boss_sun",
         "kaboom","warning","die"
     ],
     "./images/ui/":[],
-    "./images/bg/":["boss_crt_bg"],
+    "./images/bg/":["boss_crt_bg","boss_sun_bg"],
     "./images/bullets/":["bullet_def","bullet_nope","bullet_hack","bullet_aqua","bullet_happy","bullet_vapor"]
 }

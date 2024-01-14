@@ -236,6 +236,8 @@ class AutoImage():
             if resize is not None: self.image = pygame.transform.scale(self.image,resize)
         else:
             self.image = all_loaded_images['placeholder.bmp']
+            if resize is not None: self.image = pygame.transform.scale(self.image,resize)
+
     
     def update(self):
         if self.spritesheet is not None: 

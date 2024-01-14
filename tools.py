@@ -77,6 +77,8 @@ class AnglePoint():
             sin(angleRAD) * (speed if static_speed else 1)
         )
 
+
+#a movingpoint that moves across a list of points
 class MovingPoints(MovingPoint):
     def __init__(self,pos:tuple,points:list,speed:int=1,final_pos:list=None):
         self.pos = list(pos)
@@ -126,7 +128,7 @@ class MovingPoints(MovingPoint):
 
 
 
-
+#pygame.Cock but global now
 class Clock(): # a redo of pygame.clock to add more values
     def __init__(self,clock,FPS=60): #initiating stuff
         self.FPS = FPS
@@ -140,6 +142,6 @@ class Clock(): # a redo of pygame.clock to add more values
 
 
 
-
-demo = False #tools is just globals
+#global values -- gonna change this to globals soon
+demo = False
 debug = False

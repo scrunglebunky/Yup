@@ -39,7 +39,7 @@ class Player(pygame.sprite.Sprite):
             False, #crouching
         ]
         #how fast the character moves
-        self.speed = 4
+        self.speed = 7.5
         self.crouch_speed = 3
         self.momentum = 0
 
@@ -137,8 +137,12 @@ class Player(pygame.sprite.Sprite):
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
                 self.movement[1] = False
+                if pygame.key.get_pressed()[pygame.K_RIGHT]: self.movement[2] = True
+
             if event.key == pygame.K_RIGHT:
                 self.movement[2] = False
+                if pygame.key.get_pressed()[pygame.K_LEFT]: self.movement[1] = True
+
             #un-crouching
             if event.key == pygame.K_DOWN:
                 self.movement[4] = False

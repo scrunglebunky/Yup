@@ -1,4 +1,4 @@
-#PROGRAM BY ANDREW CHURCH
+#PROGRAM BY ANDREW CHURCH - test
 import pygame,os,text,random,json 
 from options import settings 
 import tools
@@ -11,6 +11,7 @@ window = pygame.display.get_surface()
 pygame.display.rect = pygame.display.get_surface().get_rect()
 pygame.display.play_pos = 20,20
 pygame.display.play_dimensions = 600,800 #oh cool, I can make a self variable in the pygame.display. hot.
+pygame.display.play_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 pygame.display.set_caption("YUP RevD")
 
 
@@ -24,14 +25,14 @@ import states as all_states
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
 
-tools.debug = False  
+tools.debug = True  
 
-# 7/02/2023 - ADDING SPECIFIC STATESx
+# 7/02/2023 - ADDING SPECIFIC STATES
 # Since states are classes, each time you make a new one a new object will be created
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title"
+state = "boss"
 states["play"] = all_states.Play(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = all_states.Pause(window=window,play_state=states["play"])
@@ -56,7 +57,7 @@ def state_switch(
         cur_state.on_start() #telling state it's been started
     elif type(state) == tuple and (type(state[0]) == str and state[0].lower() in states.keys()):
         cur_state.on_end(); cur_state.next_state = None
-        cur_state = states[state[0].lower()]
+        state = states[state[0].lower()]
         cur_state.on_start(return_state = state[1])
     else:
         global run

@@ -8,6 +8,7 @@ from bullets import *
 from enemies import Template,HurtBullet,Warning
 from tools import MovingPoint
 from anim import WhiteFlash
+winrect = pygame.display.play_rect
 
 #a boss contains a collection of autoimages and hitboxes in order to check for very specific collision
 class Boss():
@@ -25,6 +26,7 @@ class Boss():
             "phase":0, #this can be a variety of factors but is usually handled specifically by the inheritors of this class, as the amount of phases varies based off boss
             'invincible':False, #a global check for invincibility. each individual asset also has invincibility. 
             'ENDWORLD' : False,
+            "LAYERPLAYERINFRONT":False, #draws the player a second time if checked, in front of everything else
         }
         self.atk_info = {
             "when":120, #after how many frames in idle should I attack? 
@@ -63,7 +65,7 @@ class Boss():
             self.remove_dead_bullets()
         
 
-    def collision_master(self,collidername,collide_type,collided):
+    def collision_master(self,collider,collide_type,collided):
         #first value -> attribute that found collision #second value -> type of sprite the attribute collided with #third value -> the actual item
         ...
     def addAttribute(self,name:str,attribute):
@@ -91,7 +93,6 @@ class Boss():
         self.states[self.info['state']](start=True)
     def hurt(self,amount=1):
         self.info['health'] -= amount
-        self.sprites[0].add(Em(im='die',coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True))
 
     #removing dead bullets
     def remove_dead_bullets(self):
@@ -102,6 +103,15 @@ class Boss():
                 self.bullets_del_list.append(i)
         for i in sorted(self.bullets_del_list,reverse=True):
             del self.bullets[i]
+
+    def shoot(self, type: str="point", spd: int=7, info: tuple=((0,0),(100,100)), shoot_if_below: bool=True, texture:str=None):
+        bullet=None
+        if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
+            bullet = HurtBullet(type=type,spd=spd,info=info,texture=texture)
+            self.sprites[0].add(bullet)
+            self.sprites[2].add(bullet)
+            self.host.bullets.append(bullet)
+        return bullet
 
 
 #a piece of a boss. think of the boss as some sort of hand controlling a bunch of puppets.
@@ -236,7 +246,7 @@ class UFO(Boss):
     #enter state teehee
     def state_enter(self,start:bool=False):
         if start:
-            self.attributes['body'].rect.centerx = pygame.display.play_dimensions[0]//2
+            self.attributes['body'].rect.centerx = winrect.centerx
             self.attributes['body'].rect.centery = -200
         #slowly lowering down to the screen
         elif abs(self.attributes['body'].rect.centery-200) > 25:
@@ -496,7 +506,7 @@ class Nope(Boss):
         elif self.timers['in_state'] < 60: #change later
             #aggressive jittering
             self.attributes['body'].rect.centery = self.attributes['intro'].rect.centery + 10*sin(self.timers['in_state']/25) + random.randint(-1,1)
-            if self.timers['in_state']%2==0:self.attributes['body'].rect.centerx = pygame.display.play_dimensions[0]/2 + random.randint(-2,2)
+            if self.timers['in_state']%2==0:self.attributes['body'].rect.centerx = winrect.centerx + random.randint(-2,2)
         else:
             #changing the state to idle
             self.change_state('idle')
@@ -638,7 +648,7 @@ class NopeIntro(BossAttribute):
     #The boss decoy, which is used as a cute little intro for a nope that got way too pissed. 
     def __init__(self,host,sprites):
         #setting values
-        BossAttribute.__init__(self,host=host,sprites=sprites,name="intro",image="nope_D",pos=(pygame.display.play_dimensions[0]/2,-100))
+        BossAttribute.__init__(self,host=host,sprites=sprites,name="intro",image="nope_D",pos=(winrect.centerx,-100))
         self.state = 'enter'
         self.health = 5
         self.enter_y_momentum = 5
@@ -700,7 +710,7 @@ class CRT(Boss):
         #ADDING ATTRIBUTES
         self.addAttribute(name="ctrl",attribute=BossAttribute(host=self,sprites=self.sprites,name="ctrl",image="boss_crt_ctrl",pos=(-1000,-100)))
         self.addAttribute(name="body",attribute=BossAttribute(host=self,sprites=self.sprites,name="body",image="crt.png",pos=(-1000,-1000)))
-        self.addAttribute(name="body2",attribute=BossAttribute(host=self,sprites=self.sprites,name="body2",image="crt2.png",pos=(pygame.display.play_dimensions[0]/2,-200)))
+        self.addAttribute(name="body2",attribute=BossAttribute(host=self,sprites=self.sprites,name="body2",image="crt2.png",pos=(winrect.centerx,-200)))
         self.addAttribute(name="Larm",attribute=BossAttribute(host=self,sprites=self.sprites,name="Larm",image="boss_crt_arm",pos=(-1000,-1000)))
         self.addAttribute(name="Rarm",attribute=BossAttribute(host=self,sprites=self.sprites,name="Rarm",image="boss_crt_armFLIP",pos=(-1000,-1000)))
 
@@ -756,8 +766,8 @@ class CRT(Boss):
 
         if start:
             #moving attributes to be visible
-            self.attributes['ctrl'].rect.center = (pygame.display.play_dimensions[0]/2,25)
-            self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,pygame.display.play_dimensions[1]/2)
+            self.attributes['ctrl'].rect.center = (winrect.centerx,25)
+            self.attributes['body'].rect.center = (winrect.centerx,pygame.display.play_dimensions[1]/2)
             self.attributes['Larm'].rect.left = -10; self.attributes['Larm'].rect.centery = 300;
             self.attributes['Rarm'].rect.right = 610; self.attributes['Rarm'].rect.centery = 300;
             #changing timer
@@ -962,10 +972,14 @@ class CRT(Boss):
 
 class CRT_explosion(Em):
     def __init__(self,coord:tuple,resize:tuple=(125,125)):
+        self.lifespan = 0
         Em.__init__(self,im="kaboom",coord=coord,isCenter=True,animation_killonloop=True,resize=(125,125))
+    def update(self):
+        Em.update(self)
+        self.lifespan += 1
     def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
-        if type(collided) == Player:
-            collided.hurt()
+        if self.lifespan >= 15: return
+        elif type(collided) == Player:collided.hurt()
                 
 
 
@@ -975,13 +989,72 @@ class CRT_explosion(Em):
 class Crustacean(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
-        self.info['health'] = 50
-        self.info['shellhealth'] = 200
+        #basic information
+        self.info['health'] = 25 #needed to trigger phase 2 if you shoot accurately
+        self.info['shellhealth'] = 600 #needed to trigger phase 2 if you shoot him enough
+        self.info['pinch'] = self.info['pinch2'] = False
+        self.states['pinch'] = self.state_pinch
+        self.states['final'] = self.state_final
+        self.bg = self.boss_state.playstate.background
+
+        #attack information
         self.atk_info['enter_time'] = 0 
         self.state = 'enter'
+        self.atk_info['types'] = 3 #0 -> conch spam, 1 -> fish spam, 2 -> spinning and circling the border, 3 -> tentacles swiping from the sides
+        self.atk_info['type'] = 0 # current attack
+        
+        #attributes
+        self.addAttribute('body',BossAttribute(host=self,sprites=self.sprites,name="body",pos=(-100,100),image="crustbody.png"))
+        self.addAttribute('shell',BossAttribute(host=self,sprites=self.sprites,name="shell",pos=(-100,100),image="crustshell.png"))
 
-        self.addAttribute('shell',BossAttribute(host=self,sprites=self.sprites,name="shell",pos=(-100,100)))
-        self.addAttribute('body',BossAttribute(host=self,sprites=self.sprites,name="body",pos=(-100,100)))
+
+
+    def update(self):
+        Boss.update(self)
+        # if self.info['state'] == 'idle':
+        #     self.attributes['shell'].image = pygame.transform.rotate(self.attributes['shell'].image,self.atk_info['idle_angle']/2)
+        #     self.attributes['shell'].rect = self.attributes['shell'].image.get_rect()
+        #     self.attributes['body'].image = pygame.transform.rotate(self.attributes['body'].image,self.atk_info['idle_angle']/2)
+        #     self.attributes['body'].rect = self.attributes['body'].image.get_rect()
+        #     self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,100)
+        self.attributes['shell'].rect.center = self.attributes['body'].rect.center
+        
+
+    def collision_master(self,collider,collide_type,collided):
+        if (collider.name == "shell" or collider.name == "body") and self.info['state'] != 'final' and self.info['state'] != 'enter':
+            #jump code
+            if type(collided) == Player:
+                if ((collider.rect.centery) > collided.rect.bottom-collided.movement[0]):
+                    #bouncing the player up
+                    collided.bounce()
+                    #making the player invincible for six frames to prevent accidental damage
+                    collided.invincibility_counter = 18
+                    self.info[('shell' if collider.name == 'shell' else '')+'health'] -= 1
+                #hurting player if not invincible
+                else:
+                    collided.hurt()
+            #bullet interaction code
+            elif collide_type == 1: 
+                self.info[('shell' if collider.name == 'shell' else '')+'health'] -= 1
+                collided.hurt()
+        #CODE EXCLUSIVELY FOR PHASE 3
+        elif collider.name == 'body' and self.info['state'] == 'final':
+            if type (collided) == Player:
+                collided.hurt()
+                self.attributes['body'].rect.y -= 100
+            elif collide_type == 1:
+                self.attributes['body'].rect.y -= 5
+                self.info['health'] -= 1
+                collided.hurt()
+        #causing phase 2 
+        if self.info['health'] <=0 or self.info['shellhealth'] <=0 and not self.info['pinch']:
+            self.change_state('pinch')
+        #causing phase 3
+        if self.info['health'] <= 0 and self.info['pinch'] and not self.info['pinch2']:
+            self.change_state('final')
+                
+            
+
 
     def state_enter(self,start=False):
         #positioning
@@ -990,12 +1063,12 @@ class Crustacean(Boss):
         
         elif self.timers['in_state'] < 240:
             #waddling onscreen
-            if abs(self.attributes['body'].rect.centerx - pygame.display.play_dimensions[0]/2) > 10:
+            if abs(self.attributes['body'].rect.centerx - winrect.centerx) > 10:
                 self.attributes['body'].rect.centerx += 2.5 +(sin(self.timers['in_state']/5))
             
         elif self.timers['in_state'] == 240:
             #play hold animation
-            self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,100)
+            self.attributes['body'].rect.center = (winrect.centerx,100)
             self.attributes['body'].autoimage.change_anim('start_hold')
         
         elif self.timers['in_state'] == 330:
@@ -1003,6 +1076,14 @@ class Crustacean(Boss):
             self.sprites[0].add(WhiteFlash(surface=self.window))
             self.attributes['body'].autoimage.change_anim('start_push')
             #change bg, like completely initialize it and make the scroll speed QUICK
+            self.bg.autoimage.__init__(name="crust_bg.png",resize=(600,800))
+            self.bg.speed[1] = 25
+            #hiding background elements
+            if self.boss_state.playstate.floor is not None:
+                self.boss_state.playstate.floor.hide = True
+            if self.boss_state.playstate.formation is not None:
+                self.boss_state.playstate.formation.image_hide = True
+
 
         elif self.timers['in_state'] == 390:
             #new idle animation, begin idle state
@@ -1013,12 +1094,426 @@ class Crustacean(Boss):
 
             
     def state_idle(self,start=False):
-        ...     
+        #centering
+        if start:
+            self.attributes['body'].rect.center = (winrect.centerx,100)
+            self.bg.speed[1] = 15 if not self.info['pinch'] else 2
+            self.atk_info['idle_angle'] = atan2(self.player.rect.centery-self.attributes['body'].rect.centery,self.player.rect.centerx-self.attributes['body'].rect.centerx)
+        
+        #moving around if pinch
+        if self.info['pinch']:
+            self.attributes['body'].rect.centerx = winrect.centerx + sin(self.timers['in_state']*0.2)*200
+            self.attributes['body'].rect.centery = 100 + random.randint(-5,5)
+            self.bg.speed[0] = 25*sin(self.timers['in_state']/30)
+        #setting the background speed
+        else:
+            self.bg.speed[0] = 5*sin(self.timers['in_state']/30)
+
+        if self.timers['in_state']%2==0:
+            self.attributes['body'].shoot("angle",spd=3,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']))
+            self.attributes['body'].shoot("angle",spd=7,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']*2))
+            self.atk_info['idle_angle'] += 13
+
+        if self.timers['in_state'] > 360: #CHANGE TO 360
+            self.change_state('attack')
+
+
+    def state_attack(self,start=False):
+        if start:
+            self.bg.speed = [0,-2]
+            self.atk_info['type'] = random.randint(0,self.atk_info['types'])
+            self.sprites[0].add(WhiteFlash(surface=self.window))
+            # self.atk_info['type'] = 2
+            #resetting attack information
+            self.atk_info['amount'] = 0 #how many times shells/fish have been thrown
+            self.atk_info['max'] = 1 #how many times shells/fish will be thrown per attack
+            self.atk_info['amountper'] = 1#how many shells/fish will be thrown per throw - getting confusing yet?
+            self.atk_info['2_phase'] = 0 #0 -> moving left ; 1 -> moving down ; 2 -> moving right ; 3 -> moving up ; 4 -> moving left ; 0 -> end
+            #setting attack-specific attack information
+        
+        #shooting bullets
+        elif self.atk_info['type'] == 0:
+            if self.timers['in_state'] % (50 if not self.info['pinch'] else 15) == 0:
+                for i in range(random.randint(1,3) if not self.info['pinch'] else random.randint(3,7)):
+                    Crustacean.shoot_crustbullet(start=self.attributes['body'].rect.center,end=self.player.rect.center,sprites=self.sprites)
+                self.atk_info['amount'] += 1
+                if self.timers['in_state'] >= 480 or self.atk_info['amount'] > random.randint(5,10):self.change_state("idle")
             
+        #shooting fish
+        elif self.atk_info['type'] == 1:
+            if self.timers['in_state'] % (45 if not self.info['pinch'] else 30) == 0:
+                Crustacean.shoot_crustfish(start=(random.choice((0,pygame.display.play_dimensions[0])),self.attributes['body'].rect.centery+100),player=self.player,sprites=self.sprites)
+                self.atk_info['amount'] += 1
+                if self.timers['in_state'] >= 360 or self.atk_info['amount'] > random.randint(10,20):self.change_state("idle")
+
+
+        #zooming up down and all around the stage
+        elif self.atk_info['type'] == 2:
+            rect = self.attributes['body'].rect
+            #going up down and all around the stage
+            if self.atk_info['2_phase'] == 0:
+                rect.x -= 5
+                if rect.centerx <= -10: self.atk_info['2_phase'] = 1
+
+            elif self.atk_info['2_phase'] == 1:
+                rect.y += 15
+                if rect.centery > self.player.rect.centery: self.atk_info['2_phase'] = 2
+                if self.timers['in_state'] % (10 if self.info['health'] > 25 else 5) == 0: 
+                    self.attributes['body'].shoot(type="point",spd=7,info=(self.attributes['body'].rect.center,self.player.rect.center))
+            elif self.atk_info['2_phase'] == 2:
+                rect.x += 25
+                if rect.centerx >= pygame.display.play_dimensions[0] + 10: self.atk_info['2_phase'] = 3
+            elif self.atk_info['2_phase'] == 3:
+                rect.y -= 30
+                if abs(rect.centery -100) < 35: self.atk_info['2_phase'] = 4
+            elif self.atk_info['2_phase'] == 4:
+                rect.x -= 5
+                if abs(rect.centerx - winrect.centerx) < 10: self.atk_info['2_phase'] = 999
+            else:
+                self.change_state("idle")
+
+        #tentacles
+        elif self.atk_info['type'] == 3:
+            #spawning tentacles 
+            self.change_state('idle')
+
+        else:
+            self.change_state("idle")
+
+
+
+    def state_pinch(self,start=False):
+        if start and not self.info['pinch']:
+            self.info['pinch'] = True
+            self.info['health'] = 75
+            self.info['pinchcenter'] = self.attributes['body'].rect.center
+            self.attributes['shell'].kill()
+            self.sprites[0].add(Em(im="kaboom",coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True,resize=(125,125)))
+            self.bg.speed[1] = -1
+        elif self.timers['in_state'] < 90:
+            self.attributes['body'].rect.center = self.info['pinchcenter'][0] + random.randint(-5,5),self.info['pinchcenter'][1] + random.randint(-5,5)
+        elif self.timers['in_state'] >= 90:
+            self.bg.speed[1] = 2
+            self.change_state('idle')
+
+
+
+    def state_final(self,start=False):
+        speed = self.bg.speed
+        if start:
+            for bullet in self.bullets: bullet.kill()
+            self.sprites[0].add(Em(im="kaboom",coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True,resize=(200,200)))
+            self.attributes['body'].rect.center = (winrect.centerx,100)
+            self.info['health'] = 50
+            self.info['pinch2'] = True
+        #final attack
+        elif self.timers['in_state'] < 480:
+            #slowing the background down
+            if abs(speed[0]) > 0.25: speed[0]*=0.975
+            else: speed[0] = 0
+            if abs(speed[1]) > 0.25: speed[1]*=0.975
+            else: speed[1] = 0
+            #making the boss spazz out
+            self.attributes['body'].rect.centerx = winrect.centerx
+            self.attributes['body'].rect.x += random.randint(-15,15)
+            self.attributes['body'].rect.y += random.randint(-2,5)
+    
+
+
+    def state_die(self,start=False):
+        if start:
+            #resetting the background, and doing some graphical whatnots
+            self.attributes['body'].kill()
+            self.sprites[0].add(WhiteFlash(surface=self.window,spd=0.5))
+            self.bg.pos = [0,0]
+            self.bg.speed = [0,0]
+            #unhiding the floor and formation image
+            if self.boss_state.playstate.floor is not None:
+                self.boss_state.playstate.floor.hide = False
+            if self.boss_state.playstate.formation is not None:
+                self.boss_state.playstate.formation.image_hide = False
+            #resetting the background image back to whatever it was before
+            self.bg.__init__(self.boss_state.playstate.world_data['bg'], resize = self.boss_state.playstate.world_data['bg_size'], speed = self.boss_state.playstate.world_data['bg_speed'])
+            
+        elif self.timers['in_state'] > 480:
+            self.info['ENDBOSSEVENT'] = True
 
 
 
 
+    @staticmethod
+    def shoot_crustbullet(start,end,sprites):
+        bullet=CrustBullet(start,end)
+        sprites[0].add(bullet);sprites[2].add(bullet)
+    @staticmethod
+    def shoot_crustfish(start,player,sprites):
+        fish=CrustFish(start,player)
+        sprites[0].add(fish);sprites[2].add(fish)
+    
+
+
+
+#Crustaceean Bullet
+class CrustBullet(pygame.sprite.Sprite):
+    warning = None
+    #The boss decoy, which is used as a cute little intro for a nope that got way too pissed. 
+    def __init__(self,start:tuple,end:tuple):
+        pygame.sprite.Sprite.__init__(self)
+        #image info
+        self.autoimage = AImg(name="shell.png",resize=(40,40))
+        self.image = self.autoimage.image
+        self.rect = self.image.get_rect()
+        #currently moving in a random direction before jutting towards the player
+        self.move = tools.AnglePoint(pointA=start,angle=random.randint(0,360),speed=10,static_speed=False)
+        self.state = 0 #0 = startup ; 1 = wait 30 frames ; 2 = launch
+        self.state1_count = 0
+        self.end=end
+        self.timer = 0 
+    
+    #called per-frame
+    def update(self):
+        #timer updating -> optimization
+        self.timer += 1
+
+
+        if self.state == 0:
+            #slowly slowing down as the bullet moves in a random direction
+            self.move.speed = round(self.move.speed * 0.925,3)
+            self.move.update();self.rect.center = self.move.position
+            #switching the state and also changing the move vals thingamajigger
+            if self.move.speed < 1:
+                self.state = 1
+                self.move = tools.MovingPoint(pointA=self.rect.center,pointB=self.end,speed=20)
+                self.timer = 0 
+
+
+        elif self.state == 1:
+            self.state1_count += 1
+            if self.state1_count > 15:
+                self.state = 2
+
+        
+        elif self.state == 2:
+            self.move.update();self.rect.center = self.move.position
+            if self.timer > 90 and not self.rect.colliderect(pygame.display.play_rect) or self.timer > 360:
+                self.kill()
+            
+    #collision with player
+    def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
+        if type(collided) == Player:
+            collided.hurt()
+            self.kill()
+        elif collide_type == 1:
+            collided.hurt()
+    
+
+
+
+#Crustacean fish
+class CrustFish(pygame.sprite.Sprite):
+    warning = None
+    def __init__(self,start:tuple,player:Player):
+        #pygame sprite info
+        pygame.sprite.Sprite.__init__(self)
+        self.autoimage = AImg(name="crust_fish",resize=(35,35))
+        self.image = self.autoimage.image
+        self.rect=self.image.get_rect()
+        self.rect.center = start
+
+        #basic info
+        self.health = 3
+
+        #movement info
+        self.player = player #constantly tracking position of player
+        self.timer = 0 #timer to update information
+        self.move = None
+        #entrance_info
+        self.in_start = True #a basic entrance state
+        self.start_speed = 15 #speed the enemy enters at
+        self.start_dir = 0 if self.rect.centerx <= winrect.centerx else 1
+     
+    def update(self):
+        self.timer += 1
+        self.autoimage.update()
+        self.image = self.autoimage.image
+        if self.in_start:
+            #moving in a specified direction onscreen, as the fish usually appear offscreen
+            self.rect.x += self.start_speed if self.start_dir == 0 else self.start_speed * -1
+            self.start_speed *= 0.95
+            if self.start_speed < 1:
+                self.in_start = False
+                self.move = tools.MovingPoint(pointA=self.rect.center,pointB=self.player.rect.center,speed=4)
+        else:
+            #moving towards the player
+            self.move.update()
+            self.rect.center = self.move.position
+            #updating player position
+            if self.timer % 15 == 0:
+                self.move.change_all(self.player.rect.center)
+            #kill if offscreen
+            if not self.rect.colliderect(pygame.display.play_rect):
+                self.kill()
+
+    #collision with player
+    def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
+
+        if type(collided) == Player:
+            if ((self.rect.centery) > collided.rect.bottom-collided.movement[0]):
+                #bouncing the player up
+                collided.bounce()
+                #making the player invincible for six frames to prevent accidental damage
+                collided.invincibility_counter = 18
+                #kill yourself
+                self.kill()
+            else:
+                collided.hurt()
+                self.kill()
+            
+        elif collide_type == 1:
+            collided.hurt()
+            self.hurt()
+    
+    #damage
+    def hurt(self,amount=1):
+        self.health -= amount
+        if self.health <= 0:
+            self.kill()
+
+
+#crustacean tentacle
+class CrustTentacle(pygame.sprite.Sprite):
+    warning = None
+    def __init__(self,side=None,target:tuple = (100,100)):
+        #sets a destination at the start, and launches towards it
+        pygame.sprite.Sprite.__init__(self)
+        self.autoimage = AImg("tentacle",current_anim = "enter")
+        self.image = self.autoimage.image
+        #setting position info
+        self.rect = self.image.get_rect()
+        if side == None: side = random.choice(('l','r'))
+        if side == 'l': self.rect.left = 0
+        elif side == 'r': self.rect.right = pygame.display.play_dimensions[0]
+        self.rect.centery = random.randint(0,pygame.display.play_dimensions[1])
+        #misc. data
+        self.state = 0 #0 -> wait ; 1 -> launch ; 2 -> kill
+        self.angle = 0 
+        self.timer = 0 #timer to count waiting amount
+    def update(self):
+        self.autoimage.update()
+        self.image = self.autoimage.image
+        self.image = pygame.transform.rotate(self.image,angle=self.angle)
+        
+
+
+
+
+
+
+
+
+#The Sun
+class TheSun(Boss):
+    def __init__(self,**kwargs):
+        Boss.__init__(self,kwargs=kwargs)
+        #defining more values here
+        #to be fair, I think organizing all the previous values in lists was a bit stupid and confusing
+        #however, it is still 'readable' it was just harder to code
+        #i'll experiment now
+        self.bg = self.boss_state.playstate.background
+
+        #basic information
+        self.phase = 0
+        self.attack = 0 #cycles between 1 and 4
+        #entrance information
+        self.enter_phase = 0 
+        self.enter_timer = 0 
+        self.enter_speed = [0,0]
+
+        self.attacks = {
+            "confetti":self.attack_confetti,
+            "punch":self.attack_punch,
+            "bullet":self.attack_bullet,
+            "flare":self.attack_flare,
+        }
+
+        self.info['LAYERPLAYERINFRONT'] = True
+        
+        #attributes, which is only the sun body
+        self.addAttribute(name="body",attribute=BossAttribute(host=self,sprites=self.sprites,name="body",image="boss_sun",pos=(winrect.right,0)))
+
+
+    def state_enter(self,start=False):
+        if start:
+            self.bg.__init__()
+            self.enter_timer += 1
+            self.enter_phase = 0
+            self.enter_speed = [0,0] #they are set to this as placeholder values, because the speed has to be greater than 0
+            self.attributes['body'].autoimage.change_anim('idle')
+
+        elif self.enter_phase == 0:
+            #waits a couple frames
+            self.enter_timer += 1
+            if self.enter_timer >= 180:
+                #setting the next phase up
+                self.enter_timer = 0
+                self.enter_phase = 1
+                self.attributes['body'].autoimage.change_anim('angry1')
+
+        elif self.enter_phase == 1:
+            #waits a couple frames
+            self.enter_timer += 1
+            if self.enter_timer >= 120:
+                #setting the next phase up
+                self.enter_timer = 0
+                self.enter_phase = 2
+                self.attributes['body'].autoimage.change_anim('angry2')
+
+        elif self.enter_phase == 2:
+            #moving to the center
+            if self.attributes['body'].rect.centerx > (winrect.centerx+10):
+                self.enter_speed[0] = abs(self.attributes['body'].rect.centerx-winrect.centerx)/20
+                self.attributes['body'].rect.x -= self.enter_speed[0]
+            else:
+                self.enter_speed[0] = 0 
+                self.attributes['body'].rect.centerx = winrect.centerx
+            #moving to the bottom
+            if self.attributes['body'].rect.centery < (winrect.bottom-10):
+                self.enter_speed[1] += 0.25
+                self.attributes['body'].rect.y += self.enter_speed[1]
+            else:
+                self.enter_speed[1] = 0
+                self.attributes['body'].rect.centery = winrect.bottom
+            #checking to see if both of those are completed
+            if self.attributes['body'].rect.centery == winrect.bottom and self.attributes['body'].rect.centerx == winrect.centerx:
+                if self.enter_timer == 0:
+                    self.attributes['body'].autoimage.change_anim('phase1')
+                self.enter_timer += 1
+                if self.enter_timer >= 60:
+                    self.change_state('idle')
+                    self.enter_timer = 0 
+
+    def state_idle(self,start=False):
+        ...
+
+    def state_attack(self,start=False):
+        ...
+
+    def attack_confetti(self,start=False):
+        ...
+
+    def attack_punch(self,start=False):
+        ...
+
+    def attack_bullet(self,start=False):
+        ...
+
+    def attack_flare(self,start=False):
+        ...
+    
+       
+        
+
+        
 
 
 
@@ -1026,5 +1521,6 @@ loaded = {
     "ufo":UFO,
     "nope":Nope,
     "crt":CRT,
-    "crustacean":Crustacean
+    "crustacean":Crustacean,
+    "sun":TheSun,
 }

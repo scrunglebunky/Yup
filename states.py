@@ -38,8 +38,8 @@ class Play(Template):
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 0,
-                 level:int = 0,
+                 world:int = 4,
+                 level:int = 1,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -112,6 +112,7 @@ class Play(Template):
 
         #what boss the boss state pulls from
         self.curBossName = "ufo"
+
    
     
     def on_start(self,**kwargs):#__init__ v2, pretty much.
@@ -135,7 +136,8 @@ class Play(Template):
         #Updating backgrounds - drawing to window
         self.background.update()
         self.background.draw(self.window)
-        if self.floor is not None: self.floor.draw(self.window)
+        if self.floor is not None:
+            self.floor.draw(self.window)
         self.formation.draw_img(window=self.window) #displaying a special formation image if necessary
 
 
@@ -246,7 +248,7 @@ class Play(Template):
                 if event.key == pygame.K_6:
                     self.formation.empty()
                     self.formation.finished = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and tools.debug:
             pos = tuple(pygame.mouse.get_pos())
             pos = [pos[0]-pygame.display.play_pos[0],pos[1]-pygame.display.play_pos[0]]
             pos2 = [pygame.display.play_dimensions_resize[0]-pos[0],pos[1]]
@@ -641,7 +643,8 @@ class Pause(Template):
         self.logo_pos:list = [0,0] #[frames_in,y_pos] 
         self.bgpos = pygame.display.play_pos[0] + 35 , pygame.display.play_pos[1] + 38
 
-    def on_start(self,**kwargs):... #__init__ v2, pretty much.
+    def on_start(self,**kwargs): #__init__ v2, pretty much.
+        audio.play_song("kurosaki.mp3")
     def on_end(self,**kwargs):... #un-init, kind of
 
     def update(self):
@@ -760,12 +763,11 @@ class Boss(Template):
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
-        self.playstate.curBossName=self.playstate.curBossName
-        # self.playstate.curBossName="crustacean"
+        self.playstate.curBossName="sun"
         self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player,window=self.playstate.window,state=self)
 
     def on_start(self):
-        audio.play_song('twisted_inst.mp3')
+        audio.play_song('twisted_inst.mp3' if self.playstate.curBossName == "crt" else "golden_inst.mp3")
         
         #killing all previous sprites
         eBM()
@@ -805,6 +807,9 @@ class Boss(Template):
         self.boss.update()
         #draw
         Boss.sprites[0].draw(self.window)
+        #extra player draw
+        if self.boss.info['LAYERPLAYERINFRONT']:
+            Boss.sprites[1].draw(self.window)
 
         #collision
         self.collision()
@@ -817,7 +822,13 @@ class Boss(Template):
             self.next_state = "play" if not self.boss.info['ENDWORLD'] else 'advance'
 
     def event_handler(self,event):
-        Play.event_handler(self,event)
+        self.player.controls(event)
+        #changing what comes next
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                self.next_state = "options","boss"
+            if event.key == pygame.K_ESCAPE:
+                self.next_state = "pause","boss"
 
 
     def collision(self):

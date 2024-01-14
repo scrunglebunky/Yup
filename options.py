@@ -8,7 +8,7 @@ import json,text,pygame,random,audio,tools
 # The config.json file is a dictionary containing info about how the game works
 # This file is needed, though there is a default dictionary held here 
 # This is held in the options file instead of MAIN, so all items can access it
-settings = {
+settingsDEFAULT = {
     "fullscreen":["switch",False],
 
     "mute":["switch",False],
@@ -24,6 +24,7 @@ settings = {
 }
 # loading in the file
 with open("./data/config.json","r") as set_raw:
+    settings = settingsDEFAULT.copy()
     settings.update(json.load(set_raw)) #this then merges all settings with the default settings
 del set_raw
 

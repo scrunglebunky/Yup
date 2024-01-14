@@ -125,9 +125,10 @@ class Formation():
 
         #graphical stuff, specifically for the hack world
         self.image = img[self.world_data['formation_img']] if self.world_data['formation_img'] in img.keys() else None
-        print(self.world_data['world_name'],self.world_data['formation_img'])
+        # print(self.world_data['world_name'],self.world_data['formation_img'])
         self.image_size = (50 + (len(self.spawn_list[0]) * self.world_data['char_distance_x']), 75 + (len(self.spawn_list) * self.world_data['char_distance_y']))
         self.image = pygame.transform.scale(self.image,self.image_size) if self.image is not None else None
+        self.image_hide = False
 
     def update(self):
         #updating everything
@@ -320,7 +321,7 @@ class Formation():
 
     def draw_img(self,window=None):
         if window is None: window=self.window
-        if self.image is None or window is None:
+        if self.image is None or window is None or self.image_hide:
             return
         window.blit(self.image,(self.pos[0]-25,self.pos[1]-75))
         

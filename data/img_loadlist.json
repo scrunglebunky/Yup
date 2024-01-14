@@ -1,7 +1,8 @@
 
 {
     "./images/":[],
-    "./images/placeholders/":["ufo.png","crt.png","crt2.png"],
+    "./images/placeholders/":["ufo.png","crt.png","crt2.png",
+                                "crust_bg.png","shell.png","crustshell.png","crustbody.png"],
     "./images/characters/":[],
     "./images/ui/":[
         "placeholder.bmp",

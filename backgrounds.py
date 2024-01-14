@@ -88,10 +88,13 @@ class Floor():
         self.centery = window.get_height()
         self.move = move
         self.player=player
+        self.hide = False
     
     def update(self):...
 
     def draw(self,surf:pygame.Surface) -> None:
-        self.rect.centerx = self.centerx + (self.centerx-self.player.rect.x)*self.move[0] #stays centered
-        self.rect.centery = self.centery - (self.player.rect.centery - self.player.bar[1])*self.move[1] #moves with the player's y-velocity
-        surf.blit(self.image,self.rect)
+        if self.hide: return
+        else:
+            self.rect.centerx = self.centerx + (self.centerx-self.player.rect.x)*self.move[0] #stays centered
+            self.rect.centery = self.centery - (self.player.rect.centery - self.player.bar[1])*self.move[1] #moves with the player's y-velocity
+            surf.blit(self.image,self.rect)

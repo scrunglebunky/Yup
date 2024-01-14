@@ -16,6 +16,8 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 01/13/24: Crustacean boss 90% complete and playable. Moving onto Sun. 
+- 01/11/24: The crustacean boss is almost done.
 - 12/19/23: Two days early! CRT with placeholders is done. Working on Crustacean. Will finish at 12/30/2023
 - 12/08/23: I lied Nope works now. Working on CRT... gonna take a while I'd say around 12/21/23
 - 12/07/23: UFO Bosses Work. Nope promised beore 12/14/23
@@ -101,23 +103,23 @@
 ## CRT
 - A more endurance battle, a crt screen in the background that shows faces
 - [x] Idle: consists of the crt doing random animations in the background while an inferno of bullets spin. There is nothing to shoot except a control panel at the top center. 
-- [ ] Intro: The windows background bluescreens, and the background zooms out to show a powered off CRT. It then powers on again, but now with an angry face. the background represents a server room. 
-- [ ] Attack 1: Bullets stop, and robotic arms on the side attempt to luneg at and grab you. Either one arm or two. 
-- [ ] Attack 2: The control panel you shoot glitches out and starts zapping random spots that are marked. 
-- [ ] Attack 3: More of a final phase. The CRT jumps off the background and comes down in replacement of the control panel. Bullet patterns are shot out like in the idle state but will occasionally change to aim at you.
-- [ ] Death: The crt screen cracks, and with an electric shock, all the power in the facility goes out. The screen goes dark, and yup flies off.
+- [x] Intro: The windows background bluescreens, and the background zooms out to show a powered off CRT. It then powers on again, but now with an angry face. the background represents a server room. 
+- [x] Attack 1: Bullets stop, and robotic arms on the side attempt to luneg at and grab you. Either one arm or two. 
+- [x] Attack 2: The control panel you shoot glitches out and starts zapping random spots that are marked. 
+- [x] Attack 3: More of a final phase. The CRT jumps off the background and comes down in replacement of the control panel. Bullet patterns are shot out like in the idle state but will occasionally change to aim at you.
+- [x] Death: The crt screen cracks, and with an electric shock, all the power in the facility goes out. The screen goes dark, and yup flies off.
 ## CRUSTACEAN
 - A boss similar to the nope, but with far less bullets and far more dumb shennanigans
 - The seafloor background changes to a rushing one, with rippling water in the middle and hoards of seashells on the side.
-- [ ] Idle: The boss idly sits static in the center, making him an easy target during his idle state. However he has a TON of health. His soft side has less. 
-- [ ] Intro: Crustacean waddles on in from the side of the screen, in the background on the floors in the distance, and then pushes really hard to lunge you into the boss background screen.
-- [ ] Attack 1: Fish will spawn, and will aim at you and slowly chomp. Shooting them will push them back, but they have a lot of health. Only goes away if killed.
-- [ ] Attack 2: Crustacean spawns random shells that sit and wait a moment, before lunging at you. Note there are two animations: flying out from the boss's body, then lunging at you. They are rather large too, so they're big targets that cannot be killed.
+- [x] Idle: The boss idly sits static in the center, making him an easy target during his idle state. However he has a TON of health. His soft side has less. 
+- [x] Intro: Crustacean waddles on in from the side of the screen, in the background on the floors in the distance, and then pushes really hard to lunge you into the boss background screen.
+- [x] Attack 1: Fish will spawn, and will aim at you and slowly chomp. Shooting them will push them back, but they have a lot of health. Only goes away if killed.
+- [x] Attack 2: Crustacean spawns random shells that sit and wait a moment, before lunging at you. Note there are two animations: flying out from the boss's body, then lunging at you. They are rather large too, so they're big targets that cannot be killed.
 - [ ] Attack 3: (Last phase) Crustacean's tentacles spread out and go offscreen, before coming out the borders of the screen and swiping at you. Dodge these tentacles and the other attacks.
-- [ ] Death: The shell breaks open and crustacean effin explodes lol
+- [x] Death: The shell breaks open and crustacean effin explodes lol
 ## THE SUN
 - Do I have to explain it? 
-- [ ] Intro: The background becomes more animated, and the sun's expression becomes angrier. It lowers to the bottom of the screen. 
+- [x] Intro: The background becomes more animated, and the sun's expression becomes angrier. It lowers to the bottom of the screen. 
 - [ ] Idle: Similar to CRT, with a similar inferno of bullets but now faster and more sporatic. Different rain patterns as well. Occasionally, a cloud or meme will fall from the sky. All attacks are just to break the monotony. 
 - [ ] Attack 1: Confetti rapidly rains down like the D enemy does, but with far more to dodge or shoot. 
 - [ ] Attack 2: A realistic arm comes out of the sun, and will try to punch at you horizontally. Distract it by jumping and fast-falling for it to miss. Otherwise, move to the opposite of the screen.
@@ -149,6 +151,7 @@
 ## AUDIO
 - **PLAYER**: [ ] Jump [ ] Fast-Fall [ ] Shoot [x] Hurt [ ] Dead
 - **ENEMIES**: [ ] Global-fall [ ] Global-die
+- **UI**: [ ] bonus [ ] select [ ] back [ ] game exit
 
 
 ## CONTENT
