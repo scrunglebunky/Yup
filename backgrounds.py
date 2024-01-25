@@ -10,7 +10,7 @@ class Background():
         # It stores an image, a position tuple, and a speed tuple
         self.autoimage = anim.AutoImage(name=img,resize=resize)
         self.image=self.autoimage.image
-        self.size = resize.copy()
+        self.size = [self.image.get_width(),self.image.get_height()]
         self.pos = [0,0]
         self.speed = speed.copy()
         self.border = border_size

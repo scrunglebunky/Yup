@@ -2,7 +2,8 @@
 {
     "./images/":[],
     "./images/placeholders/":["ufo.png","crt.png","crt2.png",
-                                "crust_bg.png","shell.png","crustshell.png","crustbody.png"],
+                                "crust_bg.png","shell.png","crustshell.png","crustbody.png",
+                            "gun.png","bullet.png","sunblock.png"],
     "./images/characters/":[],
     "./images/ui/":[
         "placeholder.bmp",
@@ -12,7 +13,7 @@
         "high_scores.png","hiscore.png","hiscore_name.png",
         "gameover.png","gameover_score.png","gameover_level.png","gameover_rank.png","gameover_return.png",
         "levelcomplete.png","demo.png",
-        "arrow.png","warn_temp.png"],
+        "arrow.png"],
     "./images/bg/":[
         "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
         "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufos.png","ship.png",
@@ -34,6 +35,7 @@
         ["gameover_return.png",[400,200]],
         ["hiscore.png",[300,225]],
         ["hiscore_name.png",[200,100]],
-        ["levelcomplete.png",[450,225]]
+        ["levelcomplete.png",[450,225]],
+        ["sunblock.png",[75,75]]
     ]
 }

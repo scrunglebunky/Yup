@@ -1,5 +1,5 @@
 {
-    "NAME": "./images/characters/img/warning",
+    "NAME": "./images/ui/img/warning",
     "ANIM": "warning_anim.json",
     "SHEET_SIZE": [
         200,
@@ -20,5 +20,6 @@
     ],
     "scale": 1.0,
     "anim": {
-    }
+    },
+    "alpha":192
 }

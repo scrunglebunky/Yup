@@ -21,5 +21,7 @@
     "scale": 1.0,
     "flipx":false,
     "flipy":false,
-    "anim": {}
+    "anim": {},
+    "alpha":null,
+    "rotate":null
 }

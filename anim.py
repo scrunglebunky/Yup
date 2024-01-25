@@ -39,6 +39,8 @@ def generate_sprite(data):
                     xy=(data["TILE_SIZE"][0]*column,data["TILE_SIZE"][1]*row),
                     scale=data["scale"],colorkey=data["colorkey"],).convert()
             cur_img = pygame.transform.flip(cur_img,flip_x=data['flipx'],flip_y=data['flipy'])
+            if data['alpha'] != None and data['alpha'] != 255: cur_img.set_alpha(data['alpha'])
+            if data['rotate'] != None: cur_img = pygame.transform.rotate(cur_img,data['rotate']).convert_alpha()
             spritesheet.append(cur_img)
     return spritesheet
 
@@ -237,6 +239,7 @@ class AutoImage():
         else:
             self.image = all_loaded_images['placeholder.bmp']
             if resize is not None: self.image = pygame.transform.scale(self.image,resize)
+        self.mask = pygame.mask.from_surface(self.image)
 
     
     def update(self):
@@ -265,28 +268,39 @@ class AutoImage():
 #a white flashing effect
 #it flashes white what else do you want me to say 
 class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a surface to it, slowly disappearing
-    def __init__(self,surface:pygame.Surface,start_val:float=255,end_val:float=0,spd:float=10.0,img:str=None,color:str="#FFFFFF"):
+    def __init__(self,surface:pygame.Surface,start_val:float=255,end_val:float=0,spd:float=10.0,img:str=None,color:str="#FFFFFF",isreverse=False):
         pygame.sprite.Sprite.__init__(self)
 
         self.vals=[start_val,end_val,spd]
 
         #figuring out the image, whether it be a blank color or a predefined image 
-        if img == None: 
-            self.autoimage = None
-            self.image = pygame.Surface(surface.get_size(),pygame.SRCALPHA).convert_alpha()
-            self.image.fill(color=color)
-        else:
-            self.autoimage = anim.AutoImage(name=img,resize=surface.get_size())
-            self.image = self.autoimage.image.convert_alpha()
+        image = pygame.Surface(surface.get_size()).convert_alpha()
+        image.fill(color=color)
+
+        self.autoimage = AutoImage(name=img,resize=surface.get_size(),force_surf=image)
+        self.image = self.autoimage.image.convert_alpha()
+        self.mask = self.autoimage.mask
+
         #setting the current transparency
         self.image.set_alpha(self.vals[0])
         self.rect=self.image.get_rect()
-        
+        #checking for hurt
+        self.reverse = isreverse #a checker to see if the flash is going in the opposite direction or not. this doesn't change the amount being subtracted but it changes the kill check
+
     def update(self):
+        #image hooray
+        self.autoimage.update()
+        self.image = self.autoimage.image
+
         #slowing lowering the transparency values
         self.vals[0] -= self.vals[2]
-        if self.vals[0] < self.vals[1]: 
+        if (not self.reverse and (self.vals[0] < self.vals[1])) or (self.reverse and (self.vals[0] > self.vals[1])): 
             self.kill()
+
         #setting the alpha
         self.image.set_alpha(self.vals[0])
+
+    def on_collide(self,collide_type:int,collided:pygame.sprite.Sprite):
+        if collide_type == 1:
+            collided.hurt()
         

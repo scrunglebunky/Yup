@@ -1,5 +1,5 @@
 #Program by Andrew Church 5/26/23
-import pygame,audio,tools
+import pygame,audio,tools,random
 from anim import AutoImage as AImg
 
 # 5/26/23 - This is the default bullet.
@@ -22,10 +22,12 @@ class Bullet(pygame.sprite.Sprite):
         self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image)
         self.image = self.autoimage.image
         self.rect = self.image.get_rect()
+        self.mask = self.autoimage.mask
         self.rect.center=pos
         self.health = 1
         self.speed=speed
         self.kill_on_spawn = False
+        self.sprites = kwargs['sprites']
 
 
 
@@ -62,6 +64,9 @@ class Bullet(pygame.sprite.Sprite):
     def kill(self):
         pygame.sprite.Sprite.kill(self)
         Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
+        if self.health <= 0:
+            for i in range(5):self.sprites[0].add(BulletParticle(self.rect.center))
+            audio.play_sound("smallboom0.wav")
 
 
 
@@ -77,6 +82,41 @@ def emptyBulletMax():
     for item in LOADED:
         item.count = 0 
 
+
+class BulletParticle(pygame.sprite.Sprite):
+    image = pygame.Surface((5,5))
+    pygame.draw.rect(image,color="black",rect=pygame.Rect(0,0,5,5))
+    pygame.draw.rect(image,color="white",rect=pygame.Rect(1,1,3,3))
+    def __init__(self,pos:tuple = (0,0),texture=None):
+        pygame.sprite.Sprite.__init__(self)
+        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = BulletParticle.image)
+        self.image = self.autoimage.image
+        self.rect = self.image.get_rect()
+        self.mask = self.autoimage.mask
+        self.rect.center = pos
+        self.gravity_info = [
+            random.randint(-5,5), #x movement
+            random.randint(-5,-1), #y gravity
+        ]
+        self.duration = 0 
+
+    def update(self):
+        #moving x
+        self.rect.x += self.gravity_info[0]
+        #moving y
+        self.rect.y += self.gravity_info[1]
+        #changing x gravity
+        self.gravity_info[0] = round(self.gravity_info[0]*0.98,5) if abs(self.gravity_info[0]) > 0.001 else 0
+        #changing y gravity
+        self.gravity_info[1] = self.gravity_info[1]+0.5 if self.gravity_info[1] < 7 else 7
+        #updating duration information
+        self.duration += 1
+        #autokill
+        if self.duration > 15:
+            self.kill()
+
 LOADED = [
     Bullet,
 ]
+
+

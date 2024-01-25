@@ -182,7 +182,7 @@ class Formation():
             )
             #adding enemy to groups
             self.spawned_list.append(char)
-            self.sprites[0].add(char);self.sprites[2].add(char)
+            self.sprites[2].add(char)
 
             #resetting enter key
             if entrance_points is not None:

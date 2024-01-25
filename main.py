@@ -14,18 +14,17 @@ pygame.display.play_dimensions = 600,800 #oh cool, I can make a self variable in
 pygame.display.play_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 pygame.display.set_caption("YUP RevD")
 
-
 #GAME STUFF
 universal_sprite_group = pygame.sprite.Group() #This used to be a dictionary used everywhere but all groups have now been moved to their own respective states
 
-#06/01/2023 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
+#06/01/20 23 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
 import options,score,ui_border
 import states as all_states
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
 border = ui_border.Border()
 
-tools.debug = True  
+tools.debug = True
 
 # 7/02/2023 - ADDING SPECIFIC STATES
 # Since states are classes, each time you make a new one a new object will be created
@@ -41,7 +40,7 @@ states["gameover"] = all_states.GameOver(window=window,play_state=states["play"]
 states["advance"] = all_states.Advance(window=window,play_state=states["play"])
 states["boss"] = all_states.Boss(play_state=states["play"])
 
-#07/23/2023 - SWITCHING STATExzS
+#07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
 # States now have a method called "on_start" that will remedy this, which will be called in a function here
 # All states need to have a value called "next state", too, which will make it able to tell if the state is finished or not
@@ -51,13 +50,15 @@ def state_switch(
     if cur_state.next_state is not None:
         state = cur_state.next_state
     else: return cur_state,state
+
     if type(state) == str and state.lower() in states.keys():
         cur_state.on_end(); cur_state.next_state = None #resetting next state
         cur_state = states[state.lower()] #switching state
         cur_state.on_start() #telling state it's been started
+
     elif type(state) == tuple and (type(state[0]) == str and state[0].lower() in states.keys()):
         cur_state.on_end(); cur_state.next_state = None
-        state = states[state[0].lower()]
+        cur_state = states[state[0].lower()]
         cur_state.on_start(return_state = state[1])
     else:
         global run

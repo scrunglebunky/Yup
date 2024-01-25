@@ -16,6 +16,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 01/17/24: Particle effect exists now, a lot more sounds
 - 01/13/24: Crustacean boss 90% complete and playable. Moving onto Sun. 
 - 01/11/24: The crustacean boss is almost done.
 - 12/19/23: Two days early! CRT with placeholders is done. Working on Crustacean. Will finish at 12/30/2023

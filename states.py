@@ -26,7 +26,7 @@ class Play(Template):
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
-            4:pygame.sprite.Group(), #UI SPRITES
+            # 4:pygame.sprite.Group(), #UI SPRITES
         }
     demo_sprites = { #sprites exclusively for the demo state
             0:pygame.sprite.Group(), #ALL SPRITES
@@ -39,7 +39,7 @@ class Play(Template):
                  window:pygame.display,
                  campaign:str = "main_story.order",
                  world:int = 4,
-                 level:int = 1,
+                 level:int = 55,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -72,7 +72,7 @@ class Play(Template):
             )
             
         self.player = player.Player(bar=self.bar,sprite_groups=(self.sprites if not self.is_demo else self.demo_sprites),demo=self.is_demo)
-        (self.sprites if not self.is_demo else self.demo_sprites)[0].add(self.player); (self.sprites if not self.is_demo else self.demo_sprites)[1].add(self.player)
+        (self.sprites if not self.is_demo else self.demo_sprites)[1].add(self.player)
 
         #06/01/2023 - Loading in level data
         self.campaign = campaign
@@ -143,8 +143,12 @@ class Play(Template):
 
         #updating all individual sprites, with the fourth group having special priority.
         (self.sprites if not self.is_demo else self.demo_sprites)[0].update()
+        (self.sprites if not self.is_demo else self.demo_sprites)[1].update()
+        (self.sprites if not self.is_demo else self.demo_sprites)[2].update()
         (self.sprites if not self.is_demo else self.demo_sprites)[0].draw(self.window)
-        (self.sprites if not self.is_demo else self.demo_sprites)[4].draw(self.window)
+        (self.sprites if not self.is_demo else self.demo_sprites)[1].draw(self.window)
+        (self.sprites if not self.is_demo else self.demo_sprites)[2].draw(self.window)
+        # (self.sprites if not self.is_demo else self.demo_sprites)[4].draw(self.window)
 
         #ending function early if event playing
         if self.event is not None and self.event.playing:
@@ -637,6 +641,7 @@ class Pause(Template):
     def __init__(self,window:pygame.Surface,play_state):
         
         self.next_state = None #Needed to determine if a state is complete
+        self.return_state = "play"
         self.play_state = play_state
         self.window = window
         self.bg = play_state.window
@@ -645,7 +650,9 @@ class Pause(Template):
 
     def on_start(self,**kwargs): #__init__ v2, pretty much.
         audio.play_song("kurosaki.mp3")
-    def on_end(self,**kwargs):... #un-init, kind of
+        if 'return_state' in kwargs.keys(): self.return_state = kwargs['return_state']
+    def on_end(self,**kwargs): #un-init, kind of
+        pygame.mixer.music.stop()
 
     def update(self):
         #displaying of all the pause graphics and such - likely heavily unoptimized.
@@ -666,7 +673,7 @@ class Pause(Template):
                     is_restart=True
                 )
             if event.key == pygame.K_ESCAPE:
-                self.next_state = "play"
+                self.next_state = self.return_state
 
 
 
@@ -743,7 +750,7 @@ class Advance(Template):
 #same as gameplay but there is now a boss involved
 class Boss(Template):
     sprites = {
-        0:pygame.sprite.Group(), #universal sprites
+        0:pygame.sprite.Group(), #other
         1:pygame.sprite.Group(), #player sprite
         2:pygame.sprite.Group(), #boss's sprites
     }
@@ -776,7 +783,7 @@ class Boss(Template):
 
         #player code
         self.player.sprite_groups = Boss.sprites
-        Boss.sprites[0].add(self.player);Boss.sprites[1].add(self.player)
+        Boss.sprites[1].add(self.player)
 
         #redoing what was done in __init__
         self.__init__(play_state = self.playstate)
@@ -789,6 +796,19 @@ class Boss(Template):
             group.empty()
 
     def update(self,draw=True): 
+        # for sprite in self.sprites[0]:
+        #     pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
+        #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
+
+        # for sprite in self.sprites[1]:
+        #     pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
+        #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
+
+        # for sprite in self.sprites[2]:
+        #     pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
+        #     pygame.draw.rect(self.window, 'blue', sprite.mask.get_rect(), width=1)
+
+
         #Drawing previous gameplay frame to the window -- don't ask why, it just does. 
         if draw: self.fullwindow.blit(pygame.transform.scale(self.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
 
@@ -802,23 +822,23 @@ class Boss(Template):
             self.floor.update()
             self.floor.draw(self.window)
         #updating all 
+        Boss.sprites[1].update()
+        Boss.sprites[2].update()
         Boss.sprites[0].update()
         #updating boss
         self.boss.update()
         #draw
+        Boss.sprites[2].draw(self.window)
+        Boss.sprites[1].draw(self.window)
         Boss.sprites[0].draw(self.window)
-        #extra player draw
-        if self.boss.info['LAYERPLAYERINFRONT']:
-            Boss.sprites[1].draw(self.window)
 
         #collision
         self.collision()
-
         #death - somewhat broken atm
         if self.player.dead:
             self.next_state = "gameover"
         #figuring out what to do when the boss dies
-        if self.boss.info['ENDBOSSEVENT']:
+        elif self.boss.info['ENDBOSSEVENT']:
             self.next_state = "play" if not self.boss.info['ENDWORLD'] else 'advance'
 
     def event_handler(self,event):

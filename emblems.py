@@ -27,6 +27,7 @@ class Emblem(pygame.sprite.Sprite):
         self.animation_killonloop = animation_killonloop
 
         self.rect = self.image.get_rect() #finally setting rect
+        self.dead = False
 
 
         if isCenter:
@@ -63,4 +64,8 @@ class Emblem(pygame.sprite.Sprite):
 
     def update_number(self,number,rect=True):
         ...
+
+    def kill(self):
+        pygame.sprite.Sprite.kill(self)
+        self.dead=True
         

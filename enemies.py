@@ -140,7 +140,7 @@ class Template(pygame.sprite.Sprite):
     def kill(self,reason=None,play_sound = True) -> int:
         if reason == "health":
             if not self.is_demo: score.score += self.info["score"]
-            if play_sound: ps('dead.mp3',channel=0)
+            # if play_sound: ps('boom4.wav')
         pygame.sprite.Sprite.kill(self)
         self.info['dead'] = True
 
@@ -178,7 +178,7 @@ class Template(pygame.sprite.Sprite):
     def hurt(self):
         self.info['health'] -= 1
         self.change_anim("hurt")
-        self.sprites[0].add(Em(im='die',coord=self.rect.center,isCenter=True,animation_killonloop=True))
+        # self.sprites[0].add(Em(im='die',coord=self.rect.center,isCenter=True,animation_killonloop=True))
 
     def formationUpdate(self,
         new_pos:tuple #location of the formation, not including offset
@@ -192,7 +192,7 @@ class Template(pygame.sprite.Sprite):
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
             bullet = HurtBullet(type=type,spd=spd,info=info,texture=self.info['bullet_texture'])
-            self.sprites[0].add(bullet)
+            # self.sprites[0].add(bullet)
             self.sprites[2].add(bullet)
         return bullet
 
@@ -398,7 +398,7 @@ class B(Template): #loop-de-loop
             if self.atk['index']+i < len(self.atk['warnings']) and abs(self.atk['warnings'][self.atk['index'] + i].rect.centery-self.player.rect.centery)<150 :
                 warning = self.atk['warnings'][self.atk['index'] + i]
                 self.sprites[0].add(warning)
-                self.sprites[4].add(warning)
+                # self.sprites[4].add(warning)
         #makes the current warning flash aggressively, and the next warning flash faster
         if self.atk['index'] < len(self.atk['warnings']):
             self.atk['warnings'][self.atk['index']].update_intensity(60)
@@ -561,12 +561,12 @@ class Jelle(Template): #special jellyfish
                 #cutesy animation
                 self.change_anim("attack")
                 #playing sound
-                ps('zap.mp3',channel=30)
+                ps('zap.mp3')
         elif collide_type == 1:
             collided.hurt()
             self.change_anim("attack")
             #playing sound
-            ps('zap.mp3',channel=30)
+            ps('zap.mp3')
 
 
 
@@ -588,7 +588,7 @@ class Sammich(Template):
         if start and not self.info['dead']:
             self.atk['side'] = random.randint(0,1) #selecting whether COMING FROM the right or left
             self.sprites[0].add(self.atk['warning'])
-            self.sprites[4].add(self.atk['warning'])
+            # self.sprites[4].add(self.atk['warning'])
             self.atk['warning'].update_pos(self.player.rect.center)
         #homing in
         elif self.timers['in_state'] < 90:
@@ -643,7 +643,7 @@ class Nope(Template):
             self.atk['pos'] = list(self.rect.center)
             if not self.info['dead']:
                 self.sprites[0].add(self.atk['warning'])
-                self.sprites[4].add(self.atk['warning'])
+                # self.sprites[4].add(self.atk['warning'])
                 self.atk['warning'].update_pos(self.player.rect.center)
         elif self.timers['in_state'] < 120:
             self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
@@ -732,17 +732,17 @@ class Yippee(Template):
                 #confetti time
                 for i in range(5):
                     confetti = Confetti(pos=self.rect.center)
-                    self.sprites[0].add(confetti)
+                    # self.sprites[0].add(confetti)
                     self.sprites[2].add(confetti)
                 self.atk['points'].pop(0)
-                ps('yippee.mp3',channel=random.randint(25,28))
+                ps('yippee.mp3')
                 #animation
                 self.change_anim('attack')
         else:
             self.change_state('return')
 
     def kill(self,reason=None):
-        if reason == 'health' and self.info['state'] == 'attack': ps('waah.mp3')
+        ps('waah.mp3')
         Template.kill(self,reason=reason,play_sound = False)
         
 
@@ -766,7 +766,7 @@ class Lumen(Template):
                 del self.atk['warning']
             self.atk['warning'] = Warning(self.player.rect.center)
             self.sprites[0].add(self.atk['warning'])
-            self.sprites[4].add(self.atk['warning'])
+            # self.sprites[4].add(self.atk['warning'])
         elif self.timers['in_state'] < 120:
             #locking on, moving based on where you are
             self.atk['angle'] = atan2(self.player.rect.centery-self.rect.centery,self.player.rect.centerx-self.rect.centerx)
@@ -777,7 +777,7 @@ class Lumen(Template):
             self.image = pygame.transform.rotate(self.image,degrees(self.atk['angle'])) 
         elif self.timers['in_state'] == 180:
             laser = Laser(start_pos = self.rect.center,angle=degrees(self.atk['angle'])) #shooting the laser
-            self.sprites[0].add(laser)
+            # self.sprites[0].add(laser)
             self.sprites[2].add(laser)
         else:
             if self.atk['warning'] is not None: self.atk['warning'].kill()
@@ -814,15 +814,17 @@ class Confetti(pygame.sprite.Sprite):
         surf = pygame.Surface((10,10))
         pygame.draw.rect(surf,color=color,rect=pygame.Rect(0,0,10,10))
         images.append(surf)
+    mask = pygame.mask.from_surface(images[0])
     def __init__(self,pos=(0,0)):
         pygame.sprite.Sprite.__init__(self)
         self.image = random.choice(Confetti.images)
+        self.mask = Confetti.mask
         self.rect = self.image.get_rect()
         self.rect.center = pos
         self.mask = pygame.mask.from_surface(self.image)
         self.gravity_info = [
-            random.randint(-20,20), #x movement
-            random.randint(-20,-5), #y gravity
+            random.randint(-10,10), #x movement
+            random.randint(-15,-5), #y gravity
         ]
         self.duration = 0 
 
@@ -861,6 +863,7 @@ class Confetti(pygame.sprite.Sprite):
             #I SAID damaging the enemy either way
             self.kill()
             collided.hurt()
+            
 
 
 #EXTRA ASSETS -- SPECIAL LUMEN LASER
@@ -900,7 +903,6 @@ class Laser(pygame.sprite.Sprite):
 
 #EXTRA ASSETS -- WARNING SIGN
 class Warning(pygame.sprite.Sprite):
-    image = anim.all_loaded_images['warn_temp.png']
     arrow = anim.all_loaded_images['arrow.png']
     def __init__(self,pos,resize=None,arrow_pos=None,time:int=-1):
         pygame.sprite.Sprite.__init__(self)
@@ -908,6 +910,7 @@ class Warning(pygame.sprite.Sprite):
         self.autoimage = AImg('warning',current_anim='idle')
         self.autoimage.spritesheet.all_anim['idle'] = self.autoimage.spritesheet.all_anim['idle'].copy()
         self.image = self.autoimage.image
+        self.mask = self.autoimage.mask
         self.arrow = Warning.arrow.copy()
         self.rect = self.image.get_rect()
         self.rect.center = pos 
@@ -917,6 +920,7 @@ class Warning(pygame.sprite.Sprite):
 
         self.arrow_rect = self.arrow.get_rect()
         self.arrow_rect.center = self.rect.center
+
     def update(self):
         self.autoimage.update()
         self.image = self.autoimage.image
