@@ -22,8 +22,7 @@ class Emblem(pygame.sprite.Sprite):
         self.pattern_f = 0 #frames in a pattern
         self.pattern_offset = [0,0] #what pattern affects
 
-        self.autoimage = anim.AutoImage(im,force_surf=force_surf,resize=resize)
-        self.image = self.autoimage.image
+        self.aimg = anim.AutoImage(host=self,name=im,force_surf=force_surf,resize=resize)
         self.animation_killonloop = animation_killonloop
 
         self.rect = self.image.get_rect() #finally setting rect
@@ -36,11 +35,10 @@ class Emblem(pygame.sprite.Sprite):
     def update(self):
         if self.pattern is not None: self.pattern_f += 1; self.play_pattern()
         self.rect.topleft = self.coord[0]+self.pattern_offset[0],self.coord[1]+self.pattern_offset[1]
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
 
         #checking for kill condition
-        if self.animation_killonloop and self.autoimage.spritesheet != None and self.autoimage.spritesheet.looped:
+        if self.animation_killonloop and self.aimg.spritesheet != None and self.aimg.spritesheet.looped:
             self.kill()
     
     def play_pattern(self):

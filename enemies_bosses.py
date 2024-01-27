@@ -3,7 +3,7 @@ from player import Player
 from anim import all_loaded_images as img
 from anim import AutoImage as AImg
 from emblems import Emblem as Em
-from math import sin,atan2,degrees
+from math import sin,atan2,degrees,radians
 from bullets import * 
 from enemies import Template,HurtBullet,Warning,Confetti
 from tools import MovingPoint
@@ -121,13 +121,10 @@ class BossAttribute(pygame.sprite.Sprite):
         self.sprites=sprites
         
         #image info
-        self.autoimage = AImg(name=image)
-        self.image = self.autoimage.image
+        self.aimg = AImg(host=self,name=image)
 
         #positioning info
-        self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.mask = self.autoimage.mask
 
         #naming info
         self.host = host
@@ -141,8 +138,7 @@ class BossAttribute(pygame.sprite.Sprite):
         self.host.collision_master(self,collide_type,collided)
     def update(self):
         #graphic update
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
     def shoot(self, type: str="point", spd: int=7, info: tuple=((0,0),(100,100)), shoot_if_below: bool=True, texture:str=None):
         bullet=None
         if (shoot_if_below) or (type != 'point') or (info[0][1] < info[1][1]-50):
@@ -265,7 +261,7 @@ class UFO(Boss):
         if start:
             self.atk_info['type'] = random.randint(0,self.atk_info['types'])
             #changing animation
-            self.attributes['body'].autoimage.change_anim('chad' if (self.atk_info['type'] == 0 or self.atk_info['type'] == 2) else "succ" if self.atk_info['type'] == 1 else 'idle')
+            self.attributes['body'].aimg.change_anim('chad' if (self.atk_info['type'] == 0 or self.atk_info['type'] == 2) else "succ" if self.atk_info['type'] == 1 else 'idle')
             #startup info per attack
             if self.atk_info['type'] == 1:
                 self.atk_info['2_direction'] = random.choice(('l','r'))
@@ -369,7 +365,7 @@ class UFO(Boss):
             
         else:
             #changing animation and returning
-            self.attributes['body'].autoimage.change_anim('idle')
+            self.attributes['body'].aimg.change_anim('idle')
             self.change_state('idle')
 
         #spazzing out effect
@@ -382,7 +378,7 @@ class UFO(Boss):
     #dying state
     def state_die(self,start:bool=False):
         if start:
-            self.attributes['body'].autoimage.change_anim('dead')
+            self.attributes['body'].aimg.change_anim('dead')
 
         #jittering around
         self.attributes['body'].rect.centerx += random.randint(-25,25)
@@ -417,7 +413,7 @@ class UFO(Boss):
     def hurt(self,amount=1):
         Boss.hurt(self,amount)
         if self.info['health'] % 5 == 0:
-            self.attributes['body'].autoimage.change_anim(
+            self.attributes['body'].aimg.change_anim(
                 'hurt' +  ("CHAD" if (self.info['state'] == 'attack' and (self.atk_info['type'] == 2 or self.atk_info['type'] == 0)) else "SUCC" if (self.info['state'] == 'attack' and self.atk_info['type'] == 1) else "" )
             )
 
@@ -541,11 +537,11 @@ class Nope(Boss):
             if self.atk_info['type'] == 1:
                 self.atk_info['2_state'] = 0
                 self.attributes['body'].rect.centery = 100
-                self.attributes['body'].autoimage.change_anim('scream')
+                self.attributes['body'].aimg.change_anim('scream')
 
             #setting info for attack type 0 - shoot
             elif self.atk_info['type'] == 0:
-                self.attributes['body'].autoimage.change_anim('scream')
+                self.attributes['body'].aimg.change_anim('scream')
 
 
 
@@ -579,14 +575,14 @@ class Nope(Boss):
             elif self.atk_info['2_state'] == 1:
                 if self.timers['in_state'] > 180:
                     self.atk_info['2_state'] = 2
-                    self.attributes['body'].autoimage.change_anim('flydown')
+                    self.attributes['body'].aimg.change_anim('flydown')
 
             #launching
             elif self.atk_info['2_state'] == 2:
                 #going to bounce state if hitting bottom
                 if self.attributes['body'].rect.centery > self.atk_info['2_bottom']:
                     self.atk_info['2_state'] = 3
-                    self.attributes['body'].autoimage.change_anim('bounce')
+                    self.attributes['body'].aimg.change_anim('bounce')
                     self.atk_info['2_wait'] = 0 
                 #flying down if not bounced yet
                 else:
@@ -604,14 +600,14 @@ class Nope(Boss):
         
         
         else:
-            self.attributes['body'].autoimage.change_anim('idle')
+            self.attributes['body'].aimg.change_anim('idle')
             self.change_state('idle')
         
         
 
     def state_die(self,start:bool=False):
         if start:
-            self.attributes['body'].autoimage.change_anim("dead")
+            self.attributes['body'].aimg.change_anim("dead")
         
         #shaking in the center
         elif self.timers['in_state'] < 80:
@@ -640,7 +636,7 @@ class Nope(Boss):
     def hurt(self,amount=1):
         Boss.hurt(self,amount)
         if self.info['health'] % 5 == 0 and not self.info['state'] == 'attack':
-            self.attributes['body'].autoimage.change_anim('hurt')
+            self.attributes['body'].aimg.change_anim('hurt')
 
 
 
@@ -679,7 +675,6 @@ class NopeIntro(BossAttribute):
     def hurt(self):
         #changing the boss state to enter when killed
         self.health -= 1
-        self.sprites[0].add(Em(im='die',coord=self.rect.center,isCenter=True,animation_killonloop=True))
         if self.health <= 0:
             self.kill()
             self.host.change_state('enter')
@@ -721,10 +716,9 @@ class CRT(Boss):
         if collider.name == 'ctrl':
             if collide_type == 1 and not self.info['pinch']:
                 collided.hurt()
-                self.sprites[0].add(Em(im='die',coord=self.attributes['ctrl'].rect.center,isCenter=True,animation_killonloop=True))
                 self.info['controlhealth'] -= 1
                 if self.info['controlhealth']%5 == 0:
-                    self.attributes['ctrl'].autoimage.change_anim('hurt')
+                    self.attributes['ctrl'].aimg.change_anim('hurt')
 
                 if self.info['controlhealth'] <= 0:
                     self.change_state('switch')
@@ -732,10 +726,9 @@ class CRT(Boss):
         if collider.name == 'body2' :
             if collide_type == 1 and self.info['pinch'] and self.info['state'] != 'die':
                 collided.hurt()
-                self.sprites[0].add(Em(im='die',coord=self.attributes['body2'].rect.center,isCenter=True,animation_killonloop=True))
                 self.info['health'] -= 1
                 if self.info['health']%5 == 0:
-                    self.attributes['body2'].autoimage.change_anim('hurt')
+                    self.attributes['body2'].aimg.change_anim('hurt')
                 if self.info['health'] <= 0:
                     self.change_state('die')
 
@@ -748,17 +741,17 @@ class CRT(Boss):
 
     def state_intro(self):
         if self.timers['in_state'] == 10:
-            self.boss_state.playstate.background.autoimage.__init__(name="boss_crt_bg",resize=(600,800),current_anim="0")
+            self.boss_state.playstate.background.aimg.__init__(host=self.boss_state.playstate.background,name="boss_crt_bg",resize=(600,800),current_anim="0")
         # if self.timers['in_state'] % 30 == 0:
         #     self.sprites[0].add(WhiteFlash(surface=self.window))
         if self.timers['in_state'] == 180:
-            self.boss_state.playstate.background.autoimage.change_anim('1')
+            self.boss_state.playstate.background.aimg.change_anim('1')
             self.sprites[0].add(WhiteFlash(surface=self.window))
         if self.timers['in_state'] == 210:
-            self.boss_state.playstate.background.autoimage.change_anim('2')
+            self.boss_state.playstate.background.aimg.change_anim('2')
             self.sprites[0].add(WhiteFlash(surface=self.window,start_val=255,spd=20.0))
         if self.timers['in_state'] > 240:
-            self.boss_state.playstate.background.autoimage.change_anim('3')
+            self.boss_state.playstate.background.aimg.change_anim('3')
             self.sprites[0].add(WhiteFlash(surface=self.window,spd=2.5))
             self.change_state('idle')
 
@@ -846,11 +839,11 @@ class CRT(Boss):
             
             elif self.timers['2'] == 120:
                 self.atk_info['2_Lwarn'].kill()
-                self.attributes["Larm"].autoimage.change_anim("atk")
+                self.attributes["Larm"].aimg.change_anim("atk")
 
             elif self.timers['2'] == 160:
                 self.atk_info['2_Rwarn'].kill()
-                self.attributes["Rarm"].autoimage.change_anim("atk")
+                self.attributes["Rarm"].aimg.change_anim("atk")
             
             elif self.timers['2'] > 240:
                 self.sprites[0].add(WhiteFlash(surface=self.window))
@@ -903,8 +896,8 @@ class CRT(Boss):
             self.sprites[0].add(CRT_explosion(self.attributes['ctrl'].rect.center,(250,250)))
             self.attributes['ctrl'].y_momentum = -5
             #arms ouchie
-            self.attributes['Larm'].autoimage.change_anim("hurtloop")
-            self.attributes['Rarm'].autoimage.change_anim("hurtloop")
+            self.attributes['Larm'].aimg.change_anim("hurtloop")
+            self.attributes['Rarm'].aimg.change_anim("hurtloop")
             #whiteflash
             self.sprites[0].add(WhiteFlash(surface=self.window,spd=30))
             #removing all warnings
@@ -932,8 +925,8 @@ class CRT(Boss):
             self.attributes['body2'].rect.y += 2
             if self.attributes['body2'].rect.y > -5 or self.timers['in_state'] > 640:
                 #switching animations and changing state
-                self.attributes['Larm'].autoimage.change_anim("idle")
-                self.attributes['Rarm'].autoimage.change_anim("idle")
+                self.attributes['Larm'].aimg.change_anim("idle")
+                self.attributes['Rarm'].aimg.change_anim("idle")
                 self.sprites[0].add(WhiteFlash(surface=self.window))
                 self.change_state('idle')
             
@@ -942,7 +935,7 @@ class CRT(Boss):
             #graphical effects
             self.sprites[0].add(WhiteFlash(surface=self.window,spd=5.0)) #white flash
             newbg=pygame.Surface(pygame.display.play_dimensions);newbg.fill('black')
-            self.boss_state.playstate.background.autoimage.__init__(force_surf=newbg)
+            self.boss_state.playstate.background.aimg.__init__(host=self.boss_state.playstate.background,force_surf=newbg)
             #defining movement
             self.info['die_state'] = 0 
             self.sprites[0].add(CRT_explosion(self.attributes['body2'].rect.center,(350,350)))
@@ -991,6 +984,7 @@ class CRT_explosion(Em):
 class Crustacean(Boss):
     def __init__(self,**kwargs):
         Boss.__init__(self,kwargs=kwargs)
+
         #basic information
         self.info['health'] = 25 #needed to trigger phase 2 if you shoot accurately
         self.info['shellhealth'] = 600 #needed to trigger phase 2 if you shoot him enough
@@ -1013,12 +1007,6 @@ class Crustacean(Boss):
 
     def update(self):
         Boss.update(self)
-        # if self.info['state'] == 'idle':
-        #     self.attributes['shell'].image = pygame.transform.rotate(self.attributes['shell'].image,self.atk_info['idle_angle']/2)
-        #     self.attributes['shell'].rect = self.attributes['shell'].image.get_rect()
-        #     self.attributes['body'].image = pygame.transform.rotate(self.attributes['body'].image,self.atk_info['idle_angle']/2)
-        #     self.attributes['body'].rect = self.attributes['body'].image.get_rect()
-        #     self.attributes['body'].rect.center = (pygame.display.play_dimensions[0]/2,100)
         self.attributes['shell'].rect.center = self.attributes['body'].rect.center
         
 
@@ -1074,14 +1062,14 @@ class Crustacean(Boss):
         elif self.timers['in_state'] == 240:
             #play hold animation
             self.attributes['body'].rect.center = (winrect.centerx,100)
-            self.attributes['body'].autoimage.change_anim('start_hold')
+            self.attributes['body'].aimg.change_anim('start_hold')
         
         elif self.timers['in_state'] == 330:
             #play push animation, change bg, new scrolling effect
             self.sprites[0].add(WhiteFlash(surface=self.window))
-            self.attributes['body'].autoimage.change_anim('start_push')
+            self.attributes['body'].aimg.change_anim('start_push')
             #change bg, like completely initialize it and make the scroll speed QUICK
-            self.bg.autoimage.__init__(name="crust_bg.png",resize=(600,800))
+            self.bg.aimg.__init__(host=self.bg,name="crust_bg.png",resize=(600,800))
             self.bg.speed[1] = 25
             #hiding background elements
             if self.boss_state.playstate.floor is not None:
@@ -1266,13 +1254,10 @@ class Crustacean(Boss):
 #Crustaceean Bullet
 class CrustBullet(pygame.sprite.Sprite):
     warning = None
-    #The boss decoy, which is used as a cute little intro for a nope that got way too pissed. 
     def __init__(self,start:tuple,end:tuple):
         pygame.sprite.Sprite.__init__(self)
         #image info
-        self.autoimage = AImg(name="shell.png",resize=(40,40))
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name="shell.png",resize=(40,40))
         #currently moving in a random direction before jutting towards the player
         self.move = tools.AnglePoint(pointA=start,angle=random.randint(0,360),speed=10,static_speed=False)
         self.state = 0 #0 = startup ; 1 = wait 30 frames ; 2 = launch
@@ -1325,9 +1310,7 @@ class CrustFish(pygame.sprite.Sprite):
     def __init__(self,start:tuple,player:Player):
         #pygame sprite info
         pygame.sprite.Sprite.__init__(self)
-        self.autoimage = AImg(name="crust_fish",resize=(35,35))
-        self.image = self.autoimage.image
-        self.rect=self.image.get_rect()
+        self.aimg = AImg(host=self,name="crust_fish",resize=(35,35))
         self.rect.center = start
 
         #basic info
@@ -1344,8 +1327,7 @@ class CrustFish(pygame.sprite.Sprite):
      
     def update(self):
         self.timer += 1
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
         if self.in_start:
             #moving in a specified direction onscreen, as the fish usually appear offscreen
             self.rect.x += self.start_speed if self.start_dir == 0 else self.start_speed * -1
@@ -1397,10 +1379,8 @@ class CrustTentacle(pygame.sprite.Sprite):
     def __init__(self,side=None,target:tuple = (100,100)):
         #sets a destination at the start, and launches towards it
         pygame.sprite.Sprite.__init__(self)
-        self.autoimage = AImg("tentacle",current_anim = "enter")
-        self.image = self.autoimage.image
+        self.aimg = AImg(host=self,name="tentacle",current_anim = "enter")
         #setting position info
-        self.rect = self.image.get_rect()
         if side == None: side = random.choice(('l','r'))
         if side == 'l': self.rect.left = 0
         elif side == 'r': self.rect.right = pygame.display.play_dimensions[0]
@@ -1410,8 +1390,7 @@ class CrustTentacle(pygame.sprite.Sprite):
         self.angle = 0 
         self.timer = 0 #timer to count waiting amount
     def update(self):
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
         self.image = pygame.transform.rotate(self.image,angle=self.angle)
         
 
@@ -1433,8 +1412,9 @@ class TheSun(Boss):
         self.bg = self.boss_state.playstate.background
 
         #basic information
-        self.phase = 3
+        self.phase = 0
         self.attacks = [ ] 
+        self.attack_total = 0
         self.curattack = 0 #the current attack about to be implanted on this guy
         self.atk_time = 600 #time until an attack comes
         #entrance information
@@ -1473,13 +1453,14 @@ class TheSun(Boss):
 
         self.change_state("enter")
 
+
     def state_enter(self,start=False):
         if start:
-            self.bg.autoimage.__init__(name="boss_sun_bg",resize=None,current_anim="0")
+            self.bg.aimg.__init__(host=self.bg,name="boss_sun_bg",resize=None,current_anim="0")
             self.enter_timer += 1
             self.enter_phase = 0
             self.enter_speed = [0,0] #they are set to this as placeholder values, because the speed has to be greater than 0
-            self.attributes['body'].autoimage.change_anim('idle')
+            self.attributes['body'].aimg.change_anim('idle')
 
 
         elif self.enter_phase == 0:
@@ -1489,7 +1470,7 @@ class TheSun(Boss):
                 #setting the next phase up
                 self.enter_timer = 0
                 self.enter_phase = 1
-                self.attributes['body'].autoimage.change_anim('angry1')
+                self.attributes['body'].aimg.change_anim('angry1')
 
         elif self.enter_phase == 1:
             #waits a couple frames
@@ -1498,7 +1479,7 @@ class TheSun(Boss):
                 #setting the next phase up
                 self.enter_timer = 0
                 self.enter_phase = 2
-                self.attributes['body'].autoimage.change_anim('angry2')
+                self.attributes['body'].aimg.change_anim('angry2')
 
         elif self.enter_phase == 2:
             #moving to the center
@@ -1510,7 +1491,7 @@ class TheSun(Boss):
                 self.attributes['body'].rect.centerx = winrect.centerx
             #moving to the bottom
             if self.attributes['body'].rect.centery < (winrect.bottom-10):
-                self.enter_speed[1] += 0.1
+                self.enter_speed[1] += 0.1 
                 self.attributes['body'].rect.y += self.enter_speed[1]
             else:
                 self.enter_speed[1] = 0
@@ -1518,25 +1499,35 @@ class TheSun(Boss):
             #checking to see if both of those are completed
             if self.attributes['body'].rect.centery == winrect.bottom and self.attributes['body'].rect.centerx == winrect.centerx:
                 if self.enter_timer == 0:
-                    self.attributes['body'].autoimage.change_anim('phase1')
+                    self.attributes['body'].aimg.change_anim('phase0')
                 self.enter_timer += 1
                 if self.enter_timer >= 60:
                     self.change_state('idle')
                     self.enter_timer = 0 
 
+
+
     def state_idle(self,start=False):
         if start:
-            self.bg.autoimage.change_anim(str(self.phase+1))
-            self.attributes['body'].autoimage.change_anim("phase"+str(self.phase+1))
-            self.sprites[0].add(WhiteFlash(self.window,spd=3.0))
+            self.change_phase()
+            self.bg.aimg.change_anim(str(self.phase))
+            self.attributes['body'].aimg.change_anim("phase"+str(self.phase))
+            self.sprites[0].add(WhiteFlash(self.window,start_val=192,spd=5.0))
         
         if self.timers['in_state'] == self.atk_time - 180:
-            self.curattack = 3
+            #deciding what curattack is 
+            if self.attack_total <= 3:
+                self.curattack = self.attack_total
+            elif self.flare is not None: 
+                self.curattack = random.randint(0,2)
+            else:
+                self.curattack = random.randint(0,3)
             self.sprites[0].add(sunWarn(anim=str(self.curattack)))
 
         if self.timers['in_state'] == self.atk_time:
             self.attacks.append([self.curattack,0,False])
             self.attack_methods[self.curattack](start=True)
+            self.attack_total += 1
             self.change_state('idle')
         
         for i in range(len(self.attacks)):
@@ -1551,10 +1542,12 @@ class TheSun(Boss):
 
     def attack_confetti(self,start=False) -> bool:
         if start:
+            if self.yippee is not None: self.yippee.kill()
             self.yippee = sunYippee()
             self.sprites[0].add(self.yippee)
             self.yippeetimer=self.yippeeamount=0
             return False
+
         else:
 
 
@@ -1571,7 +1564,6 @@ class TheSun(Boss):
                 
             if self.yippeeamount > 10:
                 self.yippee.kill()
-                self.yippee = None
                 self.yippeetimer = self.yippeeamount = 0 
                 return True #telling the boss it's done
 
@@ -1582,14 +1574,15 @@ class TheSun(Boss):
 
     def attack_punch(self,start=False) -> bool:
         if start:
-            self.punchtimer = self.punchamount = 0 
+            self.punchamount = 0
+            self.punchtimer = 30 
         else:
             self.punchtimer += 1
-            if self.punchtimer > 60:
+            if self.punchtimer > 30:
                 self.punchamount += 1
                 self.punchtimer = 0 
                 self.sprites[2].add(sunArm(host = self))
-            if self.punchamount > 10:
+            if self.punchamount > 5:
                 self.punchamount = self.punchtimer = 0
                 return True
             else:
@@ -1597,11 +1590,19 @@ class TheSun(Boss):
               
 
     def attack_bullet(self,start=False) -> bool:
-        ...
+        if start:
+            self.gun = sunGun(sprites=self.sprites,host=self)
+            self.sprites[2].add(self.gun)
+        
+        elif self.gun.finished:
+            return False
+        else:
+            return False
 
 
     def attack_flare(self,start=False) -> bool  :
         if start:
+
             self.flare = WhiteFlash(surface=self.window,start_val=0,end_val=250.0,spd=-1.0,img="boss_sun_flash",isreverse=True)
             self.sunblock = sunBlock(player=self.player)
             self.gohere = Em(im="ui_gohere",coord=(self.sunblock.rect.x-50,self.sunblock.rect.centery),isCenter=True)
@@ -1614,28 +1615,58 @@ class TheSun(Boss):
             if self.flare.vals[0] == 180 and not self.flared:
                 ps('bigboom1.wav') 
             elif self.flare.vals[0] >= 250 and not self.flared:
+                #finishing the flare, creating a damaging sunwave
                 self.gohere.kill();self.sunblock.kill();self.flare.kill()
                 self.flared = True;ps('bigboom2.wav') 
+                #if the sunblock has not been touched, die. 
                 if not self.sunblock.got:
-                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=10.0,isreverse=False)
+                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=15.0,isreverse=False)
                     self.sprites[2].add(flash)
+                #if the sunblock has been touched, survive
                 else:
                     self.sprites[0].add(Em(im='kaboom',coord=self.player.rect.center,isCenter=True,animation_killonloop=True))
-                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=3.0,isreverse=False)
+                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=15.0,isreverse=False)
                     self.sprites[0].add(flash)
-                    
+                #killing the attack assets
+                if self.flare != None: self.flare.kill()
+                if self.sunblock != None: self.sunblock.kill()
+                if self.gohere != None: self.gohere.kill()
+                #making them None to mark that the attack is over
+                self.flare = self.sunblock = self.gohere = None
                 return True
             else:
                 return False
                 
 
+    def change_phase(self):
+        if self.attack_total < 5:
+            self.phase = 0 
+            self.atk_time = 600
+        elif self.attack_total < 10:
+            self.phase = 1
+            self.atk_time = 450
+        elif self.attack_total < 15:
+            self.phase = 2
+            self.atk_time = 300
+        elif self.attack_total < 25:
+            self.phase = 3
+            self.atk_time = 180
+        elif self.attack_total < 30:
+            self.phase = 4
+            self.atk_time = 120
+        elif self.attack_total < 40:
+            self.phase = 5
+            self.atk_time = 90
+        elif self.phase >= 50:
+            self.change_state('die')
+
+
+
+
 class sunWarn(pygame.sprite.Sprite):
     def __init__(self,anim='0'):
         pygame.sprite.Sprite.__init__(self)
-        self.autoimage = AImg("boss_sun_sign",current_anim=anim)
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
-        self.mask = self.autoimage.mask
+        self.aimg = AImg(host=self,name="boss_sun_sign",current_anim=anim)
         self.lifespan = 0
         self.x = random.choice((100,winrect.right-100))
         self.y = -100
@@ -1646,30 +1677,24 @@ class sunWarn(pygame.sprite.Sprite):
         self.rect.centerx = self.x + random.randint(-5,5)
         if self.rect.top > winrect.bottom:
             self.kill()
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
 
 
 class sunYippee(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.aimg = AImg("boss_sun_yippee")
-        self.image = self.aimg.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name="boss_sun_yippee")
         self.rect.center = (winrect.width*.75,winrect.height*.85)
         self.mask = self.aimg.mask
     def update(self):
         self.aimg.update()
-        self.image = self.aimg.image
 
 
 class sunArm(pygame.sprite.Sprite):
     def __init__(self,host):
         pygame.sprite.Sprite.__init__(self)
         #setting info
-        self.aimg = AImg("boss_sun_arm")
-        self.image = self.aimg.image 
-        self.rect = self.image.get_rect() 
+        self.aimg = AImg(host=self,name="boss_sun_arm")
         self.rect.top = 0 #The arm sits at the top waiting for a spot to fall
         self.rect.centerx = winrect.centerx #starts at the center
         self.mask = self.aimg.mask
@@ -1686,8 +1711,6 @@ class sunArm(pygame.sprite.Sprite):
         self.lifespan += 1
         #image
         self.aimg.update()
-        self.image = self.aimg.image
-        self.mask = self.aimg.mask
 
         if self.phase == 0:
             # moving back and forth
@@ -1738,9 +1761,7 @@ class sunArm(pygame.sprite.Sprite):
 class sunBlock(pygame.sprite.Sprite):
     def __init__(self,player):
         pygame.sprite.Sprite.__init__(self)
-        self.aimg = AImg("sunblock.png")
-        self.image = self.aimg.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name="sunblock.png")
         self.mask = self.aimg.mask
         self.got = False
         self.player = player
@@ -1757,29 +1778,43 @@ class sunBlock(pygame.sprite.Sprite):
 
 
 class sunGun(pygame.sprite.Sprite):
-    def __init__(self,sprites,host,shots=10,shoottimer=60):
+    def __init__(self,sprites,host,shots=10,shoottimer=30):
         pygame.sprite.Sprite.__init__(self)
-        self.aimg = AImg("gun.png")
-        self.image = self.aimg.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name="gun.png")
         self.rect.center = winrect.centerx,0
-        self.angle = 0 ; self.anglev = 1 ; self.shoottimer = 60 ; self.timer = 0 ; self.lifespan = 0 
+        self.angle = 0 ; self.anglev = 1 ; self.shoottimer = shoottimer ; self.timer = 0 ; self.lifespan = 0 
         self.sprites = sprites
         self.finished = False
+        self.health = 25
+
     def update(self):
         self.angle += self.anglev
+        self.anglev += 0.01
         #image rotation + placement
+        self.aimg.update()
         self.image = pygame.transform.rotate(self.image,self.angle)
         self.rect = self.image.get_rect()
-        self.rect.centery = 0
-        self.rect.centerx = winrect.centerx + (winrect.centerx*sin())
+        self.rect.center = ((winrect.centerx + (winrect.centerx*0.75*sin(self.lifespan/20))),60+self.lifespan//10)
         #timer to shoot
         self.timer += 1 ; self.lifespan += 1
         if self.timer > self.shoottimer:
-            self.shoottimer -=1
+            bullet = HurtBullet(type="angle",spd=7,info=(self.rect.center,self.angle*-1),texture="bullet.png")
+            self.sprites[2].add(bullet)
+            self.shoottimer -= 1
             self.timer = 0
+            
+        if self.shoottimer <= -60:  
+            self.finished = True
+            self.kill()
         
-        
+    def on_collide(self,collide_type,collided):
+        #taking damge from bullets and hurting the player
+        if collide_type == 1:
+            collided.hurt()
+            self.health -=1
+            if self.health <=0:
+                self.finished = True
+                self.kill()
 
     
 

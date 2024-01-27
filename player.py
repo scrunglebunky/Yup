@@ -25,10 +25,7 @@ class Player(pygame.sprite.Sprite):
         
 
         #IMAGE AND POSITIONING
-        self.sh = anim.Spritesheet("YUP","idle")
-        self.image = anim.all_loaded_spritesheets[self.sh.name][1][self.sh.image_displayed]
-        self.mask = self.sh.mask
-        self.rect = self.image.get_rect()
+        self.aimg = anim.AutoImage(host=self,name="YUP",generate_rect=True)
         self.rect.center = (300,self.bar[1])
         
 
@@ -59,11 +56,7 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         
         #SETTING THE IMAGE. I have no issue resetting the image every frame because it's just a callback to an object
-        try:
-            self.sh.update()
-            self.image = self.sh.image
-        except: 
-            self.image = Player.image
+        self.aimg.update()
         
 
         #07/09/2023 - rotating the image based on movement
@@ -82,7 +75,7 @@ class Player(pygame.sprite.Sprite):
             bullet=bullets.Bullet(self.rect.center,sprites=self.sprite_groups)
             self.sprite_groups[1].add(bullet)
             if not bullet.kill_on_spawn: 
-                self.change_anim("shoot")
+                self.aimg.change_anim("shoot")
                 audio.play_sound("bap.mp3")
         if self.autoshoot: 
             self.autoshoottimer += 1
@@ -113,7 +106,7 @@ class Player(pygame.sprite.Sprite):
                 self.movement[0]=25
             elif event.key == pygame.K_DOWN and self.movement[0] == 0:
                 #crouching
-                self.change_anim("crouch")
+                self.aimg.change_anim("crouch")
                 self.movement[4] = True
                 audio.play_sound("boo.wav")
 
@@ -122,12 +115,6 @@ class Player(pygame.sprite.Sprite):
             #SHOOTING
             if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
                 self.autoshoottimer = 0 
-                # bullet=bullets.Bullet(self.rect.center,is_default=not self.demo, sprites=self.sprite_groups)
-                # self.sprite_groups[0].add(bullet)
-                # self.sprite_groups[1].add(bullet)
-                # if not bullet.kill_on_spawn: 
-                    # self.change_anim("shoot")
-                    # audio.play_sound("bap.mp3")
                 self.autoshoot = True
 
             #AUTOSHOOT
@@ -153,7 +140,7 @@ class Player(pygame.sprite.Sprite):
             #un-crouching
             if event.key == pygame.K_DOWN  and self.movement[0] == 0:
                 self.movement[4] = False
-                self.change_anim('idle')
+                self.aimg.change_anim('idle')
                 audio.play_sound("womp.wav")
                 
             if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
@@ -181,12 +168,12 @@ class Player(pygame.sprite.Sprite):
             #finishing the jump, including stopping values
             self.rect.center = (self.rect.center[0],self.bar[1])
             self.movement[0] = 0
-            self.change_anim("land")
+            self.aimg.change_anim("land")
             for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.rect.centerx,self.rect.bottom)))
             #AUTO CROUCH
             if pygame.key.get_pressed()[pygame.K_DOWN]:
                 #crouching
-                self.change_anim("crouch")
+                self.aimg.change_anim("crouch")
                 self.movement[4] = True
                 audio.play_sound("boo.wav")        
         #Actually making the player move, bouncing the character off the bars if needed
@@ -217,7 +204,7 @@ class Player(pygame.sprite.Sprite):
 
     def hurt(self,amount:int=1):
         if self.invincibility_counter < 1:
-            self.change_anim("hurt")
+            self.aimg.change_anim("hurt")
             self.health -= amount
             self.invincibility_counter = 60
             audio.play_sound("ouch.mp3" if self.health > 0 else "scream.mp3")
@@ -226,7 +213,7 @@ class Player(pygame.sprite.Sprite):
     def bounce(self):
         #make the player bounce
         self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
-        self.change_anim("jump")
+        self.aimg.change_anim("jump")
         audio.play_sound("boing" + str(random.randint(0,4)) + ".wav")
         for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.rect.centerx,self.rect.bottom)))
 
@@ -242,9 +229,4 @@ class Player(pygame.sprite.Sprite):
     def display_health(self):
         pass
 
-    def change_anim(self, anim:str):
-        if "sh" in dir(self):
-            self.sh.change_anim(anim)
-            self.sh.update()
-            self.image = self.sh.image
             

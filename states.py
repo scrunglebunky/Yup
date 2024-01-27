@@ -39,7 +39,7 @@ class Play(Template):
                  window:pygame.display,
                  campaign:str = "main_story.order",
                  world:int = 4,
-                 level:int = 55,
+                 level:int = 1,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -122,10 +122,12 @@ class Play(Template):
         eBM()
 
 
+
     def on_end(self,**kwargs): #un-init, kind of
         pygame.mixer.music.stop()
         if tools.debug: print(self.debug.values())
         eBM()
+
 
     
     def update(self, draw=True):
@@ -206,12 +208,15 @@ class Play(Template):
             self.next_state = "gameover"
 
 
+
     def collision(self):
         #Detecting collision between players and enemies 
         collidelist=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[1],(self.sprites if not self.is_demo else self.demo_sprites)[2],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
-            key.on_collide(2,value[0])
-            value[0].on_collide(1,key)
+            for item in value:
+                key.on_collide(2,item)
+                item.on_collide(1,key)
+
 
 
     def new_world(self):
@@ -692,13 +697,13 @@ class Advance(Template):
     def on_start(self):
         #startup
         self.frames = 0 
-        self.play_state.player.change_anim("yay")
+        self.play_state.player.aimg.change_anim("yay")
         self.play_state.player.reset_movement()
         self.play_state.in_advance = True #stopping play_state from doing weird shit
 
     def on_end(self):
         self.frames = 0
-        self.play_state.player.change_anim("idle")
+        self.play_state.player.aimg.change_anim("idle")
         self.play_state.in_advance = False #letting play_state be goofy again
 
     def update(self):
@@ -795,17 +800,15 @@ class Boss(Template):
         for group in Boss.sprites.values():
             group.empty()
 
+
     def update(self,draw=True): 
-        # for sprite in self.sprites[0]:
-        #     pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
+        for sprite in self.sprites[0]:pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
         #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
 
-        # for sprite in self.sprites[1]:
-        #     pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
+        for sprite in self.sprites[1]:pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
         #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
 
-        # for sprite in self.sprites[2]:
-        #     pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
+        for sprite in self.sprites[2]:pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
         #     pygame.draw.rect(self.window, 'blue', sprite.mask.get_rect(), width=1)
 
 
@@ -859,8 +862,9 @@ class Boss(Template):
             False,False,collided=pygame.sprite.collide_mask)
         #telling the assets that stuff collided
         for key,value in collidelist.items():
-            key.on_collide(2,value[0])
-            value[0].on_collide(1,key)
+            for item in value:
+                key.on_collide(2,item)
+                item.on_collide(1,key)
         
 
 

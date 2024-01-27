@@ -23,11 +23,19 @@
         "loop":0, 
         "return_to":"angry2"
     },
-    "phase1":{
+    "phase0":{
         "frames":[
             10,11,12
         ],
         "FPS":12, 
+        "loop":0, 
+        "return_to":"phase1"
+    },
+    "phase1":{
+        "frames":[
+            10,11,12
+        ],
+        "FPS":24, 
         "loop":0, 
         "return_to":"phase1"
     },

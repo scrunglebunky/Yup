@@ -221,7 +221,8 @@ class Spritesheet():
 # A LOT of entity classes in this game have to manually check for animations and such, or if it's just using a static image
 # However, this class is going to streamline it, by doing all the checking for spritesheets on its own
 class AutoImage():
-    def __init__(self,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None,resize=None):
+    def __init__(self,host,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None,resize=None,generate_rect:bool=True):
+        self.host=host
         self.name = name
         self.spritesheet = None
         self.image = None
@@ -241,12 +242,24 @@ class AutoImage():
             if resize is not None: self.image = pygame.transform.scale(self.image,resize)
         self.mask = pygame.mask.from_surface(self.image)
 
+
+        #HOST INFORMATION
+        #Now, instead of each and every single sprite managing the image, rect, and mask info, the spritesheet will do it itself!
+        self.host.image = self.image
+        self.host.mask = self.mask
+        if generate_rect:
+            self.host.rect = self.image.get_rect()
     
     def update(self):
         if self.spritesheet is not None: 
             self.spritesheet.update()
             self.image = self.spritesheet.image
             self.mask = self.spritesheet.mask
+
+        #setting the host's imge and mask
+        self.host.image = self.image
+        self.host.mask = self.mask 
+    
 
     def change_anim(self,anim:str,overwrite:bool=False):
         if self.spritesheet is not None:
@@ -277,9 +290,7 @@ class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a s
         image = pygame.Surface(surface.get_size()).convert_alpha()
         image.fill(color=color)
 
-        self.autoimage = AutoImage(name=img,resize=surface.get_size(),force_surf=image)
-        self.image = self.autoimage.image.convert_alpha()
-        self.mask = self.autoimage.mask
+        self.autoimage = AutoImage(host=self,name=img,resize=surface.get_size(),force_surf=image)
 
         #setting the current transparency
         self.image.set_alpha(self.vals[0])

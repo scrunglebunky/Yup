@@ -8,8 +8,7 @@ import pygame,anim,options
 class Background():
     def __init__(self,img:str,resize:list,speed:list,border_size:tuple=pygame.display.play_dimensions,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
-        self.autoimage = anim.AutoImage(name=img,resize=resize)
-        self.image=self.autoimage.image
+        self.aimg = anim.AutoImage(host=self,name=img,resize=resize)
         self.size = [self.image.get_width(),self.image.get_height()]
         self.pos = [0,0]
         self.speed = speed.copy()
@@ -17,8 +16,7 @@ class Background():
 
     def update(self):
         #updating image
-        self.autoimage.update()
-        self.image=self.autoimage.image
+        self.aimg.update()
         #updates positioning and such
         self.pos[0] += self.speed[0] #x pos
         self.pos[1] += self.speed[1] #y pos

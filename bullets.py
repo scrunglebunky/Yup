@@ -13,16 +13,13 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    max = 4
+    max = 100
 
     def __init__(self,pos:tuple=(0,0),speed:int=15,is_default:bool = True,texture:str = None,**kwargs):
         
         pygame.sprite.Sprite.__init__(self)
         
-        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = Bullet.image)
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
-        self.mask = self.autoimage.mask
+        self.aimg = AImg(host=self,name=texture,current_anim='idle',force_surf = Bullet.image)
         self.rect.center=pos
         self.health = 1
         self.speed=speed
@@ -43,8 +40,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         #updating anim
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
 
         #updating collision
         if not self.on_screen() or self.health <= 0 or self.kill_on_spawn:
@@ -89,10 +85,7 @@ class BulletParticle(pygame.sprite.Sprite):
     pygame.draw.rect(image,color="white",rect=pygame.Rect(1,1,3,3))
     def __init__(self,pos:tuple = (0,0),texture=None):
         pygame.sprite.Sprite.__init__(self)
-        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = BulletParticle.image)
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
-        self.mask = self.autoimage.mask
+        self.aimg = AImg(host=self,name=texture,current_anim='idle',force_surf = BulletParticle.image)
         self.rect.center = pos
         self.gravity_info = [
             random.randint(-5,5), #x movement

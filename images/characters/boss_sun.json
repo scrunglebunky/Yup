@@ -19,5 +19,6 @@
         3
     ],
     "scale":2.67,
-    "anim": {}
+    "flipy": false
+
 }

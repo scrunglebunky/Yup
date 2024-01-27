@@ -53,9 +53,7 @@ class Template(pygame.sprite.Sprite):
         
         
         #image values, including spritesheets
-        self.autoimage = AImg(name = kwargs['skin'], current_anim = 'idle')
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name = kwargs['skin'], current_anim = 'idle')
         self.rect.center = self.idle["full"]
 
 
@@ -78,9 +76,7 @@ class Template(pygame.sprite.Sprite):
     def update(self): #this should be run the same no matter what
         
 
-        self.autoimage.update()
-        self.image = self.autoimage.image
-        self.mask = self.autoimage.mask 
+        self.aimg.update()
         
 
         #updating timers
@@ -130,7 +126,7 @@ class Template(pygame.sprite.Sprite):
 
     #############SPECIAL###############
     def change_anim(self,animation):
-        self.autoimage.change_anim(anim=animation)
+        self.aimg.change_anim(anim=animation)
 
     def change_state(self,state):
         self.timers['in_state'] = 0 
@@ -518,7 +514,7 @@ class Jelle(Template): #special jellyfish
     def update(self):
         Template.update(self)
         #keeping the sprite mask locked so it doesn't bounce and accidentally kill the player
-        self.mask = self.autoimage.spritesheet.all_loaded_spritesheets[self.autoimage.spritesheet.name][2][0]
+        self.mask = self.aimg.spritesheet.all_loaded_spritesheets[self.aimg.spritesheet.name][2][0]
 
     def state_idle(self,start=False):
         self.rect.center = self.idle['full']
@@ -907,12 +903,9 @@ class Warning(pygame.sprite.Sprite):
     def __init__(self,pos,resize=None,arrow_pos=None,time:int=-1):
         pygame.sprite.Sprite.__init__(self)
         #spritesheet info
-        self.autoimage = AImg('warning',current_anim='idle')
-        self.autoimage.spritesheet.all_anim['idle'] = self.autoimage.spritesheet.all_anim['idle'].copy()
-        self.image = self.autoimage.image
-        self.mask = self.autoimage.mask
+        self.aimg = AImg(host=self,name='warning',current_anim='idle')
+        self.aimg.spritesheet.all_anim['idle'] = self.aimg.spritesheet.all_anim['idle'].copy()
         self.arrow = Warning.arrow.copy()
-        self.rect = self.image.get_rect()
         self.rect.center = pos 
 
         self.time = time
@@ -922,8 +915,7 @@ class Warning(pygame.sprite.Sprite):
         self.arrow_rect.center = self.rect.center
 
     def update(self):
-        self.autoimage.update()
-        self.image = self.autoimage.image
+        self.aimg.update()
         #timer code
         self.timer += 1
         if self.time > -1 and self.timer > self.time:
@@ -932,7 +924,7 @@ class Warning(pygame.sprite.Sprite):
     def update_pos(self,pos):
         self.rect.center = pos
     def update_intensity(self,fps:int):
-        self.autoimage.spritesheet.all_anim['idle']['FPS'] = 60/fps
+        self.aimg.spritesheet.all_anim['idle']['FPS'] = 60/fps
         self.update()
         # print('after',fps,self.spriteshet.all_anim['idle']['FPS'])
 
@@ -965,16 +957,14 @@ class HurtBullet(pygame.sprite.Sprite):
         self.health = 1
         
         #setting image
-        self.autoimage = AImg(name=texture,current_anim='idle',force_surf = HurtBullet.image ,resize=(20,20))
-        self.image = self.autoimage.image
-        self.rect = self.image.get_rect()
+        self.aimg = AImg(host=self,name=texture,current_anim='idle',force_surf = HurtBullet.image ,resize=(20,20))
         self.rect.center = self.move.position
         self.dead = False
         
     def update(self):
         self.move.update()
         self.rect.center = self.move.position
-        self.autoimage.update(); self.image = self.autoimage.image
+        self.aimg.update()
         if not bullets.Bullet.on_screen(self) or self.health <= 0 or self.killonstart: 
             self.kill()
             HurtBullet.count = HurtBullet.count - 1 if HurtBullet.count > 0 else 0 
