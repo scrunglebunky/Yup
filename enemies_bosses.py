@@ -1421,22 +1421,14 @@ class TheSun(Boss):
         self.enter_phase = 0 
         self.enter_timer = 0 
         self.enter_speed = [0,0]
-        #random attack information
-        #attack yippee
-        self.yippee=None
-        self.yippeetimer=0
-        self.yippeeamount=0
-        #aattack punch
-        self.puncher=None
-        self.punchtimer = 0
-        self.punchamount = 0 
-        #attack gun
-        self.gun = None
-        #attack flare
-        self.flare = None
-        self.flared = False
-        self.gohere = None
-        self.sunblock = None
+        #important info to prevent glitching
+        self.flaring = False
+        #death information
+        self.isdying = False
+        self.dietimer = 0 
+        self.diephase = 0
+        self.diedark = None
+        self.diedarkswitch = False
 
 
         self.attack_methods = (
@@ -1461,6 +1453,9 @@ class TheSun(Boss):
             self.enter_phase = 0
             self.enter_speed = [0,0] #they are set to this as placeholder values, because the speed has to be greater than 0
             self.attributes['body'].aimg.change_anim('idle')
+            #hiding background elements
+            if self.boss_state.playstate.formation is not None:
+                self.boss_state.playstate.formation.image_hide = True
 
 
         elif self.enter_phase == 0:
@@ -1490,20 +1485,23 @@ class TheSun(Boss):
                 self.enter_speed[0] = 0 
                 self.attributes['body'].rect.centerx = winrect.centerx
             #moving to the bottom
-            if self.attributes['body'].rect.centery < (winrect.bottom-10):
+            if self.attributes['body'].rect.centery < (winrect.centery-10):
                 self.enter_speed[1] += 0.1 
                 self.attributes['body'].rect.y += self.enter_speed[1]
             else:
                 self.enter_speed[1] = 0
-                self.attributes['body'].rect.centery = winrect.bottom
+                self.attributes['body'].rect.centery = winrect.centery
             #checking to see if both of those are completed
-            if self.attributes['body'].rect.centery == winrect.bottom and self.attributes['body'].rect.centerx == winrect.centerx:
+            if self.attributes['body'].rect.centery == winrect.centery and self.attributes['body'].rect.centerx == winrect.centerx:
                 if self.enter_timer == 0:
                     self.attributes['body'].aimg.change_anim('phase0')
                 self.enter_timer += 1
                 if self.enter_timer >= 60:
                     self.change_state('idle')
                     self.enter_timer = 0 
+                    
+                if self.boss_state.playstate.floor is not None:
+                    self.boss_state.playstate.floor.hide = True
 
 
 
@@ -1514,152 +1512,207 @@ class TheSun(Boss):
             self.attributes['body'].aimg.change_anim("phase"+str(self.phase))
             self.sprites[0].add(WhiteFlash(self.window,start_val=192,spd=5.0))
         
-        if self.timers['in_state'] == self.atk_time - 180:
+        if self.timers['in_state'] == self.atk_time//2:
             #deciding what curattack is 
             if self.attack_total <= 3:
                 self.curattack = self.attack_total
-            elif self.flare is not None: 
+            elif self.flaring is not None: 
                 self.curattack = random.randint(0,2)
             else:
                 self.curattack = random.randint(0,3)
             self.sprites[0].add(sunWarn(anim=str(self.curattack)))
 
-        if self.timers['in_state'] == self.atk_time:
-            self.attacks.append([self.curattack,0,False])
-            self.attack_methods[self.curattack](start=True)
+        if self.timers['in_state'] >= self.atk_time:
+            self.attacks.append({'type':self.curattack,'time':0,'done':False})
+            id = len(self.attacks) - 1
+            self.attack_methods[self.curattack](id=id,start=True)
             self.attack_total += 1
             self.change_state('idle')
         
         for i in range(len(self.attacks)):
             #updating the attack and the attack timer
-            self.attacks[i][2] = self.attack_methods[self.attacks[i][0]]()
-            self.attacks[i][1] += 1
+            self.attacks[i]['done'] = self.attack_methods[self.attacks[i]['type']](id=i)
+            self.attacks[i]['time'] += 1
             #deleting dead enemies, and immediately breaking the loop 
-            if self.attacks[i][2]:
+            if self.attacks[i]['done']:
                 del self.attacks[i]
                 break
 
 
-    def attack_confetti(self,start=False) -> bool:
+
+    def state_die(self,start=False):
         if start:
-            if self.yippee is not None: self.yippee.kill()
-            self.yippee = sunYippee()
-            self.sprites[0].add(self.yippee)
-            self.yippeetimer=self.yippeeamount=0
+            self.isdying = False
+            self.dietimer = self.diephase = 0 
+        #DYING PHASE 1 -> waiting for the attacks to stop
+        elif len(self.attacks) > 0:
+            for i in range(len(self.attacks)):
+                #updating the attack and the attack timer
+                self.attacks[i]['done'] = self.attack_methods[self.attacks[i]['type']](id=i)
+                self.attacks[i]['time'] += 1
+                #deleting dead enemies, and immediately breaking the loop 
+                if self.attacks[i]['done']:
+                    del self.attacks[i]
+                    break
+        #DYING PHASE 2 -> SHOWING THE BOSS IS DYING
+        elif not self.isdying:
+            self.isdying = True
+            self.bg.aimg.change_anim('5')
+            self.attributes['body'].aimg.change_anim("phase5")
+            self.sprites[0].add(WhiteFlash(self.window,start_val=255,spd=0.75))
+        #DYING PHASE 3 -> WAITING
+        elif self.diephase == 0:
+            self.dietimer += 1
+            #hanging out for a while at the death screen
+            if self.dietimer > 480:
+                self.dietimer = 0 
+                self.diephase = 1
+                #creating a darkness that consumes all
+                self.diedark = WhiteFlash(self.window,start_val=0,end_val=400,spd=-1,color="#000000",isreverse=True)
+                self.sprites[0].add(self.diedark)
+
+        #DYING PHASE 4 -> CONSUMED IN DARKNESS
+        elif self.diephase == 1:
+            self.dietimer += 1
+            if self.dietimer == 375:
+                self.bg.__init__("black", resize = self.boss_state.playstate.world_data['bg_size'], speed = self.boss_state.playstate.world_data['bg_speed'])
+                self.attributes['body'].kill()
+            #resetting everything when the screen is black
+            if self.dietimer > 500:
+                self.diephase = 2
+                self.dietimer = 0
+
+
+        #DYING PHASE 5 -> NO MORE
+        elif self.diephase == 2:
+            self.info['ENDBOSSEVENT'] = self.info['ENDWORLD'] = True
+            
+
+                
+
+
+
+
+
+
+
+    def attack_confetti(self,id:int,start=False) -> bool:
+        info = self.attacks[id]
+        
+        if start:
+            #creating basic values put into the attack list's dictionary
+            info['yippee'] = sunYippee()
+            self.sprites[0].add(info['yippee'])
+            info['timer'] = info['amount'] = 0
             return False
 
         else:
-
-
-            self.yippeetimer += 1
-
-            if self.yippeetimer%30==0:
-
-                self.yippeetimer = 0;self.yippeeamount += 1
-                ps('yippee.mp3');self.yippee.aimg.change_anim('attack')
-
-                for i in range(25):
-                    confetti = Confetti(pos = (self.player.rect.centerx,400))
+            #timer stuff
+            info['timer'] += 1
+            if info['timer']%30==0:
+                #shooting off confetti
+                info['timer'] = 0 ; info['amount'] += 1
+                ps('yippee.mp3');info['yippee'].aimg.change_anim('attack')
+                #shooting off confetti
+                for i in range(10):
+                    confetti = Confetti(pos = (self.player.rect.centerx,random.randint(200,400)))
                     self.sprites[2].add(confetti)
-                
-            if self.yippeeamount > 10:
-                self.yippee.kill()
-                self.yippeetimer = self.yippeeamount = 0 
+            #exiting
+            if info['amount'] > 10:
+                info['yippee'].kill()
                 return True #telling the boss it's done
-
+            #not exitintg
             else:
                 return False
                 
 
 
-    def attack_punch(self,start=False) -> bool:
+    def attack_punch(self,id:int,start=False) -> bool:
+        #creating information about the attack, as instead of a class I use a dictionary like a loooooser
+        info = self.attacks[id]
         if start:
-            self.punchamount = 0
-            self.punchtimer = 30 
+            info['amount'] = 0
+            info['timer'] = 30 
         else:
-            self.punchtimer += 1
-            if self.punchtimer > 30:
-                self.punchamount += 1
-                self.punchtimer = 0 
+            info['timer'] += 1
+            if info['timer'] > 30:
+                info['amount'] += 1
+                info['timer'] = 0 
                 self.sprites[2].add(sunArm(host = self))
-            if self.punchamount > 5:
-                self.punchamount = self.punchtimer = 0
+            if info['amount'] > 5:
                 return True
             else:
                 return False
               
 
-    def attack_bullet(self,start=False) -> bool:
+
+    def attack_bullet(self,id:int,start=False) -> bool:
+        info = self.attacks[id]
         if start:
-            self.gun = sunGun(sprites=self.sprites,host=self)
-            self.sprites[2].add(self.gun)
-        
-        elif self.gun.finished:
-            return False
+            info['gun'] = sunGun(sprites=self.sprites,host=self)
+            self.sprites[2].add(info['gun'])
+        elif info['gun'].finished:
+            return True
         else:
             return False
 
 
-    def attack_flare(self,start=False) -> bool  :
-        if start:
 
-            self.flare = WhiteFlash(surface=self.window,start_val=0,end_val=250.0,spd=-1.0,img="boss_sun_flash",isreverse=True)
-            self.sunblock = sunBlock(player=self.player)
-            self.gohere = Em(im="ui_gohere",coord=(self.sunblock.rect.x-50,self.sunblock.rect.centery),isCenter=True)
-            self.flared = False
-            self.sprites[0].add(self.flare,self.gohere)
-            self.sprites[2].add(self.sunblock)
+    def attack_flare(self,id:int,start=False) -> bool  :
+        info = self.attacks[id]
+
+        if start:
+            self.flaring = True
+            info['flare'] = WhiteFlash(surface=self.window,start_val=0,end_val=250.0,spd=-1.0,img="boss_sun_flash",isreverse=True)
+            info['sunblock'] = sunBlock(player=self.player)
+            info['gohere'] = Em(im="ui_gohere",coord=(info['sunblock'].rect.x-50,info['sunblock'].rect.centery),isCenter=True)
+            info['flared'] = False
+            self.sprites[0].add(info['flare'],info['gohere'])
+            self.sprites[2].add(info['sunblock'])
             return False
         else:
-            if self.sunblock.got and not self.gohere.dead: self.gohere.kill()
-            if self.flare.vals[0] == 180 and not self.flared:
+            if info['sunblock'].got and not info['gohere'].dead: info['gohere'].kill()
+            if info['flare'].vals[0] == 180 and not info['flared']:
                 ps('bigboom1.wav') 
-            elif self.flare.vals[0] >= 250 and not self.flared:
+            elif info['flare'].vals[0] >= 250 and not info['flared']:
                 #finishing the flare, creating a damaging sunwave
-                self.gohere.kill();self.sunblock.kill();self.flare.kill()
-                self.flared = True;ps('bigboom2.wav') 
-                #if the sunblock has not been touched, die. 
-                if not self.sunblock.got:
-                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=15.0,isreverse=False)
-                    self.sprites[2].add(flash)
-                #if the sunblock has been touched, survive
-                else:
+                info['gohere'].kill();info['sunblock'].kill();info['flare'].kill()
+                info['flared'] = True;ps('bigboom2.wav') 
+                #maiking a flashing effect that either does nothing or damages the player
+                flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=15.0,isreverse=False)
+                self.sprites[(2 if not info['sunblock'].got else 0)].add(flash)
+                #creating an explosion effect for the sunblock 
+                if info['sunblock'].got: 
                     self.sprites[0].add(Em(im='kaboom',coord=self.player.rect.center,isCenter=True,animation_killonloop=True))
-                    flash = WhiteFlash(surface=self.window,start_val=255,end_val=0,spd=15.0,isreverse=False)
-                    self.sprites[0].add(flash)
                 #killing the attack assets
-                if self.flare != None: self.flare.kill()
-                if self.sunblock != None: self.sunblock.kill()
-                if self.gohere != None: self.gohere.kill()
-                #making them None to mark that the attack is over
-                self.flare = self.sunblock = self.gohere = None
+                info['flare'].kill();info['sunblock'].kill();info['gohere'].kill()
+                self.flaring = False
                 return True
             else:
                 return False
                 
 
+
+
     def change_phase(self):
-        if self.attack_total < 5:
+        if self.attack_total < 4:
             self.phase = 0 
             self.atk_time = 600
-        elif self.attack_total < 10:
+        elif self.attack_total < 8:
             self.phase = 1
             self.atk_time = 450
-        elif self.attack_total < 15:
+        elif self.attack_total < 12:
             self.phase = 2
             self.atk_time = 300
-        elif self.attack_total < 25:
+        elif self.attack_total < 16:
             self.phase = 3
             self.atk_time = 180
-        elif self.attack_total < 30:
+        elif self.attack_total < 20:
             self.phase = 4
             self.atk_time = 120
-        elif self.attack_total < 40:
-            self.phase = 5
-            self.atk_time = 90
-        elif self.phase >= 50:
+        elif self.attack_total >= 20:
             self.change_state('die')
-
+            
 
 
 
@@ -1668,16 +1721,17 @@ class sunWarn(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.aimg = AImg(host=self,name="boss_sun_sign",current_anim=anim)
         self.lifespan = 0
-        self.x = random.choice((100,winrect.right-100))
+        self.x = random.choice((150,winrect.right-150))
         self.y = -100
     def update(self):
         self.lifespan += 1
-        self.y += 4
+        self.y += 6
         self.rect.centery = self.y + 50*sin(self.lifespan/25)
         self.rect.centerx = self.x + random.randint(-5,5)
         if self.rect.top > winrect.bottom:
             self.kill()
         self.aimg.update()
+
 
 
 class sunYippee(pygame.sprite.Sprite):
@@ -1688,6 +1742,7 @@ class sunYippee(pygame.sprite.Sprite):
         self.mask = self.aimg.mask
     def update(self):
         self.aimg.update()
+    
 
 
 class sunArm(pygame.sprite.Sprite):
@@ -1756,7 +1811,8 @@ class sunArm(pygame.sprite.Sprite):
             collided.hurt()
             if self.phase == 2:
                 self.rect.y -= 80
-        
+
+
 
 class sunBlock(pygame.sprite.Sprite):
     def __init__(self,player):
@@ -1775,6 +1831,7 @@ class sunBlock(pygame.sprite.Sprite):
             return
         elif type(collided) == Player:
             self.got = True
+
 
 
 class sunGun(pygame.sprite.Sprite):
@@ -1817,6 +1874,13 @@ class sunGun(pygame.sprite.Sprite):
                 self.kill()
 
     
+
+
+class Angel(Boss):
+    def __init__(self):
+        Boss.__init__(self)
+        
+
 
 
 

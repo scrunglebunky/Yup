@@ -210,6 +210,8 @@ class Player(pygame.sprite.Sprite):
             audio.play_sound("ouch.mp3" if self.health > 0 else "scream.mp3")
             if self.health <= 0: self.kill()
 
+
+
     def bounce(self):
         #make the player bounce
         self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
@@ -218,6 +220,8 @@ class Player(pygame.sprite.Sprite):
         for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.rect.centerx,self.rect.bottom)))
 
         
+
+
     def reset_movement(self):
         self.movement = [
             0, #frames in up jumping movement, 30 frame limit
@@ -226,6 +230,9 @@ class Player(pygame.sprite.Sprite):
             False, #moving right
             False, #crouching
         ]
+
+
+         
     def display_health(self):
         pass
 

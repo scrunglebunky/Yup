@@ -15,7 +15,7 @@
         "levelcomplete.png","demo.png",
         "arrow.png"],
     "./images/bg/":[
-        "space.png","splash.png","uibox.png","test.png","game_over_bg.png",
+        "space.png","splash.png","uibox.png","test.png","game_over_bg.png","level_complete_bg.png",
         "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufos.png","ship.png",
         "hack_form.png","bluescreen.png",
         "happy_floor.png","nope_floor.png","water_floor.png"],

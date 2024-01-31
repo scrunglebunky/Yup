@@ -104,6 +104,9 @@ for directory,filelist in img_loadlist.items():
     for filename in filelist:
         all_loaded_images[str(filename)] = pygame.image.load(directory+filename).convert_alpha()
 
+#ADDING EXTRA COLORS
+all_loaded_images['black'] = pygame.Surface((10,10))
+all_loaded_images['black'].fill("#000000")
 
 """
 #5/8/23 - LOADING IN ALL IMAGES WITH DATA

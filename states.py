@@ -32,14 +32,13 @@ class Play(Template):
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
-            4:pygame.sprite.Group(), #UI SPRITES
         }
 
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 4,
-                 level:int = 1,
+                 world:int = 5,
+                 level:int = 100,
                  level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -775,7 +774,7 @@ class Boss(Template):
         self.background = self.playstate.background
         self.floor = self.playstate.floor
 
-        self.playstate.curBossName="sun"
+        # self.playstate.curBossName="sun"
         self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player,window=self.playstate.window,state=self)
 
     def on_start(self):

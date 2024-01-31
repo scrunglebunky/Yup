@@ -16,6 +16,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 01/30/24: Sun boss is complete, moving onto angel. 
 - 01/17/24: Particle effect exists now, a lot more sounds
 - 01/13/24: Crustacean boss 90% complete and playable. Moving onto Sun. 
 - 01/11/24: The crustacean boss is almost done.
@@ -121,21 +122,21 @@
 ## THE SUN
 - Do I have to explain it? 
 - [x] Intro: The background becomes more animated, and the sun's expression becomes angrier. It lowers to the bottom of the screen. 
-- [ ] Idle: Similar to CRT, with a similar inferno of bullets but now faster and more sporatic. Different rain patterns as well. Occasionally, a cloud or meme will fall from the sky. All attacks are just to break the monotony. 
-- [ ] Attack 1: Confetti rapidly rains down like the D enemy does, but with far more to dodge or shoot. 
-- [ ] Attack 2: A realistic arm comes out of the sun, and will try to punch at you horizontally. Distract it by jumping and fast-falling for it to miss. Otherwise, move to the opposite of the screen.
-- [ ] Attack 3: A line of bullets shoots down from the top, excluding one small space where you have to fit through. This can happen multiple times at once.
-- [ ] Attack 4: The sun spits out a random confusing meme, which will bounce along the screen aggressively like the Nope world's D enemies. Can happen multiple times at once.
-- [ ] Attack 5: A solar flare may occur, in which you have to reach a certain part of the screen to shield it.
-- [ ] Death: As the game progresses, the sun's face will slowly get angrier and angrier, but in the last few it starts to get tired. Survive long enough, and the sun burns out. Shooting the sun speeds up this process. Eventually, the sun burns out, and all goes black. Unlike the CRT boss, however, there are a few brief frames of everything becoming stupidly generically creepy (like creepypasta stuff) like a jumpscare before the end world screen comes up.
+- [x] Idle: Similar to CRT, with a similar inferno of bullets but now faster and more sporatic. Different rain patterns as well. Occasionally, a cloud or meme will fall from the sky. All attacks are just to break the monotony. 
+- [x] Attack 1: Confetti rapidly rains down like the D enemy does, but with far more to dodge or shoot. 
+- [x] Attack 2: A realistic arm comes out of the sun, and will try to punch at you horizontally. Distract it by jumping and fast-falling for it to miss. Otherwise, move to the opposite of the screen.
+- [x] Attack 3: A line of bullets shoots down from the top, excluding one small space where you have to fit through. This can happen multiple times at once.
+- [x] Attack 4: The sun spits out a random confusing meme, which will bounce along the screen aggressively like the Nope world's D enemies. Can happen multiple times at once.
+- [x] Attack 5: A solar flare may occur, in which you have to reach a certain part of the screen to shield it.
+- [x] Death: As the game progresses, the sun's face will slowly get angrier and angrier, but in the last few it starts to get tired. Survive long enough, and the sun burns out. Shooting the sun speeds up this process. Eventually, the sun burns out, and all goes black. Unlike the CRT boss, however, there are a few brief frames of everything becoming stupidly generically creepy (like creepypasta stuff) like a jumpscare before the end world screen comes up.
 ## EVIL-EYE (biblica)
-- A biblically-accurate angel. More specifically one large eye surrounded by rings of smaller eyes. Wings are hard to animate.
-- [ ] Idle: biblica spazzes out with its eye looking around panicked, while her wings aggressively flap, causing a rain of feathers (bullets) to fall from the sky. The bullets are floaty.
-- [ ] Attack 1: Eyes are sent at you, akin to attack 2 of Crustacean
-- [ ] Attack 2: A belt of eyes surround the screen. Whenever one passes the center, it shoots a circle of bullets.
-- [ ] Attack 3: Wings go offscreen, akin to Crustacean's tentacles, but instead of constantly being there it gives a pattern of lefts and rights you have to follow. The wings slam down to the bottom of the screen based on it. 
-- [ ] Pinch phase: The idle feathers come down at you during all the attacks instead of stopping. The eye is bloodshot. 
-- [ ] Death: The eye pops. The scrolling vaporwave screen stops. 
+- A hooded figure that looms in the background, leaving the player on a shaky platform.
+- [ ] Idle: Biblica sits there and does nothing as a quick break for a few seconds.
+- [ ] Attack 1: Biblica lifts its arms up and sends out random magic spells at you, specifically eyes. 
+- [ ] Attack 2: Biblica lifts its fists over the player and slams down at random parts, bumping you up or doing double damage if hit. 
+- [ ] Attack 3: Biblica does a generic bullet pattern, specifically now feathers floating down the screen slowly. 
+- [ ] Pinch phase: A horde of angels surround the background, and feathers are now constantly going. Attack 3 is replaced with an arm sweep from the angel. 
+- [ ] Death: The eye pops, the fight ends. 
 ## BIG UFO (ufo2)
 - A larger version of the original UFO. You pretty much fight the bottom of it the entire time.
 - Similar to crt, there is a glass panel up top you are trying to shoot inside. 
