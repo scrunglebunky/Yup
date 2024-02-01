@@ -388,8 +388,7 @@ class UFO(Boss):
         if self.attributes['body'].rect.bottom > 600:
             self.attributes['body'].rect.y -= 25
 
-        #increasing score
-        score.score += 30
+        
 
         
         #kaboom

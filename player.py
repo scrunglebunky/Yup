@@ -44,6 +44,7 @@ class Player(pygame.sprite.Sprite):
 
         #HEALTH
         self.health = 15
+        self.coins = 0
         self.invincibility_counter = 0 
         self.dead = self.health < 1
 

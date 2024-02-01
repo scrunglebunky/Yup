@@ -135,7 +135,9 @@ class Template(pygame.sprite.Sprite):
 
     def kill(self,reason=None,play_sound = True) -> int:
         if reason == "health":
-            if not self.is_demo: score.score += self.info["score"]
+            if not self.is_demo: 
+                for i in range(3):
+                    self.sprites[2].add(Coin(pos=self.rect.center,floor=self.player.bar[1]))
             # if play_sound: ps('boom4.wav')
         pygame.sprite.Sprite.kill(self)
         self.info['dead'] = True
@@ -783,7 +785,7 @@ class Lumen(Template):
     
     def kill(self,reason=None):
         if type(self.atk['warning']) == Warning: self.atk['warning'].kill()
-        Template.kill(self,reason=None)
+        Template.kill(self,reason=reason)
         
 
 
@@ -983,6 +985,47 @@ class HurtBullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.kill(self)
         self.dead=True
  
+
+#EXTRA ASSETS -- COIN
+class Coin(pygame.sprite.Sprite):
+    #The coin is an item spawned when an enemy dies. There are chances that an enemy drops items, but for the most part they drop coins.
+    #These coins wager your score, meaning you sacrifice your score for upgrades in the item shop. 
+    def __init__(self,pos:tuple,floor:int,value:int=1):
+        pygame.sprite.Sprite.__init__(self)
+        self.aimg = AImg(host=self,resize=(10,10))
+        self.value = value
+
+        self.floor = floor
+        self.original_v = [random.randint(-2,2),random.randint(-7,-2)]
+        self.v = self.original_v.copy()
+        self.rect.center = pos
+        self.lifespan = 1
+    def update(self):
+        #lifespan
+        self.lifespan += 1
+        if self.lifespan > 1000:
+            self.kill()
+        #moving
+        self.rect.x += self.v[0]
+        self.rect.y += self.v[1]
+        #updating velocities
+        if abs(self.v[0]) > 0.1: self.v[0] *= 0.95
+        else: self.v[0] = 0 
+        self.v[1] += 0.25
+        #bouncing
+        if self.rect.y > self.floor:
+            if self.v[1] > 0: 
+                self.v[1] *= -.25
+                #killing
+                if abs(self.v[1]) < 0.1:
+                    self.kill()
+
+    def on_collide(self,collide_type,collided):
+        if type(collided) == Player:
+            score.score += self.value
+            self.kill()
+
+
 
 ########OLD
 
