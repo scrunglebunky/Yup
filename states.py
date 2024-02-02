@@ -111,7 +111,7 @@ class Play(Template):
         self.in_advance:bool = False #if true, will not update much besides the background and player
 
         #what boss the boss state pulls from
-        self.curBossName = "ufo"
+        self.curBossName = "nope"
 
    
     
@@ -733,25 +733,14 @@ class Advance(Template):
         # if self.frames > 300:
         #     self.next_state = "play"
 
-    def phase0(self):
-        self.counter1 += 1
-        #updating the background
-        self.bg.update()
-        #managing the player and the background
-        self.play_state.player.update()
-        self.play_state.window.fill(pygame.Color(0,0,0,0))
-        self.play_state.sprites[1].draw(self.play_state.window)
-        #drawing values in order
-        self.sprites.draw(self.window)
-        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
-        
+        self.play_state.player.invincibility_counter = 60
 
-    def phase1(self):
-        ...
-    def phase2(self):
-        ...
-    def phase3(self):
-        ...
+        self.play_state.update()
+
+        Advance.sprites.update()
+        Advance.sprites.draw(self.window)
+
+
 
     def event_handler(self,event):
         pass    
