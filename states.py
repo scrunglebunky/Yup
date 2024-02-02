@@ -1,5 +1,6 @@
 import pygame,os,player,text,random,levels,json,formation,anim,audio,tools,events,score,enemies,enemies_bosses
 from anim import all_loaded_images as img
+from anim import WhiteFlash
 from text import loaded_text as txt
 from backgrounds import Background as Bg
 from backgrounds import Floor as Fl
@@ -37,9 +38,9 @@ class Play(Template):
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 5,
-                 level:int = 100,
-                 level_in_world:int = 0,
+                 world:int = 0,
+                 level:int = 0,
+                 level_in_world:int = 5,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -690,49 +691,67 @@ class Advance(Template):
         #setting values
         self.window = window
         self.play_state = play_state
-        self.frames = 0
+        self.frames = self.counter1 = self.phase = 0 
         self.next_state = None
+
+        #the settling in background
+        self.bg = None
+
         
     def on_start(self):
         #startup
         self.frames = 0 
+        self.counter1 = 0 # a rapidly-resetting counter that does not measure the lifespan of the state
+        self.phase = 0 # phase 0 -> player happy (everything stops) | phase 1 -> background settling in, 
         self.play_state.player.aimg.change_anim("yay")
         self.play_state.player.reset_movement()
         self.play_state.in_advance = True #stopping play_state from doing weird shit
+        #making the bg slowly fade in
+        self.bg = WhiteFlash(img="level_complete_bg.png",surface=self.window,start_val=0,end_val=255,isreverse=True,spd=-1.0)
+        self.sprites.add(self.bg)
+        # self.sprites.add(self.play_state.player)
 
     def on_end(self):
-        self.frames = 0
+        self.frames = self.counter1 = self.phase = 0
         self.play_state.player.aimg.change_anim("idle")
         self.play_state.in_advance = False #letting play_state be goofy again
+        self.sprites.empty
 
     def update(self):
-        self.frames += 1
-        #adding some emblems for now, will update to be better later
-        if self.frames==1: Advance.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
-        #speeding everything up
-        if self.frames < 150:
-            for i in range(2):
-                if self.play_state.background.speed[i] <= 150:
-                    self.play_state.background.speed[i] *= 1.05
-        #changing the play_state stored world
-        if self.frames == 150:
-            Advance.sprites.empty()
-            self.play_state.new_world()
-            self.kaboom(
-                coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]/2+pygame.display.play_pos[1]),
-                animation_resize=(500,500))
-        #ending
-        if self.frames > 300:
-            self.next_state = "play"
+        self.phase0()
+        return
+        # self.frames += 1
+        # self.frames==1: Advance.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
+        # #changing the play_state stored world
+        # if self.frames == 150:
+        #     Advance.sprites.empty()
+        #     self.play_state.new_world()
+        #     self.kaboom(
+        #         coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]/2+pygame.display.play_pos[1]),
+        #         animation_resize=(500,500))
+        # #ending
+        # if self.frames > 300:
+        #     self.next_state = "play"
 
-        self.play_state.player.invincibility_counter = 60
+    def phase0(self):
+        self.counter1 += 1
+        #updating the background
+        self.bg.update()
+        #managing the player and the background
+        self.play_state.player.update()
+        self.play_state.window.fill(pygame.Color(0,0,0,0))
+        self.play_state.sprites[1].draw(self.play_state.window)
+        #drawing values in order
+        self.sprites.draw(self.window)
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        
 
-        self.play_state.update()
-
-        Advance.sprites.update()
-        Advance.sprites.draw(self.window)
-
-
+    def phase1(self):
+        ...
+    def phase2(self):
+        ...
+    def phase3(self):
+        ...
 
     def event_handler(self,event):
         pass    

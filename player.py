@@ -52,6 +52,11 @@ class Player(pygame.sprite.Sprite):
         self.autoshoot = False
         self.autoshoottimer = 0 
 
+        #UPGRADE VALUES -- UNFINISHED
+        self.bullet_max = 3 #how many bullets can be on screen at one given time
+        self.bullet_time = 6 #shoots once every 6 frames
+        self.current_bullet = "def" #the current bullet being shot at the moment
+
 
 
     def update(self):
@@ -77,7 +82,6 @@ class Player(pygame.sprite.Sprite):
             self.sprite_groups[1].add(bullet)
             if not bullet.kill_on_spawn: 
                 self.aimg.change_anim("shoot")
-                audio.play_sound("bap.mp3")
         if self.autoshoot: 
             self.autoshoottimer += 1
 

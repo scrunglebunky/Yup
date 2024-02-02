@@ -62,7 +62,7 @@ class Bullet(pygame.sprite.Sprite):
         Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
         if self.health <= 0:
             for i in range(5):self.sprites[0].add(BulletParticle(self.rect.center))
-            audio.play_sound("smallboom0.wav")
+            # audio.play_sound("smallboom0.wav")
 
 
 
