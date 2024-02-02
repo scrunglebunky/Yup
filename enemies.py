@@ -136,9 +136,8 @@ class Template(pygame.sprite.Sprite):
     def kill(self,reason=None,play_sound = True) -> int:
         if reason == "health":
             if not self.is_demo: 
-                for i in range(3):
+                for i in range(1):
                     self.sprites[2].add(Coin(pos=self.rect.center,floor=self.player.bar[1]))
-            # if play_sound: ps('boom4.wav')
         pygame.sprite.Sprite.kill(self)
         self.info['dead'] = True
 
@@ -236,7 +235,6 @@ class A(Template): #geurilla warfare
             self.atk['direct'] = self.idle['full'][0]<self.atk['turn_vals'][0]
             #setting animation
             self.change_anim('attack')
-            ps("rizz.mp3")
 
             return
         #changing x and y by x and y velocities
@@ -254,7 +252,6 @@ class A(Template): #geurilla warfare
         #checking to turn around to next value
         if abs(self.rect.center[0]-self.atk['turn_vals'][self.atk['turn_cur']]) < self.atk['terminal'] * 2:
             # print("FINISHED:",self.atk['turn_cur'],'OF',len(self.atk['turn_vals']),self.atk['turn_vals'][self.atk['turn_cur']])
-            ps("rizz.mp3")
             #updating values
             self.atk['turn_cur'] += 1
             self.atk['direct'] = not self.atk['direct']
@@ -326,7 +323,6 @@ class B(Template): #loop-de-loop
             #creating the warning signs and adding them to le sprite groups
             if not self.info['dead']:
                 self.update_warnings()
-            ps('boing.mp3')
             
             return
         #updating position
@@ -343,8 +339,6 @@ class B(Template): #loop-de-loop
             self.atk['index'] += 1
             #updating warnings
             self.update_warnings()
-            #boing sound
-            ps("boing.mp3")
             #finishing movement
             if self.atk['index'] >= len(self.atk['points']):
                 self.follow=None
@@ -558,13 +552,9 @@ class Jelle(Template): #special jellyfish
                 collided.hurt()
                 #cutesy animation
                 self.change_anim("attack")
-                #playing sound
-                ps('zap.mp3')
         elif collide_type == 1:
             collided.hurt()
             self.change_anim("attack")
-            #playing sound
-            ps('zap.mp3')
 
 
 
@@ -597,7 +587,6 @@ class Sammich(Template):
         elif self.timers['in_state'] < 120:
             self.rect.center = self.rect.center
         #lunging at player
-        elif self.timers['in_state'] == 150: ps("rizz.mp3")
         elif self.timers['in_state'] < 150:
             self.atk['warning'].kill()
             self.rect.x = self.rect.x - self.atk['momentum'] if self.atk['side'] == 1 else self.rect.x + self.atk['momentum'] if self.atk['side'] == 0 else self.rect.x
@@ -733,14 +722,12 @@ class Yippee(Template):
                     # self.sprites[0].add(confetti)
                     self.sprites[2].add(confetti)
                 self.atk['points'].pop(0)
-                ps('yippee.mp3')
                 #animation
                 self.change_anim('attack')
         else:
             self.change_state('return')
 
     def kill(self,reason=None):
-        ps('waah.mp3')
         Template.kill(self,reason=reason,play_sound = False)
         
 
@@ -990,9 +977,18 @@ class HurtBullet(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     #The coin is an item spawned when an enemy dies. There are chances that an enemy drops items, but for the most part they drop coins.
     #These coins wager your score, meaning you sacrifice your score for upgrades in the item shop. 
+    val_list = (1,5,10,25,50,100)
     def __init__(self,pos:tuple,floor:int,value:int=1):
         pygame.sprite.Sprite.__init__(self)
-        self.aimg = AImg(host=self,resize=(10,10))
+        img="1"
+        for val in Coin.val_list:
+            if value <= val:
+                img = str(val)
+                break
+            else:
+                continue
+        print(img)
+        self.aimg = AImg(host=self,name="coin",current_anim=img,resize=(20,20))
         self.value = value
 
         self.floor = floor
@@ -1000,7 +996,10 @@ class Coin(pygame.sprite.Sprite):
         self.v = self.original_v.copy()
         self.rect.center = pos
         self.lifespan = 1
+
     def update(self):
+        #image
+        self.aimg.update()
         #lifespan
         self.lifespan += 1
         if self.lifespan > 1000:

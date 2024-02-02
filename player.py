@@ -77,7 +77,6 @@ class Player(pygame.sprite.Sprite):
             self.sprite_groups[1].add(bullet)
             if not bullet.kill_on_spawn: 
                 self.aimg.change_anim("shoot")
-                audio.play_sound("bap.mp3")
         if self.autoshoot: 
             self.autoshoottimer += 1
 

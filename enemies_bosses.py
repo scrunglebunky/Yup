@@ -5,7 +5,7 @@ from anim import AutoImage as AImg
 from emblems import Emblem as Em
 from math import sin,atan2,degrees,radians
 from bullets import * 
-from enemies import Template,HurtBullet,Warning,Confetti
+from enemies import Template,HurtBullet,Warning,Confetti,Coin
 from tools import MovingPoint
 from anim import WhiteFlash
 from audio import play_sound as ps
@@ -111,6 +111,7 @@ class Boss():
             self.sprites[2].add(bullet)
             self.host.bullets.append(bullet)
         return bullet
+
 
 
 #a piece of a boss. think of the boss as some sort of hand controlling a bunch of puppets.
@@ -400,6 +401,9 @@ class UFO(Boss):
                     animation_killonloop=True,
                     resize=(100,100)
                     ))
+            self.sprites[2].add(Coin(pos=self.attributes['body'].rect.center,floor=self.player.bar[1],value=random.choice((0,5))))
+
+            
 
 
         #ending
@@ -612,6 +616,9 @@ class Nope(Boss):
         elif self.timers['in_state'] < 80:
             self.attributes['body'].rect.center = (300,100)
             self.attributes['body'].rect.x += random.randint(-5,5); self.attributes['body'].rect.y += random.randint(-3,3)
+            if self.timers['in_state'] % 5 == 0:
+                self.sprites[2].add(Coin(pos=self.attributes['body'].rect.center,floor=self.player.bar[1],value=1))
+
 
         #exploding
         elif self.timers['in_state'] == 80:
@@ -623,6 +630,9 @@ class Nope(Boss):
                     resize=(450,450)
                     ))
             self.attributes['body'].kill()
+            for i in range(100):
+                self.sprites[2].add(Coin(pos=self.attributes['body'].rect.center,floor=self.player.bar[1],value=5))
+
 
         #finishing
         elif self.timers['in_state'] > 240:
@@ -1025,7 +1035,6 @@ class Crustacean(Boss):
             #bullet interaction code
             elif collide_type == 1: 
                 self.info[('shell' if collider.name == 'shell' else '')+'health'] -= 1
-                ps('ding.wav' if collider.name == 'shell' else 'boom5.wav' if not self.info['pinch'] else 'boom3.wav')
                 collided.hurt()
         #CODE EXCLUSIVELY FOR PHASE 3
         elif collider.name == 'body' and self.info['state'] == 'final':
@@ -1182,7 +1191,6 @@ class Crustacean(Boss):
             self.attributes['shell'].kill()
             self.sprites[0].add(Em(im="kaboom",coord=self.attributes['body'].rect.center,isCenter=True,animation_killonloop=True,resize=(125,125)))
             self.bg.speed[1] = -1
-            ps('boom2.wav')
         elif self.timers['in_state'] < 90:
             self.attributes['body'].rect.center = self.info['pinchcenter'][0] + random.randint(-5,5),self.info['pinchcenter'][1] + random.randint(-5,5)
         elif self.timers['in_state'] >= 90:
@@ -1788,7 +1796,6 @@ class sunArm(pygame.sprite.Sprite):
                 self.phase = 3
                 self.lifespan = 0
                 self.aimg.change_anim('squash')
-                ps("boom4.wav")
                 self.warning.kill()
         elif self.phase == 3:
             #waiting a little longer

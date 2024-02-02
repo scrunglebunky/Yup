@@ -300,6 +300,8 @@ class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a s
         self.rect=self.image.get_rect()
         #checking for hurt
         self.reverse = isreverse #a checker to see if the flash is going in the opposite direction or not. this doesn't change the amount being subtracted but it changes the kill check
+        #checking for finished
+        self.finished = False
 
     def update(self):
         #image hooray
@@ -309,6 +311,7 @@ class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a s
         #slowing lowering the transparency values
         self.vals[0] -= self.vals[2]
         if (not self.reverse and (self.vals[0] < self.vals[1])) or (self.reverse and (self.vals[0] > self.vals[1])): 
+            self.finished=True
             self.kill()
 
         #setting the alpha

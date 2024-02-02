@@ -16,6 +16,7 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 01/31/24: Enemies and bosses drop COINS instead of points now. There are issues relating to the screen being too cluttered, which will be worked on soon. 
 - 01/30/24: Sun boss is complete, moving onto angel. 
 - 01/17/24: Particle effect exists now, a lot more sounds
 - 01/13/24: Crustacean boss 90% complete and playable. Moving onto Sun. 
@@ -151,30 +152,29 @@
 
 
 ## AUDIO
-- **PLAYER**: [ ] Jump [ ] Fast-Fall [ ] Shoot [x] Hurt [ ] Dead
-- **ENEMIES**: [ ] Global-fall [ ] Global-die
-- **UI**: [ ] bonus [ ] select [ ] back [ ] game exit
+- [ ] Make sure all audio is equal in volume. No sounds until this happens.
 
 
 ## CONTENT
+- [ ] Replace the Crouch ability with FOCUS: hold shift to move slower, and shrink your hitbox.
+- [ ] Make HURTING elements glow RED, make HEALING / SAFE elements glow GREEN. 
 - [ ] Level intro indicator should have a dozen or so different effects. 
-- [ ] Advance state should behave like the gameover state. [ ] Background [ ] Bonuses [ ] Music
+- [ ] Advance state should behave like the gameover state. [x] Background [ ] Bonuses [ ] Music
 - [ ] Emblems tween effect, where you place them somewhere and they stretch back to the original pos.
 - [ ] Graphic placements on spawn (specifically world 1 but itll work with anything)
 - [ ] Program FINAL world
 
 ## OPTIMIZATION
-- [ ] file called "bosses" that pulls boss file out of the bosses folder
-- [ ] file called "states" that pulls out state files out of the states folde
+- [x] anim should be used for anything with images. put Emblems, scoreboard loading, and text inside of it.
+### Global
 - [ ] call tools Global, and condense settings, clock, display, and global values within
-- [ ] anim should be used for anything with images. put Emblems, scoreboard loading, and text inside of it.
 - [ ] make UI_Border use emblems that can be universally accessed and used. 
 - [ ] put UI_Border object inside global instead of main
 - [ ] put most main-accessible values inside global for easy modification
 ## BUGS
-- [ ] Every world except the first one starts at level 1 instead of 0. This is due to the way that state_play updates levels and does not initialize every new world. Check this off when every world either starts at level 0 or the issue is understood.
-- [ ] When the boss state selectively chooses to run advance state instead of playstate, for some reason playstate begins and runs in the middle of advancestate
-- [ ] Audio will clip out and run separately in different channels. Sort that out. 
+- [x] Every world except the first one starts at level 1 instead of 0. This is due to the way that state_play updates levels and does not initialize every new world. Check this off when every world either starts at level 0 or the issue is understood. (I am making level_in_world 0 the tutorial)
+- [x] When the boss state selectively chooses to run advance state instead of playstate, for some reason playstate begins and runs in the middle of advancestate
+- [x] Audio will clip out and run separately in different channels. Sort that out. 
 
 
 ## FEATURES
