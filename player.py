@@ -37,6 +37,8 @@ class Player(pygame.sprite.Sprite):
             False, #jumping
             False, #crouching
         ]
+        self.movement_old = self.movement[:]
+
         #how fast the character moves
         self.speed = 7.5
         self.crouch_speed = 3
@@ -56,14 +58,15 @@ class Player(pygame.sprite.Sprite):
         self.bullet_max = 3 #how many bullets can be on screen at one given time
         self.bullet_time = 6 #shoots once every 6 frames
         self.current_bullet = "def" #the current bullet being shot at the moment
-
+        self.bullet_lock = False #stop shooting 
 
 
     def update(self):
-        
+
+
+
         #SETTING THE IMAGE. I have no issue resetting the image every frame because it's just a callback to an object
         self.aimg.update()
-        
 
         #07/09/2023 - rotating the image based on movement
         try:
@@ -77,11 +80,8 @@ class Player(pygame.sprite.Sprite):
 
 
         #debug
-        if self.autoshoot and self.autoshoottimer%5==0:
-            bullet=bullets.Bullet(self.rect.center,sprites=self.sprite_groups)
-            self.sprite_groups[1].add(bullet)
-            if not bullet.kill_on_spawn: 
-                self.aimg.change_anim("shoot")
+        if self.autoshoot and self.autoshoottimer%5==0 and self.autoshoottimer != 0 and not self.bullet_lock:
+            self.shoot()
         if self.autoshoot: 
             self.autoshoottimer += 1
 
@@ -118,7 +118,8 @@ class Player(pygame.sprite.Sprite):
                 
 
             #SHOOTING
-            if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
+            if (event.key == pygame.K_x or event.key == pygame.K_z) and not (self.movement[4] or self.bullet_lock):
+                self.shoot()
                 self.autoshoottimer = 0 
                 self.autoshoot = True
 
@@ -228,6 +229,7 @@ class Player(pygame.sprite.Sprite):
 
 
     def reset_movement(self):
+        self.movement_old = self.movement[:]
         self.movement = [
             0, #frames in up jumping movement, 30 frame limit
             0, #frames in down jumping movement, 30 frame limit
@@ -235,10 +237,17 @@ class Player(pygame.sprite.Sprite):
             False, #moving right
             False, #crouching
         ]
-
+    def movement_redo(self):
+        self.movement = self.movement_old[:]
 
          
     def display_health(self):
         pass
 
+
+    def shoot(self):
+        bullet=bullets.Bullet(self.rect.center,sprites=self.sprite_groups)
+        if not bullet.kill_on_spawn: 
+            self.sprite_groups[1].add(bullet)
+            self.aimg.change_anim("shoot")
             

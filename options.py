@@ -33,10 +33,10 @@ pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings[
 pygame.display.set_mode(pygame.display.dimensions, pygame.SCALED)
 
 #07/13/2023 - finishing the rest of the imports now that the settings are complete
-import anim,ui_border
+import anim
 
 #07/13/2023 - This actually applies the settings 
-def apply_settings(border:ui_border.Border = None):
+def apply_settings(border = None):
     #display
     pygame.display.dimensions = (settings["screen_width"][1],settings["screen_height"][1]) 
     pygame.display.play_dimensions_resize = (settings["gameplay_width"][1],settings["gameplay_height"][1])
@@ -67,7 +67,7 @@ text.loaded_text["PRESS P TO APPLY"] = text.loaded_text["PRESS P TO APPLY"].rend
 
 class State():    
 
-    def __init__(self,window:pygame.Surface,border:ui_border.Border):
+    def __init__(self,window:pygame.Surface,border):
         self.next_state = None #Needed to determine if a state is complete
         self.return_state = "title" #so the state knows what specifically to return to upon exit - specific to options
 

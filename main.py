@@ -22,7 +22,7 @@ import options,score,ui_border
 import states as all_states
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
-border = ui_border.Border()
+border = ui_border.Border(window=window)
 
 tools.debug = True
 
@@ -46,7 +46,7 @@ states["boss"] = all_states.Boss(play_state=states["play"])
 # All states need to have a value called "next state", too, which will make it able to tell if the state is finished or not
 def state_switch(
     cur_state,state #the current state used
-    ):
+    ) -> tuple:
     if cur_state.next_state is not None:
         state = cur_state.next_state
     else: return cur_state,state

@@ -2,11 +2,68 @@
 import pygame,anim,text,random,emblems
 from anim import all_loaded_images as img
 from emblems import Emblem as Em
+from backgrounds import Background as Bg
+winrect = pygame.display.rect
+
+
+
+class Border():
+    sprites = pygame.sprite.Group()
+    #define important emblems
+    emblems = {
+            "logo": Em(
+                im = "logo.png",
+                coord = (
+                    winrect.centerx,
+                    0)), #LOGO
+            "score": Em(
+                im="score.png",
+                coord = (
+                    winrect.centerx,
+                    50)), #SCORE
+            "debug": Em(
+                im="debug.png",
+                coord=( 
+                    winrect.centerx,
+                    100)), #DEBUG
+            "lives": Em(
+                im="lives.png",
+                coord=(
+                    winrect.centerx,
+                    150)), #LIVES
+            "weapon": Em(
+                im="weapon.png",
+                coord=(
+                    winrect.centerx,
+                    200)), #WEAPON
+                    }
+    
+
+    def __init__(self,window:pygame.Surface):
+        #add emblems to sprite group
+        self.window = window
+        #assets for graphics
+        self.bg = Bg(img="uibox.png",resize=self.window.get_size(),speed=(0.25,0),border_size=self.window.get_size())
+        #adding emblem values
+        Border.sprites.empty()
+        for value in Border.emblems.values(): Border.sprites.add(value)
+
+    def draw(self,*args,**kwargs):
+        self.bg.draw(self.window)
+        Border.sprites.draw(self.window)
+    def draw_specific(self,*args,**kwargs):...
+    def display_lives(self,*args,**kwargs):...
+    def update(self):
+        self.bg.update()
+        Border.sprites.update()
+
+
+
 
 #06/22/2023 - UI BAR CLASS
 # The UI bar is something used by playstate to display things such as the score, background image, and logo.
 
-class Border():
+class BorderOld():
     
     #06/24/2023 - Adding EMBLEMS, which are just different UI symbols to add
     emblems = [ ]

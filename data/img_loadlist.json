@@ -35,7 +35,7 @@
         ["gameover_return.png",[400,200]],
         ["hiscore.png",[300,225]],
         ["hiscore_name.png",[200,100]],
-        ["levelcomplete.png",[450,225]],
+        ["levelcomplete.png",[225,112]],
         ["sunblock.png",[75,75]]
     ]
 }

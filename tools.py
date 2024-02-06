@@ -7,32 +7,30 @@ class MovingPoint():
         #defining values
         self.pointA,self.pointB = pointA,pointB #saving points
         self.position = list(self.pointA)
-        #calculations
-        if check_finished: self.distance = MovingPoint.calc_distance(pointA,pointB) #calculating distance
-        else: self.distance = None
-
-        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,speed = (speed if not ignore_speed else 1)) #calculating values
-        
         #more arguments
         self.finished = False ; self.check_finished = check_finished
         self.ignore_speed = ignore_speed #A value to make the speed separate from the calc_move_vals function to change speeds separately
         self.speed = speed
+        #calculations
+        self.finished = MovingPoint.calc_distance_bool(pointA,pointB,self.speed*5) #calculating distance
+        self.move_vals = MovingPoint.calc_move_vals(self.pointA,self.pointB,speed = (speed if not ignore_speed else 1)) #calculating values
+        
+        
 
 
     #called every frame
     def update(self):
         self.position[0] += (self.move_vals[0] if not self.ignore_speed else self.move_vals[0]*self.speed)
         self.position[1] += (self.move_vals[1] if not self.ignore_speed else self.move_vals[1]*self.speed)
-        self.distance = 0
         #checking for finish, the only need for distance
         if self.check_finished:
-            self.distance = MovingPoint.calc_distance(self.position,self.pointB)
-            self.finished = abs(self.distance)<(self.speed*5)
+            self.finished = MovingPoint.calc_distance_bool(self.position,self.pointB,self.speed*5)
+
 
     #updating everything if needed
     def change_all(self,pointB):
         self.pointB = pointB
-        if self.check_finished: self.distance = MovingPoint.calc_distance(self.pointA,self.pointB,) #yea
+        if self.check_finished: self.finished = MovingPoint.calc_distance_bool(self.pointA,self.pointB,self.speed*5) #yea
         self.move_vals = MovingPoint.calc_move_vals(self.position,self.pointB,speed=(self.speed if not self.ignore_speed else 1)) #calculating values
 
 
@@ -45,12 +43,21 @@ class MovingPoint():
             sin(angle) * speed
         )
     
+
+
     @staticmethod
     def calc_distance(pointA:tuple,pointB:tuple): #calculating distance, self explanatory
         return sqrt(
                 ((pointB[0]-pointA[0])**2) + 
                 ((pointB[1]-pointA[1])**2)
             ) 
+
+
+
+    @staticmethod 
+    def calc_distance_bool(pointA:tuple,pointB:tuple,range:float):
+        # a WAAAAY less complicated way of using the distance, because it's only subtraction now!
+        return (abs(pointA[0]-pointB[0]) < range) and (abs(pointA[1]-pointB[1]) < range)
 
 
 
@@ -78,6 +85,8 @@ class AnglePoint():
         )
 
 
+
+
 #a movingpoint that moves across a list of points
 class MovingPoints(MovingPoint):
     def __init__(self,pos:tuple,points:list,speed:int=1,final_pos:list=None):
@@ -85,7 +94,7 @@ class MovingPoints(MovingPoint):
         self.points = points #points to follow
         self.cur_target = 0 #which point in points to target
         self.speed = speed
-        self.distance = MovingPoint.calc_distance(self.pos,self.points[self.cur_target])
+        self.finished_part = MovingPoint.calc_distance_bool(self.pos,self.points[self.cur_target],self.speed*5)
         self.move_vals = MovingPoint.calc_move_vals(self.pos,self.points[self.cur_target],self.speed)
         
         #checking for finish
@@ -102,9 +111,9 @@ class MovingPoints(MovingPoint):
             #updating
             self.pos[0] += self.move_vals[0]
             self.pos[1] += self.move_vals[1]
-            self.distance = MovingPoint.calc_distance(self.pos,self.points[self.cur_target])
+            self.finished_part = MovingPoint.calc_distance_bool(self.pos,self.points[self.cur_target],self.speed*5)
             #checking for completion
-            if abs(self.distance)<self.speed*1.5:
+            if self.finished_part:
                 self.cur_target += 1
                 #fully completing
                 self.finished = self.cur_target >= len(self.points)
@@ -114,7 +123,7 @@ class MovingPoints(MovingPoint):
                     self.cur_target = 0 
                     self.final_trigger = True
                     self.finished = False
-                    self.distance = MovingPoint.calc_distance(self.pos,self.points[self.cur_target])
+                    self.distance = MovingPoint.calc_distance_bool(self.pos,self.points[self.cur_target],self.speed*5)
                     self.move_vals = MovingPoint.calc_move_vals(self.pos,self.points[self.cur_target],self.speed)
                     return
                 elif self.finished:

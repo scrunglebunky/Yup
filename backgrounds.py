@@ -6,13 +6,17 @@ import pygame,anim,options
 # This may be a little overkill for an entire class, but it works for organization purposes in my opinion
 
 class Background():
+
+
     def __init__(self,img:str,resize:list,speed:list,border_size:tuple=pygame.display.play_dimensions,**kwargs):
         # It stores an image, a position tuple, and a speed tuple
         self.aimg = anim.AutoImage(host=self,name=img,resize=resize)
         self.size = [self.image.get_width(),self.image.get_height()]
         self.pos = [0,0]
-        self.speed = speed.copy()
-        self.border = border_size
+        self.speed = speed[:]
+        self.border = (self.image.get_width(),self.image.get_height())
+
+
 
     def update(self):
         #updating image
@@ -29,12 +33,13 @@ class Background():
             # print('reset y')
         
 
-    def draw(self,window:pygame.display):
+    def draw(self,window:pygame.display,force:bool=False):
         #drawing the image to the window
         window.blit(self.image,self.pos)
         #activating duplicates
         if self.pos != [0,0]:
-            self.duplicates(window,pos=self.pos)
+            self.duplicates(window,pos=self.pos,force=force)
+
 
     def change(self,img,resize,speed,border_size:tuple=pygame.display.play_dimensions):
         # It stores an image, a position tuple, and a speed tuple
@@ -46,27 +51,27 @@ class Background():
         self.border = border_size
 
 
-    def duplicates(self,window:pygame.display,pos:tuple=None):
+    def duplicates(self,window:pygame.display,pos:tuple=None,force:bool=False):
         #7/10/2023 - adding a default position
         pos = self.pos if pos is None else pos 
         #drawing repeats of the background if any of it is offscreen
         #07/10/2023 - instead of individually blitting, it makes a list for easy modification
         blit_list = [ ] 
-        if pos[0] > 0:#LEFT
+        if pos[0] > 0 or force:#LEFT
             blit_list.append((pos[0]-self.size[0],pos[1]))
-        elif pos[0] < 0:#RIGHT
+        elif pos[0] < 0 or force:#RIGHT
             blit_list.append((pos[0]+self.size[0],pos[1]))
-        if pos[1] > 0:#UP
+        if pos[1] > 0 or force:#UP
             blit_list.append((pos[0],pos[1]-self.size[1]))
-        elif pos[1] < 0:#DOWN
+        elif pos[1] < 0 or force:#DOWN
             blit_list.append((pos[0],pos[1]+self.size[1]))
-        if pos[0] > 0 and pos[1] > 0:#UPLEFT
+        if pos[0] > 0 and pos[1] > 0 or force:#UPLEFT
             blit_list.append((pos[0]-self.size[0],pos[1]-self.size[1]))
-        if pos[0] > 0 and pos[1] < 0:#DOWNLEFT
+        if pos[0] > 0 and pos[1] < 0 or force:#DOWNLEFT
             blit_list.append((pos[0]-self.size[0],pos[1]+self.size[1]))
-        if pos[0] < 0 and pos[1] > 0:#UPRIGHT
+        if pos[0] < 0 and pos[1] > 0 or force:#UPRIGHT
             blit_list.append((pos[0]+self.size[0],pos[1]-self.size[0]))
-        if pos[0] < 0 and pos[1] < 0:#DOWNRIGHT
+        if pos[0] < 0 and pos[1] < 0 or force:#DOWNRIGHT
             blit_list.append((pos[0]+self.size[0],pos[1]+self.size[1]))
 
 

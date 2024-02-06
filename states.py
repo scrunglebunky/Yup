@@ -7,6 +7,9 @@ from backgrounds import Floor as Fl
 from emblems import Emblem as Em
 from bullets import emptyBulletMax as eBM
 
+winrect = pygame.display.rect
+
+
 #basic template for states to go off of
 class Template():
     def __init__(self):
@@ -38,8 +41,8 @@ class Play(Template):
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 0,
-                 level:int = 0,
+                 world:int = 1,
+                 level:int = 10,
                  level_in_world:int = 5,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
@@ -111,7 +114,7 @@ class Play(Template):
         self.in_advance:bool = False #if true, will not update much besides the background and player
 
         #what boss the boss state pulls from
-        self.curBossName = "nope"
+        self.curBossName = "ufo"
 
    
     
@@ -687,29 +690,35 @@ class Pause(Template):
 #when a world is completed
 class Advance(Template):
     sprites=pygame.sprite.Group()
+
+
     def __init__(self,window,play_state):
         #setting values
         self.window = window
         self.play_state = play_state
-        self.frames = self.counter1 = self.phase = 0 
         self.next_state = None
-
-        #the settling in background
-        self.bg = None
+        #phases
+        self.phases = (self.phase0,self.phase1,self.phase2,self.phase3)
+        """ PHASE LIST
+        0 - the background slowly fading in
+        1 - "LEVEL COMPLETE" hitting the screen
+        2 - A list of certain things that have occurred: killed enemies, damage taken, shots fired, accuracy
+        3 - Saying where you are going, with a scaled-down picture of the background. 
+        4 - Playing a random animation that launches the player offscreen"""
+        #defining a bunch of values elsewhere
+        self.initialize_values()   
 
         
     def on_start(self):
-        #startup
-        self.frames = 0 
-        self.counter1 = 0 # a rapidly-resetting counter that does not measure the lifespan of the state
-        self.phase = 0 # phase 0 -> player happy (everything stops) | phase 1 -> background settling in, 
+        #player
+        self.play_state.player.movement_redo()
+        self.play_state.player.bullet_lock = True
+        #defining values
+        self.initialize_values()
+        #player stuff -> state stuff
         self.play_state.player.aimg.change_anim("yay")
         self.play_state.player.reset_movement()
         self.play_state.in_advance = True #stopping play_state from doing weird shit
-        #making the bg slowly fade in
-        self.bg = WhiteFlash(img="level_complete_bg.png",surface=self.window,start_val=0,end_val=255,isreverse=True,spd=-1.0)
-        self.sprites.add(self.bg)
-        # self.sprites.add(self.play_state.player)
 
     def on_end(self):
         self.frames = self.counter1 = self.phase = 0
@@ -717,8 +726,9 @@ class Advance(Template):
         self.play_state.in_advance = False #letting play_state be goofy again
         self.sprites.empty
 
+
     def update(self):
-        self.phase0()
+        self.phases[self.phase]()
         return
         # self.frames += 1
         # self.frames==1: Advance.sprites.add(Em(im="levelcomplete.png",coord=(pygame.display.play_dimensions_resize[0]/2+pygame.display.play_pos[0],pygame.display.play_dimensions_resize[1]*0.25+pygame.display.play_pos[1]),isCenter=True,pattern="jagged"))
@@ -733,17 +743,44 @@ class Advance(Template):
         # if self.frames > 300:
         #     self.next_state = "play"
 
-        self.play_state.player.invincibility_counter = 60
 
-        self.play_state.update()
+    def phase0(self):
+        self.counter1 += 1
+        #updating the background
+        self.bgFlash.update()
+        self.bg.update()
+        self.bg.image = self.bgFlash.image
+        self.playstate_draw()
+        #drawing values in order
+        self.bg.draw(self.window)
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        #checking to finish
+        if self.counter1 > 255 or (type(self.bg) == WhiteFlash and self.bg.finished):
+            self.phase = 1
+            self.counter1 = 0 
+            self.bg = Bg(img="level_complete_bg.png",resize=pygame.display.dimensions,speed=[-5,-5])
+            self.em_complete.add_tween_pos(cur_pos = (winrect.centerx,-50), target_pos = (winrect.centerx,100), speed=2, started=True, isCenter=True)
+            self.sprites.add(self.em_complete)
 
-        Advance.sprites.update()
-        Advance.sprites.draw(self.window)
+    def phase1(self):
+
+        #updating the other generic stuff -- player background timer
+        self.counter1 += 1
+        self.bg.update()
+        self.sprites.update()
+        self.playstate_draw()
+        self.bg.draw(self.window)
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        self.sprites.draw(self.window)
 
 
+    def phase2(self):
+        ...
+    def phase3(self):
+        ...
 
     def event_handler(self,event):
-        pass    
+        self.play_state.player.controls(event)    
     
     def kaboom(self,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
             (Advance.sprites if not play else self.play_state.sprites[0]).add(
@@ -754,7 +791,27 @@ class Advance(Template):
                 animation_killonloop=True,
                 resize=animation_resize
                 ))
+    
+    def playstate_draw(self):
+        #managing the player and the background
+        self.play_state.sprites[1].update()
+        self.play_state.window.fill(pygame.Color(0,0,0,0))
+        self.play_state.sprites[1].draw(self.play_state.window)
 
+
+
+    def initialize_values(self):
+        #startup
+        self.frames = 0 
+        self.counter1 = 0 # a rapidly-resetting counter that does not measure the lifespan of the state
+        self.phase = 0 # phase 0 -> player happy (everything stops) | phase 1 -> background settling in, 
+        #fading bg assets
+        self.bgFlash = WhiteFlash(img="level_complete_bg.png",surface=self.window,start_val=0,end_val=255,isreverse=True,spd=-2.0)
+        self.bg = Bg(img=None,resize=pygame.display.dimensions,speed=[-5,-5])
+        self.bg.image = self.bgFlash.image
+        #other assets
+        self.em_complete = Em(im="levelcomplete.png",coord=(0,0))
+        # self.sprites.add(self.bg)
 
 
 
@@ -785,6 +842,7 @@ class Boss(Template):
         # self.playstate.curBossName="sun"
         self.boss = enemies_bosses.loaded[self.playstate.curBossName](sprites=Boss.sprites,player=self.player,window=self.playstate.window,state=self)
 
+
     def on_start(self):
         audio.play_song('twisted_inst.mp3' if self.playstate.curBossName == "crt" else "golden_inst.mp3")
         
@@ -810,13 +868,8 @@ class Boss(Template):
 
     def update(self,draw=True): 
         for sprite in self.sprites[0]:pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
-        #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
-
         for sprite in self.sprites[1]:pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
-        #     pygame.draw.rect(self.window, 'black', sprite.mask.get_rect(), width=1)
-
         for sprite in self.sprites[2]:pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
-        #     pygame.draw.rect(self.window, 'blue', sprite.mask.get_rect(), width=1)
 
 
         #Drawing previous gameplay frame to the window -- don't ask why, it just does. 
@@ -850,6 +903,7 @@ class Boss(Template):
         #figuring out what to do when the boss dies
         elif self.boss.info['ENDBOSSEVENT']:
             self.next_state = "play" if not self.boss.info['ENDWORLD'] else 'advance'
+
 
     def event_handler(self,event):
         self.player.controls(event)
