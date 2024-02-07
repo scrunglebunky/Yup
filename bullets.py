@@ -1,6 +1,7 @@
 #Program by Andrew Church 5/26/23
 import pygame,audio,tools,random
 from anim import AutoImage as AImg
+from tools import world_log as wl
 
 # 5/26/23 - This is the default bullet.
 # It is rather similar to the previous version's bullet, but that's because of how simple it is
@@ -26,6 +27,8 @@ class Bullet(pygame.sprite.Sprite):
         self.kill_on_spawn = False
         self.sprites = kwargs['sprites']
 
+        
+
 
 
         #5/27/2023 - Kill Counter
@@ -35,6 +38,9 @@ class Bullet(pygame.sprite.Sprite):
             if Bullet.count > Bullet.max:
                 self.kill_on_spawn = True
                 return
+            else:
+                #updating the amount of total shots as long as it wasn't immediately killed
+                wl['shots'] += 1
         
         
 
@@ -62,6 +68,8 @@ class Bullet(pygame.sprite.Sprite):
         Bullet.count = Bullet.count - 1 if Bullet.count > 0 else 0 
         if self.health <= 0:
             for i in range(5):self.sprites[0].add(BulletParticle(self.rect.center))
+            #updating the 'hits' counter. this means that the accuracy is different from the kills
+            wl['hits'] += 1
             # audio.play_sound("smallboom0.wav")
 
 

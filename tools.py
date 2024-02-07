@@ -159,7 +159,7 @@ debug = False
 
 
 #global logs
-log = {"kills":100,"got_away":100,"shots":99,"damage":100}
+log = {"kills":0,"got_away":0,"shots":0,"hits":0,"damage":0}
 world_log = log.copy()
 def update_log():
     for k,v in world_log.items():

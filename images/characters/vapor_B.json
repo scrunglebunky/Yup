@@ -4,11 +4,11 @@
     "PATH": "./vapor_B/",
     "SHEET_SIZE": [
         300,
-        50
+        55
     ],
     "TILE_SIZE": [
         50,
-        50
+        55
     ],
     "ROWS/COLUMNS": [
         1,

@@ -28,6 +28,7 @@ class Template():
 
 
 
+
 #gameplay
 class Play(Template):
     sprites = { #sprites are now state-specific hahaha
@@ -45,7 +46,7 @@ class Play(Template):
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 1,
+                 world:int = 5,
                  level:int = 10,
                  level_in_world:int = 5,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
@@ -946,7 +947,7 @@ class Advance(Template):
     def fetch_numbers(self):
         Advance.values['score'] = score.score
         Advance.values['lives'] = self.play_state.player.health
-        Advance.values['kills'] = tools.world_log['kills']
+        Advance.values['kills'] = tools.world_log['hits'] #CGHANGE THIS SOON
         Advance.values['shots'] = tools.world_log['shots'] 
         if Advance.values['shots'] > 0:
             Advance.values['accuracy'] = Advance.values['kills']/Advance.values['shots'] 
@@ -986,6 +987,8 @@ class Advance(Template):
         else:
             #done
             return True
+
+
 
 
 
@@ -1102,3 +1105,10 @@ class Boss(Template):
         
 
 
+
+
+
+
+class Tutorial(Template):
+    def __init__(self):
+        Template.__init__(self)

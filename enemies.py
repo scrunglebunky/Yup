@@ -4,6 +4,7 @@ from emblems import Emblem as Em
 from math import sin,cos,atan2,degrees
 from anim import AutoImage as AImg
 from player import Player
+from tools import world_log as wl
 
 class Template(pygame.sprite.Sprite):
     #default image if unchanged
@@ -135,12 +136,17 @@ class Template(pygame.sprite.Sprite):
 
     def kill(self,reason=None,play_sound = True) -> int:
         if reason == "health":
+            #COIN CODE
             if not self.is_demo: 
                 for i in range(1):
                     self.sprites[2].add(Coin(pos=self.rect.center,floor=self.player.bar[1]))
+            #UPDATING THE KILL COUNT
+            wl['kills'] += 1
+        else:
+            wl['got_away'] += 1
+        #KILLING THE SPRITE ANYWAYS
         pygame.sprite.Sprite.kill(self)
         self.info['dead'] = True
-
         return self.timers['exist']
 
     def check_dead(self):

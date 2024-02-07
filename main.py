@@ -18,7 +18,7 @@ pygame.display.set_caption("YUP RevD")
 universal_sprite_group = pygame.sprite.Group() #This used to be a dictionary used everywhere but all groups have now been moved to their own respective states
 
 #06/01/20 23 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import options,score,ui_border
+import options,score,ui_border,score
 import states as all_states
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
@@ -77,23 +77,10 @@ while run:
 
     #filling the screen in case something is offscreen
     window.fill(defaultcolor)
-
     #06/23/2023 - drawing border to window 
+    border.update_values(score=score.score,lives=states['play'].player.health)
     border.draw(window)
-    #06/x/2023 - adding numbers to be drawn to the border
-    # border.draw_specific(
-        # window = window, 
-        # lives = states["play"].player.health,
-        # nums = [
-        #     score.score,
-        #     round(clock.clock.get_fps(),2),
-        #     round(clock.offset,2),
-        #     round(clock.clock.get_fps()*clock.offset,2),
-        #     ]
-        # ) 
-    border.values['lives'] = 2
-    border.display_lives()
-
+    
 
     #event handler
     for event in pygame.event.get():

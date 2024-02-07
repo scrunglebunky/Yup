@@ -3,11 +3,11 @@
     "ANIM": "coin_anim.json",
     "SHEET_SIZE": [
         150,
-        25
+        27
     ],
     "TILE_SIZE": [
         25,
-        25
+        27
     ],
     "ROWS/COLUMNS": [
         1,
