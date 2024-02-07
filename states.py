@@ -1,13 +1,17 @@
 import pygame,os,player,text,random,levels,json,formation,anim,audio,tools,events,score,enemies,enemies_bosses
 from anim import all_loaded_images as img
 from anim import WhiteFlash
-from text import loaded_text as txt
+from text import display_numbers as dn
+from text import text_list as tl
 from backgrounds import Background as Bg
 from backgrounds import Floor as Fl
 from emblems import Emblem as Em
 from bullets import emptyBulletMax as eBM
 
 winrect = pygame.display.rect
+height,width = winrect.height,winrect.width
+starty = winrect.height * 0.25
+
 
 
 #basic template for states to go off of
@@ -492,9 +496,9 @@ class GameOver(Template):
         if self.timer == 500:
             GameOver.sprites.add(Em(im="gameover_score.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.35),isCenter=True))
         if self.timer == 650:
-            GameOver.sprites.add(Em(im="gameover_level.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
+            GameOver.sprites.add(Em(im="g_level.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.45),isCenter=True))
         if self.timer == 800:
-            GameOver.sprites.add(Em(im="gameover_rank.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
+            GameOver.sprites.add(Em(im="g_rank.png",coord=(pygame.display.rect.center[0]*0.35,pygame.display.rect.height*0.90),isCenter=True))
         #numbers
         if self.timer == 530:
             GameOver.sprites.add(Em(force_surf = text.load_text(text=str(score.score),size=40) ,coord=(pygame.display.rect.center[0]*0.75,pygame.display.rect.height*0.32),isCenter=False))
@@ -577,19 +581,19 @@ class GameOver(Template):
         #makes a rank value and gives you a set of ranks based off of it
         rank_val = score.score * (1 + 0.01*self.play_state.world) * (1+(0.01*self.play_state.level))
         ranks = {
-            0:("so bad its a joke",), #joke 
-            1000:("horrible",), #horrible
-            5000:("bad",), #bad
-            10000:("not bad but not good",), #not good
-            50000:("mid",), #mid
-            100000:("ok",), #ok
-            250000:("good",), #good 
-            500000:("great",), #great (shitpost)
-            1000000:("amazing",), #amazing
-            2500000:("cracked",), #cracked 1
-            7500000:("crackeder",), #cracked 2
-            10000000:("crackedest",), #cracked 3
-            999999999:("holy hell",) #holy shit
+            0:"joke", #joke 
+            100:"horrible", #horrible
+            500:"bad", #bad
+            1000:"notgood", #not good
+            2500:"mid", #mid
+            5000:"ok", #ok
+            10000:"good", #good 
+            25000:"great", #great (shitpost)
+            50000:"amazing", #amazing
+            100000:"cracked", #cracked 1
+            250000:"crackeder", #cracked 2
+            500000:"crackedest", #cracked 3
+            1000000:"holymoly" #holy hell
         }
         #figuring out what rank to put you into
         rank_key=None
@@ -599,12 +603,12 @@ class GameOver(Template):
             else:
                 break
         #giving the rank
-        rank = random.choice(ranks[rank_key])
+        rank = random.choice(tl["rank_" + str(ranks[rank_key])])
         return rank
 
     def got_high_score(self) -> bool: #it says if you got a high score or not
-        if score.score > score.scores[0][1]: return True
-        else: return False
+        return (score.score > score.scores[0][1]) or (len(score.scores)<10)
+
 
     def hiscore_updatename(self,text:str="",backspace:bool=False):
         if backspace and len(self.name) > 0: 
@@ -613,7 +617,7 @@ class GameOver(Template):
             self.name = ''
             self.name.join(tempname)
         else: self.name += (text.upper() if text.upper() != "SPACE" else " ")
-        self.scoregraphic.autoimage.image = score.generate_graphic(score.score,self.name)
+        self.scoregraphic.aimg.image = score.generate_graphic(score.score,self.name)
 
 
 
@@ -691,6 +695,19 @@ class Pause(Template):
 class Advance(Template):
     sprites=pygame.sprite.Group()
 
+    emblems = {
+        "score":Em(im="g_score.png",coord=(0,starty+height*0)),
+        "lives":Em(im="g_lives.png",coord=(0,starty+height*0.1)),
+        "shots":Em(im="g_shots.png",coord=(0,starty+height*0.2)),
+        "kills":Em(im="g_kills.png",coord=(0,starty+height*0.3)),
+        "accuracy":Em(im="g_accuracy.png",coord=(0,starty+height*0.4)),
+        "rank":Em(im="g_rank.png",coord=(0,height*0.9)),
+    }
+    emblemkeys = list(emblems.keys())
+    values = {"score":0,"lives":0,"shots":0,"kills":0,"accuracy":0,"rank":"hello"}
+    suffix = {"score":0,"lives":10,"shots":0.25,"kills":1,"accuracy":1000,"rank":0}
+    
+
 
     def __init__(self,window,play_state):
         #setting values
@@ -698,7 +715,7 @@ class Advance(Template):
         self.play_state = play_state
         self.next_state = None
         #phases
-        self.phases = (self.phase0,self.phase1,self.phase2,self.phase3)
+        self.phases = (self.phase0,self.phase1,self.phase2,self.phase3,self.phase4)
         """ PHASE LIST
         0 - the background slowly fading in
         1 - "LEVEL COMPLETE" hitting the screen
@@ -710,24 +727,32 @@ class Advance(Template):
 
         
     def on_start(self):
+        #advancing the world early in playstate so the right info is fetched
+        self.play_state.new_world()
         #player
         self.play_state.player.movement_redo()
         self.play_state.player.bullet_lock = True
         #defining values
         self.initialize_values()
+        self.fetch_numbers() #copying the world logs
+        tools.update_log() #resetting the world logs to 0 
         #player stuff -> state stuff
         self.play_state.player.aimg.change_anim("yay")
         self.play_state.player.reset_movement()
         self.play_state.in_advance = True #stopping play_state from doing weird shit
 
+
     def on_end(self):
+        
         self.frames = self.counter1 = self.phase = 0
         self.play_state.player.aimg.change_anim("idle")
+        self.play_state.player.bullet_lock = False
         self.play_state.in_advance = False #letting play_state be goofy again
         self.sprites.empty
 
 
     def update(self):
+        Advance.values['score'] = score.score
         self.phases[self.phase]()
         return
         # self.frames += 1
@@ -772,12 +797,97 @@ class Advance(Template):
         self.bg.draw(self.window)
         self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
         self.sprites.draw(self.window)
+        #displaying emblem numbers
+        self.draw_numbers()
+        #adding emblems to the screen
+        if self.counter1 > 45 and self.state1_counter < len(Advance.emblemkeys):
+            self.sprites.add(Advance.emblems[Advance.emblemkeys[self.state1_counter]])
+            # print(Advance.emblemkeys[self.state1_counter],Advance.emblems[Advance.emblemkeys[self.state1_counter]].rect.topleft)
+            self.kaboom(coord=Advance.emblems[Advance.emblemkeys[self.state1_counter]].rect.center,animation_resize = (150,75))
+            self.state1_counter += 1
+            self.counter1 = 0 
+
+        elif self.state1_counter >= len(Advance.emblemkeys) and self.counter1 > 255:
+            self.phase = 2
+            self.counter1 = 0
 
 
     def phase2(self):
-        ...
+        #updating the other generic stuff -- player background timer
+        self.counter1 += 1
+        self.bg.update()
+        self.sprites.update()
+        self.playstate_draw()
+        self.bg.draw(self.window)
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        self.sprites.draw(self.window)
+
+        #subtracting values to add to score
+        done = self.subtract_numbers()
+        self.draw_numbers()
+
+        #done
+        if done:
+            self.counter1 = 0
+            self.phase = 3
+            self.sprites.add(self.em_nextlevel,self.em_movingto,self.em_nextleveltext)
+
+
+
+
     def phase3(self):
+        #fade the background away
+        self.bg.update()
+        self.bg.draw(self.window)
+
+        #updating the other generic stuff -- player background timer
+        self.counter1 += 1
+        self.sprites.update()
+        self.playstate_draw()
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        self.sprites.draw(self.window)
+        self.draw_numbers()
+
+
+        #waiting as the game says where the player is moving next
+        if self.counter1 > 360:
+            self.counter1 = 0
+            self.phase = 4
+
+
+    def phase4(self):
+        #fade the background away
+        self.bgUnflash.update()
+        self.bg.update()
+        self.bg.image = self.bgUnflash.image
+        self.bg.draw(self.window)
+
+        #updating the other generic stuff -- player background timer
+        self.counter1 += 1
+        self.sprites.update()
+        self.playstate_draw()
+        self.window.blit(pygame.transform.scale(self.play_state.window,pygame.display.play_dimensions_resize),pygame.display.play_pos)
+        self.sprites.draw(self.window)
+        self.draw_numbers()
+
+        #destroying all living assets
+        if self.counter1 % 15 == 0:
+            if len(self.sprites) <= 0: 
+                pass
+            else:
+                for v in self.sprites:
+                    if v.aimg.name == 'kaboom':break
+                    self.kaboom(coord=v.rect.center,animation_resize=(v.rect.width,v.rect.height))
+                    v.kill()
+                    break
+
+        #waiting as the game says where the player is moving next
+        if self.counter1 > 150:
+            self.next_state = "play"
+    
+    def phase5(self):
         ...
+        
 
     def event_handler(self,event):
         self.play_state.player.controls(event)    
@@ -807,12 +917,75 @@ class Advance(Template):
         self.phase = 0 # phase 0 -> player happy (everything stops) | phase 1 -> background settling in, 
         #fading bg assets
         self.bgFlash = WhiteFlash(img="level_complete_bg.png",surface=self.window,start_val=0,end_val=255,isreverse=True,spd=-2.0)
+        self.bgUnflash = WhiteFlash(img="level_complete_bg.png",surface=self.window,spd=2.0)
         self.bg = Bg(img=None,resize=pygame.display.dimensions,speed=[-5,-5])
         self.bg.image = self.bgFlash.image
         #other assets
         self.em_complete = Em(im="levelcomplete.png",coord=(0,0))
+        self.em_nextlevel = Em(im=self.play_state.world_data['bg'],resize=(225,300),pattern="sine",coord=(winrect.width*0.75,winrect.centery),isCenter=True)
+        self.em_movingto = Em(im="a_movingto.png",pattern="jagged",coord=(self.em_nextlevel.rect.centerx,self.em_nextlevel.rect.top-25),isCenter=True)
+        self.em_nextleveltext = Em(force_surf = text.load_text(str(self.play_state.world_data['world_name']),50),pattern="jagged",coord=(self.em_nextlevel.rect.centerx,self.em_nextlevel.rect.bottom+25),isCenter=True)
         # self.sprites.add(self.bg)
+        
+        #state 1 values -> emblems
+        self.state1_counter = 0 
 
+
+    def draw_numbers(self):
+        for k,v in Advance.emblems.items():
+            if k == "rank":
+                continue
+            elif v.alive():
+                if k == "score": 
+                    dn(str(Advance.values[k]), pos=v.rect.topright,window=self.window) 
+                elif k == "accuracy":
+                    dn(str(round(Advance.values[k]*100))+"%x"+str(Advance.suffix[k]), pos=v.rect.topright,window=self.window) 
+                else:
+                    dn(str(Advance.values[k])+"x"+str(Advance.suffix[k]), pos=v.rect.topright,window=self.window)
+
+    def fetch_numbers(self):
+        Advance.values['score'] = score.score
+        Advance.values['lives'] = self.play_state.player.health
+        Advance.values['kills'] = tools.world_log['kills']
+        Advance.values['shots'] = tools.world_log['shots'] 
+        if Advance.values['shots'] > 0:
+            Advance.values['accuracy'] = Advance.values['kills']/Advance.values['shots'] 
+        else:
+            Advance.values['accuracy'] = 1.0
+
+    def subtract_numbers(self) -> bool:
+        snapped=subbed=False
+        for k,v in Advance.emblems.items():
+            if v.alive():
+                if k == "score":
+                    continue
+                if k == "rank":
+                    v.kill()
+                    snapped = True
+                    self.kaboom(coord=v.rect.center,animation_resize = (100,200))
+                else:
+                    if Advance.values[k] >= 1:
+                        #if >= 1
+                        score.score += round(Advance.suffix[k],2)
+                        Advance.values[k] -= 1
+                        subbed = True
+                    elif Advance.values[k] > 0:
+                        #if between 1 and 0 
+                        score.score += round(Advance.suffix[k]*Advance.values[k],2)
+                        Advance.values[k] = 0
+                        subbed = True
+                    else:
+                        #if <= 0 
+                        v.kill()
+                        self.kaboom(coord=v.rect.center,animation_resize = (100,200))
+                        snapped = True
+        if snapped:...
+        if subbed:
+            #play sound
+            return False
+        else:
+            #done
+            return True
 
 
 
@@ -867,9 +1040,9 @@ class Boss(Template):
 
 
     def update(self,draw=True): 
-        for sprite in self.sprites[0]:pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
-        for sprite in self.sprites[1]:pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
-        for sprite in self.sprites[2]:pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
+        # for sprite in self.sprites[0]:pygame.draw.rect(self.window, 'blue', sprite.rect, width=3)
+        # for sprite in self.sprites[1]:pygame.draw.rect(self.window, 'green', sprite.rect, width=3)
+        # for sprite in self.sprites[2]:pygame.draw.rect(self.window, 'red', sprite.rect, width=3)
 
 
         #Drawing previous gameplay frame to the window -- don't ask why, it just does. 

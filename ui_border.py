@@ -4,6 +4,8 @@ from anim import all_loaded_images as img
 from emblems import Emblem as Em
 from backgrounds import Background as Bg
 winrect = pygame.display.rect
+xstart = pygame.display.play_dimensions_resize[0] + pygame.display.play_pos[0]
+height = pygame.display.dimensions[1] 
 
 
 
@@ -13,30 +15,21 @@ class Border():
     emblems = {
             "logo": Em(
                 im = "logo.png",
-                coord = (
-                    winrect.centerx,
-                    0)), #LOGO
+                coord = (xstart,height*0)), #LOGO
             "score": Em(
-                im="score.png",
-                coord = (
-                    winrect.centerx,
-                    50)), #SCORE
+                im="g_score.png",
+                coord = (xstart,height*0.25)), #SCORE
             "debug": Em(
-                im="debug.png",
-                coord=( 
-                    winrect.centerx,
-                    100)), #DEBUG
+                im="g_debug.png",
+                coord=(xstart,height*0.5)), #DEBUG
             "lives": Em(
-                im="lives.png",
-                coord=(
-                    winrect.centerx,
-                    150)), #LIVES
+                im="g_lives.png",
+                coord=(xstart,height*0.3)), #LIVES
             "weapon": Em(
-                im="weapon.png",
-                coord=(
-                    winrect.centerx,
-                    200)), #WEAPON
-                    }
+                im="weapon.png",coord=(xstart,height*0.4)), #WEAPON
+            }
+    #values to associate with the emblems
+    values = {"logo":0,"score":0,"debug":0,"lives":0,"weapon":0,}
     
 
     def __init__(self,window:pygame.Surface):
@@ -52,7 +45,10 @@ class Border():
         self.bg.draw(self.window)
         Border.sprites.draw(self.window)
     def draw_specific(self,*args,**kwargs):...
-    def display_lives(self,*args,**kwargs):...
+    def display_lives(self,*args,**kwargs):
+        if Border.values['lives'] < 5:
+            for i in range(Border.values['lives']):
+                self.window.blit(img['life.png'], (Border.emblems['lives'].rect.right + i*35,  Border.emblems['lives'].rect.top))
     def update(self):
         self.bg.update()
         Border.sprites.update()

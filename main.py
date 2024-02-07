@@ -81,16 +81,19 @@ while run:
     #06/23/2023 - drawing border to window 
     border.draw(window)
     #06/x/2023 - adding numbers to be drawn to the border
-    border.draw_specific(
-        window = window, 
-        lives = states["play"].player.health,
-        nums = [
-            score.score,
-            round(clock.clock.get_fps(),2),
-            round(clock.offset,2),
-            round(clock.clock.get_fps()*clock.offset,2),
-            ]
-        ) 
+    # border.draw_specific(
+        # window = window, 
+        # lives = states["play"].player.health,
+        # nums = [
+        #     score.score,
+        #     round(clock.clock.get_fps(),2),
+        #     round(clock.offset,2),
+        #     round(clock.clock.get_fps()*clock.offset,2),
+        #     ]
+        # ) 
+    border.values['lives'] = 2
+    border.display_lives()
+
 
     #event handler
     for event in pygame.event.get():

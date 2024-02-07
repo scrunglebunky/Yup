@@ -151,6 +151,17 @@ class Clock(): # a redo of pygame.clock to add more values
 
 
 
+
+
 #global values -- gonna change this to globals soon
 demo = False
 debug = False
+
+
+#global logs
+log = {"kills":100,"got_away":100,"shots":99,"damage":100}
+world_log = log.copy()
+def update_log():
+    for k,v in world_log.items():
+        log[k] = world_log[k]
+        world_log[k] = 0

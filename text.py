@@ -1,5 +1,5 @@
 # ANDREW CHURCH - 2023
-import pygame,math
+import pygame,math,json
 pygame.font.init()
 
 #5/30/2023 - START OF TEXT PROGRAMMING
@@ -11,19 +11,22 @@ loaded_text = {}
 
 
 #5/30/2023 - LOADING NUMBERS
-load_list = [".","-","+",0,1,2,3,4,5,6,7,8,9]
+load_list = [".","-","+","x","%",0,1,2,3,4,5,6,7,8,9]
 for num in load_list:
     loaded_text[str(num)] = pygame.font.Font("./data/font.ttf",30)
     loaded_text[str(num)] = loaded_text[str(num)].render(str(num),False,"white","black")
 
-#5/31/2023 - LOADING NUMBERS   
+#5/31/2023 - LOADING ITEMS   
 # pretty much it opens a file and loads all items inside
-with open("./data/text.txt","r") as file:
-    load_list = file.read().split(",")
-for item in load_list:
-    loaded_text[str(item)] = pygame.font.Font("./data/font.ttf",30)
-    loaded_text[str(item)] = loaded_text[str(item)].render(str(item),False,"white","black")
-
+# with open("./data/text.txt","r") as file:
+#     load_list = file.read().split(",")
+# for item in load_list:
+#     loaded_text[str(item).lower()] = pygame.font.Font("./data/font.ttf",30)
+#     loaded_text[str(item).lower()] = loaded_text[str(item)].render(str(item),False,"white","black")
+#LOADING TEXT FROM A LOAD LIST
+text_list = {}
+with open("./data/text_list.json") as raw:
+    text_list.update(json.load(raw))
 
 #5/30/2023 - DISPLAY_NUMBERS
 # There is separate function for displaying numbers because I'm not gonna store several numbers as their own stupid variables, as that would take up too much RAM
@@ -51,7 +54,7 @@ def load_text(
     font: str = "./data/font.ttf",  # the font ; could also be SetFont
     fg: str = "white",  # foreground color
     bg: str = "black",  # background color
-    add_to_loaded:bool = True #if the text should be added to the loaded_text thing to be used later
+    add_to_loaded:bool = False #if the text should be added to the loaded_text thing to be used later
     ):
         # Setting the image, if it is loaded
         if text in loaded_text.keys():

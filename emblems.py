@@ -33,6 +33,7 @@ class Emblem(pygame.sprite.Sprite):
         self.animation_killonloop = animation_killonloop
 
         self.rect = self.image.get_rect() #finally setting rect
+        self.rect.topleft = self.coord
         self.dead = False
 
 
@@ -51,6 +52,9 @@ class Emblem(pygame.sprite.Sprite):
         #updating the tweens
         if len(self.tweens['move']) > 5 and not self.tweens['move'][4]:
             self.tween_pos()
+
+        #what the hell
+        # print(self.rect.center)
 
     
     def play_pattern(self):
@@ -101,6 +105,6 @@ class Emblem(pygame.sprite.Sprite):
             self.tweens['move'][4] = True
             self.change_pos(pos = self.tweens['move'][1][:], isCenter = self.tweens['move'][6])
 
-
+        
         
     
