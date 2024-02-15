@@ -8,7 +8,7 @@
     "./images/ui/":[
         "placeholder.bmp",
         "a_movingto.png",
-        "logo.png","g_score.png","g_debug.png","g_lives.png","g_level.png","g_rank.png","g_shots.png","g_kills.png","g_accuracy.png",
+        "logo.png","g_score.png","g_debug.png","g_lives.png","g_level.png","g_rank.png","g_shots.png","g_kills.png","g_accuracy.png","g_great.png",
         "life.png","weapon.png","cursor.png",
         "config_menu.png","on.png","off.png","paused.png","pauseborder.png",
         "high_scores.png","hiscore.png","hiscore_name.png",
@@ -16,7 +16,7 @@
         "levelcomplete.png","demo.png",
         "arrow.png"],
     "./images/bg/":[
-        "space.png","splash.png","uibox.png","test.png","game_over_bg.png","level_complete_bg.png",
+        "space.png","splash.png","uibox.png","test.png","game_over_bg.png","level_complete_bg.png","tutorial_bg.png",
         "home.bmp","nope.png","hack.png","water.png","happy.png","vaporwave.png","ufos.png","ship.png",
         "hack_form.png","bluescreen.png",
         "happy_floor.png","nope_floor.png","water_floor.png"],
@@ -35,6 +35,7 @@
         ["hiscore.png",[300,225]],
         ["hiscore_name.png",[200,100]],
         ["levelcomplete.png",[225,112]],
-        ["sunblock.png",[75,75]]
+        ["sunblock.png",[75,75]],
+        ["g_great.png",[200,100]]
     ]
 }

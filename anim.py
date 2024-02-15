@@ -9,6 +9,7 @@ import pygame,os,json
 all_loaded_spritesheets = {}
 all_loaded_images = {}
 
+
     
 #5/8/23 - DEFINING THING TO LOAD ALL IMAGES
 def get_image(sheet,
@@ -90,6 +91,10 @@ for directory,filelist in anim_loadlist.items():
             for animation in anim_file.keys():
                 anim_file[animation]["FPS"] = 60/anim_file[animation]["FPS"]
 
+# for v in all_loaded_spritesheets.values():
+#     for val in v:
+#         print(val,end='\n--------')
+#     print("\n"*20)
 
 #06/01/2023 - LOADING NON-ANIMATED IMAGES
 with open("./data/img_loadlist.json","r") as raw:
@@ -107,6 +112,24 @@ for directory,filelist in img_loadlist.items():
 #ADDING EXTRA COLORS
 all_loaded_images['black'] = pygame.Surface((10,10))
 all_loaded_images['black'].fill("#000000")
+
+all_loaded_images['greenblock'] = pygame.Surface((5,5))
+pygame.draw.rect(all_loaded_images['greenblock'],color=(0,128,0),rect=pygame.Rect(0,0,5,5))
+pygame.draw.rect(all_loaded_images['greenblock'],color=(0,255,0),rect=pygame.Rect(1,1,3,3))
+
+all_loaded_images['redblock'] = pygame.Surface((5,5))
+pygame.draw.rect(all_loaded_images['redblock'],color=(128,0,0),rect=pygame.Rect(0,0,5,5))
+pygame.draw.rect(all_loaded_images['redblock'],color=(255,0,0),rect=pygame.Rect(1,1,3,3))
+
+all_loaded_images['bwblock'] = pygame.Surface((5,5))
+pygame.draw.rect(all_loaded_images['bwblock'],color=(0,0,0),rect=pygame.Rect(0,0,5,5))
+pygame.draw.rect(all_loaded_images['bwblock'],color=(255,255,255),rect=pygame.Rect(1,1,3,3))
+
+
+NONE = pygame.Surface((10,10)).convert_alpha()
+NONE.fill(pygame.Color(0,0,0,0))
+
+all_loaded_images["NONE"] = NONE
 
 """
 #5/8/23 - LOADING IN ALL IMAGES WITH DATA
@@ -224,7 +247,13 @@ class Spritesheet():
 # A LOT of entity classes in this game have to manually check for animations and such, or if it's just using a static image
 # However, this class is going to streamline it, by doing all the checking for spritesheets on its own
 class AutoImage():
-    def __init__(self,host,name:str=None,current_anim:str='idle',force_surf:pygame.Surface=None,resize=None,generate_rect:bool=True):
+    def __init__(self,
+                host,
+                name:str=None,
+                current_anim:str='idle',
+                force_surf:pygame.Surface=None,
+                resize=None,
+                generate_rect:bool=True):
         self.host=host
         self.name = name
         self.spritesheet = None
@@ -263,7 +292,6 @@ class AutoImage():
         self.host.image = self.image
         self.host.mask = self.mask 
     
-
     def change_anim(self,anim:str,overwrite:bool=False):
         if self.spritesheet is not None:
             self.spritesheet.change_anim(anim,overwrite=overwrite)

@@ -7,6 +7,9 @@ from backgrounds import Background as Bg
 from backgrounds import Floor as Fl
 from emblems import Emblem as Em
 from bullets import emptyBulletMax as eBM
+from bullets import BulletParticle as BP
+from math import sin
+from player import PlayerDummy as PD
 
 winrect = pygame.display.rect
 height,width = winrect.height,winrect.width
@@ -18,12 +21,23 @@ starty = winrect.height * 0.25
 class Template():
     def __init__(self):
         self.next_state = None #Needed to determine if a state is complete
+    def update(self):
+        ...
     def on_start(self):
         ...
     def on_end(self):
         ...
     def event_handler(self,event):
         ...
+    def kaboom(self,group:pygame.sprite.Group,coord:tuple,animation_resize:tuple,play:bool=False,): #because kaboom happens so much
+            group.add(
+            Em(
+                im='kaboom',
+                coord=coord,
+                isCenter=True,
+                animation_killonloop=True,
+                resize=animation_resize
+                ))
 
 
 
@@ -46,9 +60,9 @@ class Play(Template):
     def __init__(self,
                  window:pygame.display,
                  campaign:str = "main_story.order",
-                 world:int = 5,
-                 level:int = 10,
-                 level_in_world:int = 5,
+                 world:int = 0,
+                 level:int = 0,
+                 level_in_world:int = 0,
                  is_restart:bool = False, #so init can be rerun to reset the whole ass state
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
@@ -115,9 +129,10 @@ class Play(Template):
         self.floor = Fl(image=self.world_data['floor_img'],player=self.player,window=self.window,move=self.world_data['floor_move'],scale=self.world_data['floor_size']) if self.world_data['floor_img'] is not None else None
 
 
+        #timer for updating new level
+        self.leveltimer = 0 
         #relating to advance sprite
         self.in_advance:bool = False #if true, will not update much besides the background and player
-
         #what boss the boss state pulls from
         self.curBossName = "ufo"
 
@@ -184,7 +199,7 @@ class Play(Template):
 
         
         #06/18/2023 - Starting a new level
-        if self.formation.cleared:
+        if self.formation.cleared and self.leveltimer > 180:
             #checking to start the advance state
             if self.level_in_world >= self.world_data["levels"]:
                 self.next_state = "advance"
@@ -209,8 +224,17 @@ class Play(Template):
                 sprites=(self.sprites if not self.is_demo else self.demo_sprites),
                 player=self.player,window=self.window,
                 is_demo = self.is_demo)
+
+            #resetting the level timer
+            self.leveltimer = 0 
+
             #restarting the new level event
             if self.event is not None: self.event.__init__(window=self.window,level=self.level)
+
+        #updating the wait timer
+        elif self.formation.cleared:
+            self.leveltimer += 1
+        
         #08/21/2023 - Game Over - opening a new state if the player is dead
         if self.player.health <= 0:
             self.next_state = "gameover"
@@ -242,29 +266,32 @@ class Play(Template):
         self.player.controls(event)
         #changing what comes next
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                self.next_state = "options","play"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"
             if tools.debug: 
-                if event.key == pygame.K_b:
-                    (self.sprites if not self.is_demo else self.demo_sprites)[0].add(
-                        Em(
-                            im=None,
-                            coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
-                            isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
-                    ))
-                if event.key == pygame.K_4:
-                    self.debug[0].pop(len(self.debug[0])-1)
-                    self.debug[1].pop(len(self.debug[1])-1)
-                if event.key == pygame.K_5:
-                    print("@@@@@@@@@@@")
-                    for item in self.formation.spawned_list:
-                        print(item.info['state'])
-                    print("@@@@@@@@@@@")
-                if event.key == pygame.K_6:
-                    self.formation.empty()
-                    self.formation.finished = True
+                # if event.key == pygame.K_b:
+                #     # (self.sprites if not self.is_demo else self.demo_sprites)[0].add(
+                #     #     Em(
+                #     #         im=None,
+                #     #         coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
+                #     #         isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
+                #     # ))
+                #     ...
+                # if event.key == pygame.K_4:
+                #     # self.debug[0].pop(len(self.debug[0])-1)
+                #     # self.debug[1].pop(len(self.debug[1])-1)
+                #     ...
+                # if event.key == pygame.K_5:
+                #     # print("@@@@@@@@@@@")
+                #     # for item in self.formation.spawned_list:
+                #     #     print(item.info['state'])
+                #     # print("@@@@@@@@@@@")\
+                #     ...
+                # if event.key == pygame.K_6:
+                #     # self.formation.empty()
+                #     # self.formation.finished = True
+                #     ...
+                ...
         if event.type == pygame.MOUSEBUTTONDOWN and tools.debug:
             pos = tuple(pygame.mouse.get_pos())
             pos = [pos[0]-pygame.display.play_pos[0],pos[1]-pygame.display.play_pos[0]]
@@ -327,8 +354,7 @@ class Title(Template):
             event = pygame.event.Event(random.choice([pygame.KEYDOWN,pygame.KEYUP]), key = random.choice([pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_z,pygame.K_x])) #create the event        
             #stopping constant movement
             if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
-                if event.key == pygame.K_LEFT: self.demo_state.player.momentum = self.demo_state.player.speed*-1 if not self.demo_state.player.movement[4] else self.demo_state.player.crouch_speed*-1
-                else: self.demo_state.player.momentum = self.demo_state.player.speed if not self.demo_state.player.movement[4] else self.demo_state.player.crouch_speed
+                self.demo_state.player.move(dir=event.key == pygame.K_RIGHT,release=True)
             else: self.demo_state.player.controls(event)
     
         #high score
@@ -350,7 +376,7 @@ class Title(Template):
     def event_handler(self,event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                self.next_state = "play"
+                self.next_state = "tutorial"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "quit"
 
@@ -856,6 +882,7 @@ class Advance(Template):
             self.phase = 4
 
 
+
     def phase4(self):
         #fade the background away
         self.bgUnflash.update()
@@ -980,6 +1007,7 @@ class Advance(Template):
                         v.kill()
                         self.kaboom(coord=v.rect.center,animation_resize = (100,200))
                         snapped = True
+                    score.score = round(score.score,2)
         if snapped:...
         if subbed:
             #play sound
@@ -1075,7 +1103,7 @@ class Boss(Template):
         self.collision()
         #death - somewhat broken atm
         if self.player.dead:
-            self.next_state = "gameover"
+            self.next_state = "play"
         #figuring out what to do when the boss dies
         elif self.boss.info['ENDBOSSEVENT']:
             self.next_state = "play" if not self.boss.info['ENDWORLD'] else 'advance'
@@ -1110,5 +1138,365 @@ class Boss(Template):
 
 
 class Tutorial(Template):
-    def __init__(self):
+    sprites = { #sprites are now state-specific hahaha
+            0:pygame.sprite.Group(), #ALL SPRITES
+            1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
+            2:pygame.sprite.Group(), #ENEMY SPRITES
+            # 4:pygame.sprite.Group(), #UI SPRITES
+        }
+    
+    #tutorial player object
+    bar=("h",winrect.height*0.7,(winrect.centerx*0.5,winrect.right*0.95),1)
+    player = PD(bar=bar,sprite_groups=sprites)
+    #emblmes
+    t_title = Em("tutorial",current_anim="tutorial")
+    t_yes = Em("tutorial",current_anim="yes")
+    t_no = Em("tutorial",current_anim="no")
+    t_great = Em("g_great.png",coord=(winrect.width*0.8,winrect.height*0.5),isCenter=True,pattern="sine")
+    t_continue = Em("continue",current_anim="idle",coord=(0,0))
+    t_sandwich = enemies.BasicEventItem(im="home_D",coord=(winrect.width*.75,bar[1]),isCenter=True)
+    #keeping a consistent image for the continue button
+    t_continue.orig_coord = (winrect.width-t_continue.rect.width,winrect.height-t_continue.rect.height)
+
+    #text emblem -- displays specific text at a given time -- no emblem for text yet so this one's modified
+    cur_text=Em()
+    text = text.AutoNum("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z/X TO CONFIRM.",host=cur_text,make_host_rect=True)
+    cur_text.aimg = text
+    
+    #tutorial graphic information
+    t_tutorial = Em(im="tutorial",current_anim="move",coord=(-100,-100)) #this will change animations based off which part of the tutorial is playing
+    tutorial_anim = ("move","jump","crouch","fastfall","shoot","focus")
+    tutorial_text = (
+        "<- OR -> TO MOVE!",
+        "UP KEY TO JUMP!\nYOU CAN JUMP ON ENEMIES!",
+        "DOWN TO CROUCH!\nGOOD FOR DODGING.",
+        "DOWN KEY WHILE\nIN THE AIR TO FASTFALL!",
+        "Z or X TO SHOOT!\nHOLD DOWN TO AUTOSHOOT.",
+        "SHIFT TO FOCUS!\nTHIS MAKES YOU SMALLER AND SLOWER!",)
+    enemies_text = (
+        "ENEMIES SIT AT THE TOP OF THE SCREEN\n AND SWERVE DOWN TO ATTACK YOU.",
+        "THERE ARE FOUR DIFFERENT ENEMY TYPES:\n A,B,C, AND D.",
+        "A SWERVES DOWN, B BOUNCES,\n C IS A TURRET, AND D IS SPECIAL PER WORLD.",
+        "A GUIDE WILL SHOW TO TELL YOU WHICH ENEMIES\n ARE WHICH AT THE START OF THE WORLD.",
+    )
+    end_text = (
+        "GREAT JOB!\nHAVE A SANDWICH AS A REWARD.",
+        "...",
+        "DAMN.",
+        "NO NO NO WAIT-"
+    )
+
+   
+
+    def __init__(self,window):
         Template.__init__(self)
+        self.window=window
+        self.initialize_values()
+
+    def on_start(self):
+        self.initialize_values()
+        self.update_phase()
+
+    def on_end(self):
+        ...
+
+    def start(self,start=False):
+        if start:
+            #creating emblems for this purpose
+            Tutorial.sprites[0].add(Tutorial.t_title,Tutorial.t_yes,Tutorial.t_no,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.t_title.add_tween_pos((winrect.centerx,-100),(winrect.centerx,50),speed=2.0,started=True,isCenter=True)
+            Tutorial.t_no.add_tween_pos((-100,winrect.centery/2),(winrect.width*0.4,winrect.centery/2),speed=2.0,started=True,isCenter=True)
+            Tutorial.t_yes.add_tween_pos((winrect.width+100,winrect.centery/2),(winrect.width*0.6,winrect.centery/2),speed=2.0,started=True,isCenter=True)
+            Tutorial.cur_text.add_tween_pos((0,winrect.height+100),(0,winrect.height*0.8),speed=5,started=True)
+            Tutorial.t_continue.add_tween_pos((Tutorial.t_continue.orig_coord[0],winrect.width+100),Tutorial.t_continue.orig_coord,speed=2.0,started=True)
+            return
+        self.counter1 += 1
+        #bg effects
+        self.bgFlash.update()
+        self.bg.update()
+        self.bg.image = self.bgFlash.image
+        self.bg.draw(self.window)
+        self.bg.speed=[5*sin(self.counter1/250),5*sin(self.counter1/400)]
+        #sprites
+        self.update_sprites()
+
+        #drawing choice
+        if not self.choice:
+            self.window.blit(img['cursor.png'],(Tutorial.t_no.rect.centerx-50, Tutorial.t_no.rect.centery-10))
+        else:
+            self.window.blit(img['cursor.png'],(Tutorial.t_yes.rect.centerx-50, Tutorial.t_yes.rect.centery-10))
+
+
+    def tutorial(self,start=False):
+        if start:
+            self.subphase=0
+            #deleting old graphics, adding new ones, changing text graphic
+            Tutorial.t_yes.kill();Tutorial.t_no.kill();Tutorial.t_continue.kill()
+            Tutorial.sprites[0].add(Tutorial.t_tutorial)
+            Tutorial.cur_text.aimg.update_text(Tutorial.tutorial_text[self.subphase])
+            #changing the background
+            self.bg.aimg.__init__(host=self.bg,name="tutorial_bg.png",resize=winrect.size)
+            self.bg.speed=[0,1]
+            #extra new graphic info
+            Tutorial.t_tutorial.add_tween_pos((-100,winrect.centery/2),(winrect.centerx/2,winrect.centery/2),speed=5,started=True,isCenter=True)
+            Tutorial.t_tutorial.pattern = "sine"
+            #adding the player
+            Tutorial.sprites[1].add(Tutorial.player)
+            Tutorial.player.reset()
+            return
+
+        self.counter1 += 1
+        #bg
+        self.bg.update()
+        self.bg.draw(self.window)
+        self.bg.speed=[0,1]
+        #sprites
+        self.update_sprites()
+        #updating information
+        self.checker1 = self.checker1 or Tutorial.player.check[Tutorial.tutorial_anim[self.subphase]]
+        if self.checker1 and self.intermission > 60:
+            if self.subphase +1 >= len(Tutorial.tutorial_anim):
+                self.update_phase()
+                return
+            #updating task checking info
+            Tutorial.player.reset()
+            self.checker1 = False
+            self.subphase += 1
+            self.intermission = 0
+            #updating graphics
+            Tutorial.t_tutorial.aimg.change_anim(Tutorial.tutorial_anim[self.subphase])
+            Tutorial.cur_text.aimg.update_text(Tutorial.tutorial_text[self.subphase])
+            #killing 'great'
+            Tutorial.t_great.kill()
+        elif self.checker1 and self.intermission == 0:
+            self.intermission += 1
+            self.sprites[0].add(Tutorial.t_great)
+            self.kaboom(group=Tutorial.sprites[0],coord=Tutorial.t_great.rect.center,animation_resize=(225,120))
+        #intermission code
+        elif self.checker1:
+            self.intermission += 1
+            Tutorial.sprites[0].add(BP(pos=(Tutorial.t_great.rect.centerx,Tutorial.t_great.rect.centery+50),texture="greenblock"))
+            self.bg.speed=[5*sin(self.counter1/5),10*sin(self.counter1/2)]
+
+
+
+    def objective(self,start=False):
+        # self.next_state = "play"
+
+        if start:
+            self.counter1 = 0 
+            self.sprites[0].empty()
+            self.sprites[0].add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.t_tutorial.aimg.change_anim('premise')
+            Tutorial.cur_text.add_tween_pos((0,winrect.height+100),(0,winrect.height*0.8),speed=5,started=True)
+            Tutorial.cur_text.aimg.update_text("ITEMS WITH A RED SHADOW WILL DAMAGE YOU.\nITEMS WITH A GREEN SHADOW ARE SAFE TO TOUCH.")
+            Tutorial.player.rect.centerx = winrect.centerx
+            Tutorial.player.reset_movement()
+            Tutorial.player.autoshoot=False
+            Tutorial.t_continue.add_tween_pos((Tutorial.t_continue.orig_coord[0],winrect.width+100),Tutorial.t_continue.orig_coord,speed=2.0,started=True)
+
+        #bg
+        self.counter1 += 1
+        self.bg.update()
+        self.bg.draw(self.window)
+        self.bg.speed=[0,1]
+        #sprites
+        self.update_sprites()
+
+        #Adding example elements
+        if self.counter1 % 80 == 0:
+            Tutorial.sprites[2].add(enemies.HurtHeal(self.player,type=self.obj_type))
+            self.obj_type = not self.obj_type
+
+
+    def enemies(self,start=False):
+        if start:
+            self.counter1 = 0 
+            self.subphase = 0 
+            self.checker1 = False
+            self.sprites[0].empty()
+            self.sprites[0].add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.t_tutorial.aimg.change_anim('enemies')
+            Tutorial.cur_text.aimg.update_text(Tutorial.enemies_text[self.subphase])
+            
+            Tutorial.t_continue.add_tween_pos((Tutorial.t_continue.orig_coord[0],winrect.width+100),Tutorial.t_continue.orig_coord,speed=2.0,started=True)
+            Tutorial.cur_text.add_tween_pos((0,winrect.height+100),(0,winrect.height*0.8),speed=5,started=True)
+            Tutorial.player.rect.centerx = winrect.centerx
+            Tutorial.player.movement[0],Tutorial.player.movement[3] = Tutorial.player.movement_old[0],Tutorial.player.movement_old[3]
+            Tutorial.player.autoshoot=False
+
+        self.bg.update()
+        self.bg.draw(self.window)
+        self.bg.speed=[1,0.5]
+        self.update_sprites()
+
+        if self.checker1:
+            self.checker1 = False
+            self.subphase += 1
+            if self.subphase >= len(Tutorial.enemies_text):
+                self.update_phase()
+            else:
+                Tutorial.cur_text.aimg.update_text(Tutorial.enemies_text[self.subphase])
+
+
+
+    def end(self,start=False):
+        if start:
+            #initializing values yet again
+            self.counter1 = self.subphase = 0 
+            self.sprites[2].add(Tutorial.t_sandwich)
+            Tutorial.t_tutorial.aimg.change_anim('enemies')
+            Tutorial.cur_text.aimg.update_text(Tutorial.end_text[self.subphase])
+            Tutorial.cur_text.pattern='sine'
+            Tutorial.cur_text.add_tween_pos(Tutorial.cur_text.coord,(0,winrect.height*0.5),speed=5,started=True)
+            Tutorial.t_continue.add_tween_pos(Tutorial.t_continue.orig_coord,(Tutorial.t_continue.orig_coord[0],winrect.width+100),speed=1.0,started=True)
+            Tutorial.t_title.add_tween_pos(Tutorial.t_title.rect.center,(Tutorial.t_title.rect.centerx,-100),isCenter=True,speed=3.0,started=True)
+            Tutorial.t_tutorial.add_tween_pos(Tutorial.t_tutorial.rect.center,(0,-999),isCenter=True,speed=5.0,started=True)
+            Tutorial.player.rect.centerx = winrect.centerx
+            Tutorial.player.autoshoot=False
+        else:
+            self.counter1 += 1
+            
+            self.bg.update()
+            if self.subphase == 1:
+                self.bgUnflash.update()
+                self.bg.image = self.bgUnflash.image
+            self.bg.draw(self.window)
+            self.bg.speed=[1,0.5]
+            self.update_sprites()
+
+            if self.counter1 == 120:
+                Tutorial.t_continue.kill()
+                Tutorial.t_title.kill()
+                Tutorial.t_tutorial.kill()
+
+
+            #turnary operators go brr
+            self.checker1 = Tutorial.t_sandwich.touched if self.subphase == 0 else self.counter1 > 240 if self.subphase == 1 else self.counter1 > 120 if self.subphase == 2 else self.counter1 > 30 if self.subphase == 3 else False
+            #updating subphase info
+            if self.checker1:
+                self.subphase += 1
+                if self.subphase >= len(Tutorial.end_text):
+                    self.update_phase()
+                else:
+                    Tutorial.cur_text.aimg.update_text(Tutorial.end_text[self.subphase])
+                    
+
+                #phase-specific events
+                if self.subphase == 1:
+                    self.counter1 = 0 
+                    Tutorial.t_sandwich.kill()
+                    Tutorial.player.kill()
+                    self.kaboom(self.sprites[0],Tutorial.player.rect.center,Tutorial.player.rect.size)
+
+                elif self.subphase == 2:
+                    self.bg.aimg.__init__(host=self.bg,name="NONE")
+                    self.counter1 = 0 
+                elif self.subphase == 3:
+                    self.kaboom(self.sprites[0],winrect.center,(winrect.size[0]*2,winrect.size[1]*2))
+                    self.counter1 = 0
+
+
+
+
+
+
+    def done(self,start=False):
+        #skipping the cutscene for now
+        self.next_state = "play"
+
+
+
+    def update(self):
+        self.phases[self.phase]()
+        self.collision()
+
+
+
+    def update_phase(self):
+        self.phase += 1
+        self.phases[self.phase](start=True)
+
+
+
+    def update_sprites(self):
+        #sprites
+        for v in Tutorial.sprites.values():
+            v.update()
+            v.draw(self.window)
+
+
+
+    def initialize_values(self):
+        #bg info
+        self.bgFlash = WhiteFlash(surface=self.window,img="tutorial_bg.png",start_val=0,end_val=255,spd=-1.0,isreverse=True)
+        self.bgUnflash = WhiteFlash(surface=self.window,img="tutorial_bg.png",start_val=255,end_val=0,spd=1.25)
+        self.bg=Bg(img=self.bgFlash.image,speed=[0.25,0.25],resize=pygame.display.dimensions)
+        self.bg.pos = [pygame.display.dimensions[0]/-2,pygame.display.dimensions[0]/-2]
+        
+        #emblem info
+        Tutorial.cur_text.aimg.update_text("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z/X TO CONFIRM.")
+
+        #other info
+        self.next_state = None
+        self.return_state = "play"
+        #phase info
+        self.phase=-1
+        self.phases = (
+            self.start,
+            self.tutorial,
+            self.objective,
+            self.enemies,
+            self.end,
+            self.done,)
+        #start phase
+        self.choice = True #initially says you need a tutorial
+        #tutorial subphase
+        self.subphase = 0 
+        self.intermission = 0
+        self.checker1 = False
+        self.counter1 = 0 
+
+        #objective phase
+        self.obj_type = True
+        
+
+        
+
+    def event_handler(self,event):
+        if self.phase == 0:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    self.choice = True
+                elif event.key == pygame.K_LEFT:
+                    self.choice = False
+                    
+        elif self.phase == 1 or self.phase == 4:
+            Tutorial.player.controls(event)
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+            if self.phase == 0:
+                if self.choice:
+                        self.update_phase()
+                else:
+                    for i in range(4):
+                        self.update_phase()
+                    
+
+            if self.phase == 1:
+                if self.checker1:
+                    self.intermission = 999
+            elif self.phase == 3:
+                self.checker1 = True
+            elif self.phase == 2:
+                self.update_phase()
+                
+
+
+    def collision(self):
+        #Detecting collision between players and enemies 
+        collidelist=pygame.sprite.groupcollide(Tutorial.sprites[1],Tutorial.sprites[2],False,False,collided=pygame.sprite.collide_mask)
+        for key,value in collidelist.items():
+            for item in value:
+                key.on_collide(2,item)
+                item.on_collide(1,key)

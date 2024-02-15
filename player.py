@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite):
 
         #IMAGE AND POSITIONING
         self.aimg = anim.AutoImage(host=self,name="YUP",generate_rect=True)
-        self.rect.center = (300,self.bar[1])
+        self.pos = [self.bar[2][1]-((self.bar[2][1]-self.bar[2][0])/2),self.bar[1]]
         
 
         #MOVEMENT CODE
@@ -36,12 +36,12 @@ class Player(pygame.sprite.Sprite):
             False, #moving right
             False, #jumping
             False, #crouching
+            False, #focusing
         ]
         self.movement_old = self.movement[:]
 
         #how fast the character moves
         self.speed = 7.5
-        self.crouch_speed = 3
         self.momentum = 0
 
         #HEALTH
@@ -56,10 +56,11 @@ class Player(pygame.sprite.Sprite):
 
         #UPGRADE VALUES -- UNFINISHED
         self.bullet_max = 3 #how many bullets can be on screen at one given time
-        self.bullet_time = 6 #shoots once every 6 frames
+        self.bullet_time = 12 #shoots once every x frames
         self.current_bullet = "def" #the current bullet being shot at the moment
         self.bullet_lock = False #stop shooting 
 
+        self.rect.center = self.pos
 
     def update(self):
 
@@ -73,6 +74,22 @@ class Player(pygame.sprite.Sprite):
             if self.momentum != 0 and not self.movement[4]:
                 self.image = pygame.transform.rotate(self.image,self.momentum*-2)
         except:...
+        #making the image transparent if invincible
+        if self.invincibility_counter > 0 and self.invincibility_counter % 2 == 0: 
+            self.image = anim.NONE
+        #TEMPORARY -- shrinking the image if focusing
+        if self.movement[5]:
+            self.image = pygame.transform.scale(self.image,(50,50))
+            self.mask = pygame.mask.from_surface(self.image)
+            rect = self.image.get_rect()
+            rect.center = self.rect.center[:]
+            self.rect = rect
+        else:
+            rect = self.image.get_rect()
+            rect.center = self.rect.center[:]
+            self.rect = rect
+        
+
 
         #collision is just movement
         self.collision()
@@ -80,7 +97,7 @@ class Player(pygame.sprite.Sprite):
 
 
         #debug
-        if self.autoshoot and self.autoshoottimer%5==0 and self.autoshoottimer != 0 and not self.bullet_lock:
+        if self.autoshoot and self.autoshoottimer%self.bullet_time==0 and self.autoshoottimer != 0 and not self.bullet_lock:
             self.shoot()
         if self.autoshoot: 
             self.autoshoottimer += 1
@@ -95,25 +112,18 @@ class Player(pygame.sprite.Sprite):
     def controls(self,event):
         #ENGAGING movement
         if event.type == pygame.KEYDOWN:
-            #ENGAGING the movement
+            #CALLING MOVEMENT FUNCTIONS
             if event.key == pygame.K_LEFT:
-                self.movement[1] = True
-                self.movement[2] = False
+                self.move(False)
             if event.key == pygame.K_RIGHT:
-                self.movement[2] = True
-                self.movement[1] = False
-
-
-            #STARTING THE JUMPS
-            if event.key == pygame.K_UP and self.movement[0] == 0:
-                self.bounce()
-            if event.key == pygame.K_DOWN and self.movement[0] != 0:
-                self.movement[0]=25
-            elif event.key == pygame.K_DOWN and self.movement[0] == 0:
-                #crouching
-                self.aimg.change_anim("crouch")
-                self.movement[4] = True
-                audio.play_sound("boo.wav")
+                self.move(True)
+            if event.key == pygame.K_UP:
+                self.jump()
+            if event.key == pygame.K_DOWN:
+                self.crouch(True)
+            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                self.focus()
+                
 
                 
 
@@ -125,10 +135,8 @@ class Player(pygame.sprite.Sprite):
 
             #AUTOSHOOT
             if tools.debug:
-                if event.key == pygame.K_2:
-                    self.autoshoot = not self.autoshoot
                 if event.key == pygame.K_3:
-                    self.health += 10
+                    self.health += 1
                 if event.key == pygame.K_0:
                     self.health -= 1
 
@@ -136,58 +144,60 @@ class Player(pygame.sprite.Sprite):
         #RELEASING movement
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
-                self.movement[1] = False
-                if pygame.key.get_pressed()[pygame.K_RIGHT]: self.movement[2] = True
+                self.move(False,True)
 
             if event.key == pygame.K_RIGHT:
-                self.movement[2] = False
-                if pygame.key.get_pressed()[pygame.K_LEFT]: self.movement[1] = True
+                self.move(True,True)
 
             #un-crouching
-            if event.key == pygame.K_DOWN  and self.movement[0] == 0:
-                self.movement[4] = False
-                self.aimg.change_anim('idle')
-                audio.play_sound("womp.wav")
+            if event.key == pygame.K_DOWN:
+                self.crouch(False)
                 
             if (event.key == pygame.K_x or event.key == pygame.K_z) and not self.movement[4]:
                 self.autoshoot = False
+
+            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                self.focus(False)
+            
+
 
         
     def collision(self):
     
         #most collision will now be done in the state, instead of by invidual enemies
         #this is so there's not a huge loop of enemies colliding
-        #it removes a *shred* of universality, but it's fine
-        if self.movement[1]:
-            self.momentum = self.speed*-1 if not self.movement[4] else self.crouch_speed*-1
-        elif self.movement[2]: 
-            self.momentum = self.speed if not self.movement[4] else self.crouch_speed
-        
+        self.momentum = 0 
+        multiplier = 0
+        if self.movement[1] or self.movement[2]: multiplier += 1
+        if self.movement[4]: multiplier *= 0.5
+        if self.movement[5]: multiplier *= 0.25
+        if self.movement[1]: multiplier *= -1
+        self.momentum = self.speed * multiplier
+        if (self.pos[0] + self.momentum) < self.bar[2][0] or (self.pos[0] + self.momentum) > self.bar[2][1]: self.momentum = 0
+        self.pos[0] += self.momentum        
 
 
         #jumping code
         #doing y momentum stuffystuff
-        self.rect.y += self.movement[0]
-        self.movement[0] += .3 if self.movement[0] != 0 else 0
-
-        if self.rect.center[1]>self.bar[1] and self.movement[0] != 0:
+        gravity = .3 if not self.movement[5] else 0.1
+        self.pos[1] += self.movement[0]*(.33 if self.movement[5] else 1)
+        self.movement[0] += gravity if self.movement[0] != 0 else 0
+        #landing code
+        if self.pos[1]>self.bar[1] and self.movement[0] != 0:
             #finishing the jump, including stopping values
-            self.rect.center = (self.rect.center[0],self.bar[1])
+            self.pos[1]=self.bar[1]
             self.movement[0] = 0
             self.aimg.change_anim("land")
-            for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.rect.centerx,self.rect.bottom)))
+            for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.pos[0],self.rect.bottom)))
             #AUTO CROUCH
             if pygame.key.get_pressed()[pygame.K_DOWN]:
                 #crouching
-                self.aimg.change_anim("crouch")
-                self.movement[4] = True
-                audio.play_sound("boo.wav")        
-        #Actually making the player move, bouncing the character off the bars if needed
-        if (self.rect.center[0] + self.momentum) < self.bar[2][0] or (self.rect.center[0] + self.momentum) > self.bar[2][1]: 
-            self.momentum = 0
+                self.crouch()   
 
-        self.rect.x += self.momentum
-        self.momentum *= 0.5 if (self.momentum > 1 or self.momentum < -1) else 0
+
+        #updating position
+        self.rect.center = self.pos  
+
 
 
     def health_update(self):
@@ -223,7 +233,7 @@ class Player(pygame.sprite.Sprite):
         self.movement[0] = self.movement[0] - 7.5 if self.movement[0] <= 0 else -7.5
         self.aimg.change_anim("jump")
         audio.play_sound("boing" + str(random.randint(0,4)) + ".wav")
-        for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.rect.centerx,self.rect.bottom)))
+        for i in range(5):self.sprite_groups[0].add(bullets.BulletParticle((self.pos[0],self.rect.bottom)))
 
         
 
@@ -236,18 +246,99 @@ class Player(pygame.sprite.Sprite):
             False, #moving left
             False, #moving right
             False, #crouching
+            False, #focusing
         ]
+    
+    
     def movement_redo(self):
         self.movement = self.movement_old[:]
 
-         
-    def display_health(self):
-        pass
 
 
     def shoot(self):
-        bullet=bullets.Bullet(self.rect.center,sprites=self.sprite_groups)
+        bullet=bullets.Bullet(self.pos,sprites=self.sprite_groups)
         if not bullet.kill_on_spawn: 
             self.sprite_groups[1].add(bullet)
             self.aimg.change_anim("shoot")
             
+
+    def move(self,dir:bool=True,release:bool=False):
+        if not release: 
+            if dir:
+                self.movement[2] = True
+                self.movement[1] = False
+            else:
+                self.movement[1] = True
+                self.movement[2] = False
+        elif release:
+            if dir:
+                self.movement[2] = False
+                if pygame.key.get_pressed()[pygame.K_LEFT]: self.movement[1] = True
+            else:
+                self.movement[1] = False
+                if pygame.key.get_pressed()[pygame.K_RIGHT]: self.movement[2] = True
+
+
+    def jump(self):
+        if self.movement[0] == 0:
+            self.bounce()
+    
+
+    def crouch(self,down:bool=True):
+        if down:
+            if self.movement[0] == 0:
+                #crouching
+                self.aimg.change_anim("crouch")
+                self.movement[4] = True
+                audio.play_sound("boo.wav")
+            else:
+                self.movement[0] = 25
+        else:
+            if self.movement[0] == 0:
+                self.movement[4] = False
+                self.aimg.change_anim('idle')
+                audio.play_sound("womp.wav")
+            
+    def focus(self,down:bool=True):
+        if down:
+            self.movement[5] = True
+        else:
+            self.movement[5] = False
+
+
+
+class PlayerDummy(Player):
+    def __init__(self,bar,sprite_groups, demo=False):
+        Player.__init__(self,bar=bar,sprite_groups=sprite_groups,demo=demo)
+        self.check = {
+            "move":False,
+            "jump":False,
+            "crouch":False,
+            "fastfall":False,
+            "shoot":False,
+            "focus":False,
+        }
+
+    def reset(self):
+        for k in self.check.keys():
+            self.check[k] = False
+
+    def move(self,dir:bool=True,release:bool=False):
+        Player.move(self,dir,release)
+        self.check['move'] = True
+    
+    def jump(self):
+        Player.jump(self)
+        self.check['jump'] = True
+    
+    def crouch(self,down:bool=True):
+        Player.crouch(self,down)
+        self.check['crouch' if self.movement[0] == 0 else 'fastfall'] = True
+
+    def shoot(self):
+        Player.shoot(self)
+        self.check['shoot'] = True
+
+    def focus(self,down:bool=True):
+        Player.focus(self,down=down)
+        self.check['focus'] = True

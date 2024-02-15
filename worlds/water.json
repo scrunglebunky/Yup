@@ -38,6 +38,5 @@
             "shoot":[999]}
     },
 
-    "boss_levels":[2],
     "bosses":["crustacean"]
 }

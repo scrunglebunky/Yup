@@ -16,6 +16,8 @@
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 02/15/24: Tutorial is (mostly) complete.
+- 02/07/24: When completing a level, the levelcomplete screen is VERY finished. 
 - 01/31/24: Enemies and bosses drop COINS instead of points now. There are issues relating to the screen being too cluttered, which will be worked on soon. 
 - 01/30/24: Sun boss is complete, moving onto angel. 
 - 01/17/24: Particle effect exists now, a lot more sounds
@@ -87,6 +89,21 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
+
+## extra
+### TUTORIAL
+- Entrance info: displays text asking if you want a tutorial. Shoot yes or no.
+#### YES - PHASES
+- Make PlayerDummy, a player that has all the aspects of the normal player but has values to check if certain things have happened
+- Make emblems for each thing, which will be added every step along the way
+- **MOVE**: set "moved" to false in PlayerDummy, spawn movement emblems
+- Do the same with **jump, crouch, fastfall, shoot, focus**
+- **MAIN FOCUS**: show that good things have green shadows, and bad things have red shadows. lock the player movement, and drop both items on the player to show one is harmless. 
+- **ENEMY TYPES**: Show the way that type A enemies work, how type B enemies work, how type C enemies work, and show various special enemies. State they look different per world, with examples of the different worlds. 
+- **OUTRO**: Center the player, and show the player happy, eating a sandwich. "CONGRATULATIONS. ENJOY A SANDWICH AS A REWARD." "DAMN", and the player flies off
+#### NO
+- Just play the player eating a sandwich, and having it get stolen.  
+
 ## bosses
 ### UFO
 - The hat yup hiding within a mechanical body

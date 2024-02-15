@@ -774,23 +774,20 @@ class CRT(Boss):
             self.attributes['Larm'].rect.left = -10; self.attributes['Larm'].rect.centery = 300;
             self.attributes['Rarm'].rect.right = 610; self.attributes['Rarm'].rect.centery = 300;
             #changing timer
-            self.atk_info['wait'] = random.randint(240,360) if not self.info['pinch'] else 60
+            self.atk_info['wait'] = random.randint(240,360) if not self.info['pinch'] else 120
             
         else:
-            if self.timers['in_state'] % 45 == 0: 
-                if not self.info['pinch']:
-                    #switching shoot direction
-                    for i in range(7):
-                        self.attributes["ctrl"].shoot("angle",spd=4,info=((0,i*200),random.randint(40,65)),texture="bullet_hack")
-                        self.attributes["ctrl"].shoot("angle",spd=4,info=((200*i,0),random.randint(40,65)),texture="bullet_hack")
-                else:
-                    for i in range(5):
-                        self.attributes["ctrl"].shoot("angle",spd=7,info=((0,i*250),random.randint(40,65)),texture="bullet_hack")
-                        self.attributes["ctrl"].shoot("angle",spd=7,info=((250*i,0),random.randint(40,65)),texture="bullet_hack")
-            
+            if self.timers['in_state'] % 20 == 0: 
+                #switching shoot direction
+                for i in range(10):
+                    angle = 52.5 + 10*sin(self.timers['in_state']/30) + i*20
+                    spd = 3 if not self.info['pinch'] else 4
+                    self.attributes["ctrl"].shoot("angle",spd=spd,info=((10,0),angle),texture="bullet_hack")
+                    self.attributes["ctrl"].shoot("angle",spd=spd,info=((winrect.right-10,0),angle-45),texture="bullet_hack")
+                
             #swinging the arms back and forth for no reason
-            self.attributes['Larm'].rect.centery = sin(self.timers['in_state']/15)*200 + 600
-            self.attributes['Rarm'].rect.centery = sin(self.timers['in_state']/20)*200 + 600
+            self.attributes['Larm'].rect.centery = sin(self.timers['in_state']/15)*200 + 300
+            self.attributes['Rarm'].rect.centery = sin(self.timers['in_state']/20)*200 + 300
 
             #starting attack
             if self.timers['in_state'] > self.atk_info['wait']:
@@ -800,10 +797,8 @@ class CRT(Boss):
     def state_attack(self,start:bool=False):
         if start:
             #figuring out which attack to go with
-            self.sprites[0].add(WhiteFlash(surface=self.window))
+            self.sprites[0].add(WhiteFlash(surface=self.window,start_val=128))
             self.atk_info['type'] = random.randint(0,self.atk_info['types'])
-            if not self.info['pinch']: 
-                for bullet in self.bullets: bullet.kill()
             #definitions for the first attack -> explosions
             if self.atk_info['type'] == 0:
                 #attack 1: kabooms
@@ -824,37 +819,27 @@ class CRT(Boss):
                 #attack 2: arms - values
                 if '2_Lwarn' in self.atk_info.keys():
                     self.atk_info['2_Lwarn'].kill()
-                    self.atk_info['2_Rwarn'].kill()
                 self.atk_info['2_arm']:int = 0 #0 -> L, 1 -> R
                 self.atk_info['2_Lpos'] = self.atk_info['2_Rpos'] = 0 
                 self.atk_info['2_Lwarn'] = Warning((-1000,-1000))
-                self.atk_info['2_Rwarn'] = Warning((-1000,-1000))
                 self.timers['2'] = 0 #a timer that will reset on occasion
                 #adding the warning symbols
-                self.sprites[0].add(self.atk_info['2_Lwarn'],self.atk_info['2_Rwarn'])
-                self.atk_info['2_Lwarn'].rect.center = self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
+                self.sprites[0].add(self.atk_info['2_Lwarn'])
+                self.atk_info['2_Lwarn'].rect.center = self.player.rect.center
 
         if self.atk_info['type'] == 1:
             self.timers['2'] += 1
 
             if self.timers['2'] < 90:
-                self.attributes["Larm"].rect.centery = self.player.rect.centery
-                self.attributes["Rarm"].rect.centery = self.player.rect.centery
-                self.atk_info['2_Lwarn'].rect.center = self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
-
-            elif self.timers['2'] >= 90 and self.timers['2'] < 120:
-                self.attributes["Rarm"].rect.centery = self.player.rect.centery
-                self.atk_info['2_Rwarn'].rect.center = self.player.rect.center
+                self.attributes["Larm"].rect.centery = self.attributes["Rarm"].rect.centery = self.player.rect.centery 
+                self.atk_info['2_Lwarn'].rect.center = self.player.rect.center
             
             elif self.timers['2'] == 120:
                 self.atk_info['2_Lwarn'].kill()
                 self.attributes["Larm"].aimg.change_anim("atk")
-
-            elif self.timers['2'] == 160:
-                self.atk_info['2_Rwarn'].kill()
                 self.attributes["Rarm"].aimg.change_anim("atk")
-            
-            elif self.timers['2'] > 240:
+
+            elif self.timers['2'] > 210:
                 self.sprites[0].add(WhiteFlash(surface=self.window))
                 self.change_state('idle')
 
@@ -889,13 +874,14 @@ class CRT(Boss):
                 self.change_state('idle')      
 
         #DOING THE EVIL IDLE BULLETS IF PINCH MODE
-        if self.info['pinch']:
-            if self.timers['in_state'] % 45 == 0: 
-                #switching shoot direction
-                for i in range(4):
-                    self.attributes["ctrl"].shoot("angle",spd=7,info=((0,i*300),random.randint(40,65)),texture="bullet_hack")
-                    self.attributes["ctrl"].shoot("angle",spd=7,info=((300*i,0),random.randint(40,65)),texture="bullet_hack")
-
+        if self.info['pinch'] and self.timers['in_state']%30==0:
+            #switching shoot direction
+            for i in range(10):
+                angle = 52.5 + 10*sin(self.timers['in_state']/30) + i*20
+                spd = 3
+                self.attributes["ctrl"].shoot("angle",spd=spd,info=((10,0),angle),texture="bullet_hack")
+                self.attributes["ctrl"].shoot("angle",spd=spd,info=((winrect.right-10,0),angle-45),texture="bullet_hack")
+            
 
     def state_switch(self,start:bool=False):
         if start: 
@@ -914,6 +900,9 @@ class CRT(Boss):
                 for warning in self.atk_info['1_warnings']:
                     warning.kill()
                 del self.atk_info['1_warnings'][:]
+            #warnings
+            if '2_Lwarn' in self.atk_info.keys():
+                self.atk_info['2_Lwarn'].kill()
 
         elif self.info['switch_state'] == 0:
             #the control panel falling
@@ -956,7 +945,6 @@ class CRT(Boss):
             #warnings
             if '2_Lwarn' in self.atk_info.keys():
                 self.atk_info['2_Lwarn'].kill()
-                self.atk_info['2_Rwarn'].kill()
             #more warnings
             if '1_warnings' in self.atk_info.keys():
                 for warning in self.atk_info['1_warnings']:
@@ -1111,8 +1099,8 @@ class Crustacean(Boss):
             self.bg.speed[0] = 5*sin(self.timers['in_state']/30)
 
         if self.timers['in_state']%2==0:
-            self.attributes['body'].shoot("angle",spd=3,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']))
-            self.attributes['body'].shoot("angle",spd=7,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']*2))
+            self.attributes['body'].shoot("angle",spd=2,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']))
+            self.attributes['body'].shoot("angle",spd=4,info=(self.attributes['body'].rect.center,self.atk_info['idle_angle']*2))
             self.atk_info['idle_angle'] += 13
 
         if self.timers['in_state'] > 360: #CHANGE TO 360
@@ -1249,11 +1237,11 @@ class Crustacean(Boss):
     @staticmethod
     def shoot_crustbullet(start,end,sprites):
         bullet=CrustBullet(start,end)
-        sprites[0].add(bullet);sprites[2].add(bullet)
+        sprites[2].add(bullet)
     @staticmethod
     def shoot_crustfish(start,player,sprites):
         fish=CrustFish(start,player)
-        sprites[0].add(fish);sprites[2].add(fish)
+        sprites[2].add(fish)
     
 
 

@@ -11,11 +11,11 @@ class Emblem(pygame.sprite.Sprite):
     animation_killonloop:bool=False,
     pattern:str=None,
     force_surf:pygame.Surface=None,
-    resize=None, **kwargs
+    resize=None,current_anim="idle", **kwargs
     ):
         pygame.sprite.Sprite.__init__(self)
         
-        self.orig_coord = coord #an original coordinate to go to when hidden, most likely
+        self.orig_coord = coord[:] #an original coordinate to go to when hidden, most likely
         self.coord = coord[:]
         self.coord_dest = coord[:] #where the coordinate is currently moving to. TWEENING
 
@@ -29,7 +29,7 @@ class Emblem(pygame.sprite.Sprite):
         self.pattern_f = 0 #frames in a pattern
         self.pattern_offset = [0,0] #what pattern affects
 
-        self.aimg = anim.AutoImage(host=self,name=im,force_surf=force_surf,resize=resize)
+        self.aimg = anim.AutoImage(host=self,name=im,force_surf=force_surf,resize=resize,current_anim=current_anim)
         self.animation_killonloop = animation_killonloop
 
         self.rect = self.image.get_rect() #finally setting rect

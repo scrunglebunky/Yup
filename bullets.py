@@ -14,8 +14,6 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    max = 100
-
     def __init__(self,pos:tuple=(0,0),speed:int=15,is_default:bool = True,texture:str = None,**kwargs):
         
         pygame.sprite.Sprite.__init__(self)
@@ -34,13 +32,13 @@ class Bullet(pygame.sprite.Sprite):
         #5/27/2023 - Kill Counter
         # If there are too many of a single bullet on screen, the bullet stops spawning. That's all. 
         if is_default: # 06/24/2023 addendum -> the maximum bullet check only really counts for the default bullet, as each bullet has their own individual counts
-            Bullet.count += 1
-            if Bullet.count > Bullet.max:
-                self.kill_on_spawn = True
-                return
-            else:
-                #updating the amount of total shots as long as it wasn't immediately killed
-                wl['shots'] += 1
+            # Bullet.count += 1
+            # if Bullet.count > Bullet.max:
+            #     self.kill_on_spawn = True
+            #     return
+            # else:
+            #     #updating the amount of total shots as long as it wasn't immediately killed
+            wl['shots'] += 1
         
         
 
@@ -88,16 +86,13 @@ def emptyBulletMax():
 
 
 class BulletParticle(pygame.sprite.Sprite):
-    image = pygame.Surface((5,5))
-    pygame.draw.rect(image,color="black",rect=pygame.Rect(0,0,5,5))
-    pygame.draw.rect(image,color="white",rect=pygame.Rect(1,1,3,3))
-    def __init__(self,pos:tuple = (0,0),texture=None):
+    def __init__(self,pos:tuple = (0,0),texture="bwblock"):
         pygame.sprite.Sprite.__init__(self)
-        self.aimg = AImg(host=self,name=texture,current_anim='idle',force_surf = BulletParticle.image)
+        self.aimg = AImg(host=self,name=texture,current_anim='idle')
         self.rect.center = pos
         self.gravity_info = [
-            random.randint(-5,5), #x movement
-            random.randint(-5,-1), #y gravity
+            random.uniform(-5,5), #x movement
+            random.uniform(-5,-1), #y gravity
         ]
         self.duration = 0 
 
@@ -115,6 +110,8 @@ class BulletParticle(pygame.sprite.Sprite):
         #autokill
         if self.duration > 15:
             self.kill()
+
+
 
 LOADED = [
     Bullet,

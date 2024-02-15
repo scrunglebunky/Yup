@@ -993,7 +993,6 @@ class Coin(pygame.sprite.Sprite):
                 break
             else:
                 continue
-        print(img)
         self.aimg = AImg(host=self,name="coin",current_anim=img,resize=(20,20))
         self.value = value
 
@@ -1031,6 +1030,44 @@ class Coin(pygame.sprite.Sprite):
             self.kill()
 
 
+
+#EXTRA ASSETS -- TUTORIAL HURT
+class HurtHeal(pygame.sprite.Sprite):
+    def __init__(self,player,type:bool=True):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = type
+        self.aimg = AImg(host=self,name="tutorial",current_anim = ("good" if self.type else "bad"),generate_rect=True)
+        self.player = player
+        self.rect.center = self.player.rect.centerx,0
+        self.v = 0
+        self.y = 0
+    def update(self):
+        self.aimg.update()
+        self.v += 0.25
+        self.y += self.v
+        self.rect.centery = self.y
+        if self.rect.top > pygame.display.rect.height:
+            self.kill()
+    def on_collide(self,collide_type,collided):
+        if type(collided) == type(self.player):
+            if self.type:
+                for i in range(25):
+                    self.player.sprite_groups[0].add(bullets.BulletParticle(pos=self.rect.center,texture="greenblock"))
+                self.player.health += 1
+            else:
+                for i in range(25):
+                    self.player.sprite_groups[0].add(bullets.BulletParticle(pos=self.rect.center,texture="redblock"))
+                self.player.hurt()
+            self.kill()
+
+
+class BasicEventItem(Em):
+    def __init__(self,im=None,coord=(0,0),isCenter=False,pattern:str="sine"):
+        Em.__init__(self,im,coord,isCenter,pattern=pattern)
+        self.touched = False
+    def on_collide(self,collide_type,collided):
+        if collide_type == 1:
+            self.touched = True
 
 ########OLD
 

@@ -31,14 +31,15 @@ tools.debug = True
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "play"
+state = "title33eede3edx3x"
 states["play"] = all_states.Play(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
-states["pause"] = all_states.Pause(window=window,play_state=states["play"])
+states["pause"] = all_states.Pause(window=window,play_state=states["play"]) 
 states["title"] = all_states.Title(window=window,border=border)
 states["gameover"] = all_states.GameOver(window=window,play_state=states["play"])
 states["advance"] = all_states.Advance(window=window,play_state=states["play"])
 states["boss"] = all_states.Boss(play_state=states["play"])
+states["tutorial"] = all_states.Tutorial(window=window)
 
 #07/23/2023 - SWITCHING STATES
 # States have an issue now where, since they are all initialized at startup, some things that should only be run when the state *actually* starts still appears.
@@ -76,7 +77,7 @@ freeze = False
 while run:
 
     #filling the screen in case something is offscreen
-    window.fill(defaultcolor)
+    # window.fill(defaultcolor)
     #06/23/2023 - drawing border to window 
     border.update_values(score=score.score,lives=states['play'].player.health)
     border.draw(window)
@@ -100,7 +101,7 @@ while run:
                 
 
         cur_state.event_handler(event=event)
-
+ 
     #debug pause function
 
     if not freeze:
