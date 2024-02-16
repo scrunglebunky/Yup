@@ -248,13 +248,14 @@ class Spritesheet():
 # However, this class is going to streamline it, by doing all the checking for spritesheets on its own
 class AutoImage():
     def __init__(self,
-                host,
+                host = None,
                 name:str=None,
                 current_anim:str='idle',
                 force_surf:pygame.Surface=None,
                 resize=None,
                 generate_rect:bool=True):
         self.host=host
+        self.hashost = host is not None
         self.name = name
         self.spritesheet = None
         self.image = None
@@ -277,10 +278,11 @@ class AutoImage():
 
         #HOST INFORMATION
         #Now, instead of each and every single sprite managing the image, rect, and mask info, the spritesheet will do it itself!
-        self.host.image = self.image
-        self.host.mask = self.mask
-        if generate_rect:
-            self.host.rect = self.image.get_rect()
+        if self.hashost:
+            self.host.image = self.image
+            self.host.mask = self.mask
+            if generate_rect:
+                self.host.rect = self.image.get_rect()
     
     def update(self):
         if self.spritesheet is not None: 
@@ -289,8 +291,9 @@ class AutoImage():
             self.mask = self.spritesheet.mask
 
         #setting the host's imge and mask
-        self.host.image = self.image
-        self.host.mask = self.mask 
+        if self.hashost:
+            self.host.image = self.image
+            self.host.mask = self.mask 
     
     def change_anim(self,anim:str,overwrite:bool=False):
         if self.spritesheet is not None:
@@ -349,3 +352,17 @@ class WhiteFlash(pygame.sprite.Sprite): # asks you for a surface, then draws a s
         if collide_type == 1:
             collided.hurt()
         
+
+
+
+#generating enemies based on current world
+def generate_enemy_log(world_data:dict) -> pygame.Surface:
+    surface = all_loaded_images['enemylog.png'].copy()
+    skins = world_data['skins']
+    skinskeys = tuple(skins.keys())
+    for i in range(len(skinskeys)):
+        enemy = AutoImage(name=skins[skinskeys[i]],resize=(60,60)).image
+        surface.blit(enemy,(i*75,35))
+    return surface
+
+

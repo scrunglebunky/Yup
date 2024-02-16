@@ -9,6 +9,7 @@ class Formation():
                 sprites,
                 player,
                 difficulty:float=1.0,
+                is_demo:bool=False,
                 **kwargs
                 ):
         #basic info
@@ -19,7 +20,7 @@ class Formation():
         self.level = level
         self.level_in_world = level_in_world
         self.window = kwargs['window'] if 'window' in kwargs.keys() else None
-        self.is_demo = kwargs['is_demo'] #to tell if the game is being used in the title demo -> stops score
+        self.is_demo = is_demo #to tell if the game is being used in the title demo -> stops score
 
         #formation positioning
         self.pos = [pygame.display.rect.center[0],100] #positioning
@@ -272,7 +273,11 @@ class Formation():
 
 
     def update_movement(self): #updating where the idle position is
-        self.pos[1] = 45 + (math.sin(self.timer["duration"] * 0.1) * 15) + ((self.timer["duration"]*self.world_data["form_drop_speed"]) if self.state != "start" else 0)
+        if self.state != "start" or self.is_demo:
+            add = 0 
+        else:
+            add = (self.timer["duration"]*self.world_data["form_drop_speed"])
+        self.pos[1] = 45 + (math.sin(self.timer["duration"] * 0.1) * 15) + add
         for char in self.spawned_list:
             char.formationUpdate(self.pos)
 

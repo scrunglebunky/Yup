@@ -45,18 +45,20 @@ class Border():
 
     def draw(self,*args,**kwargs):
         self.bg.draw(self.window)
-        Border.sprites.draw(self.window)
+        for sprite in Border.sprites:
+            if not sprite.hide: 
+                self.window.blit(sprite.image,sprite.rect)
         self.display_values()
         self.display_lives()
     
     def display_values(self):
         for k in Border.emblems.keys():
-            if k not in Border.exclude:
+            if k not in Border.exclude and not Border.emblems[k].hide:
                 dn(num=Border.values[k],pos=(Border.emblems[k].rect.right,Border.emblems[k].rect.top),window=self.window)
                 
     
     def display_lives(self,*args,**kwargs):
-        if Border.values['lives'] < 900:
+        if Border.values['lives'] < 25 and not Border.emblems['lives'].hide:
             for i in range(Border.values['lives']):
                 self.window.blit(img['life.png'], (Border.emblems['lives'].rect.right + i*35,  Border.emblems['lives'].rect.top))
     
@@ -68,6 +70,12 @@ class Border():
 
     def update_values(self,**kwargs):
         Border.values.update(kwargs)
+
+    def change_vis(self,**kwargs):
+        for k,v in kwargs.items():
+            if k in Border.emblems:
+                Border.emblems[k].hide = v
+        
 
 
 #06/22/2023 - UI BAR CLASS

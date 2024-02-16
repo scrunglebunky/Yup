@@ -18,7 +18,7 @@ pygame.display.set_caption("YUP RevD")
 universal_sprite_group = pygame.sprite.Group() #This used to be a dictionary used everywhere but all groups have now been moved to their own respective states
 
 #06/01/20 23 - IMPORTING GAME-RELATED STUFF NEEDED AFTER ALL IS SET UP
-import options,score,ui_border,score
+import options,score,ui_border,score,anim
 import states as all_states
 
 #06/22/2023 - SETTING BORDER IMAGE / SPRITESHEET
@@ -31,7 +31,7 @@ tools.debug = True
 # However, there is no need to have several state classes open at once
 # Because of this, it's just gonna s up every state as an object instead of a class
 states = {}
-state = "title33eede3edx3x"
+state = "title"
 states["play"] = all_states.Play(window=window,campaign="main_story.order")
 states["options"] = options.State(window=window,border=border)
 states["pause"] = all_states.Pause(window=window,play_state=states["play"]) 
@@ -73,6 +73,8 @@ cur_state = states[state] ; cur_state.on_start()
 freeze = False
 
 # tools.demo = True #DELETE AFTERWARDS
+# img = anim.generate_enemy_log({"skins":{"A":"aqua_A","B":"aqua_B","C":"aqua_C","D":"aqua_D"}})
+
 
 while run:
 
@@ -114,12 +116,16 @@ while run:
     elif freeze:
         window.blit(states["play"].window,(0,0))
 
+    # window.blit(
+    #qimg,(100,100))
+
+
     #general update
     pygame.display.update()
     clock.tick()
 
 
- 
+    
 
 pygame.quit()
 exit()

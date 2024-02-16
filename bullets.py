@@ -14,7 +14,7 @@ class Bullet(pygame.sprite.Sprite):
     screen_rect = pygame.Rect(0,0,pygame.display.play_dimensions[0],pygame.display.play_dimensions[1])
 
     count = 0
-    def __init__(self,pos:tuple=(0,0),speed:int=15,is_default:bool = True,texture:str = None,**kwargs):
+    def __init__(self,pos:tuple=(0,0),speed:int=15,is_default:bool = True,texture:str = None, max_bullets:int = 3, **kwargs):
         
         pygame.sprite.Sprite.__init__(self)
         
@@ -26,18 +26,19 @@ class Bullet(pygame.sprite.Sprite):
         self.sprites = kwargs['sprites']
 
         
-
+        # print(Bullet.count)
 
 
         #5/27/2023 - Kill Counter
         # If there are too many of a single bullet on screen, the bullet stops spawning. That's all. 
         if is_default: # 06/24/2023 addendum -> the maximum bullet check only really counts for the default bullet, as each bullet has their own individual counts
-            # Bullet.count += 1
-            # if Bullet.count > Bullet.max:
-            #     self.kill_on_spawn = True
-            #     return
+            if Bullet.count >= max_bullets:
+                self.kill_on_spawn = True
+                return
+            else:
+                Bullet.count += 1
             # else:
-            #     #updating the amount of total shots as long as it wasn't immediately killed
+                #updating the amount of total shots as long as it wasn't immediately killed
             wl['shots'] += 1
         
         

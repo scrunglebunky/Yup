@@ -5,17 +5,12 @@
 - This is the fourth iteration of the game. In the third one, I got too obsessed with optimization and changing everything up.
 - This is my last attempt: a refresher that ensures that I make a simple, intuitive game that I do not overthink about.
 ## IMPORTANT NOTE
-- A LOT OF THE SOUNDS, SONGS, ETC ARE ALL PLACEHOLDERS. 
-- I DO NOT OWN THE RIGHTS TO ANY OF THEM, AND IF THESE POSE A POTENTIAL ISSUE LATER DOWN THE LINE, I WILL REMOVE THEM.
-- Sonic the hedgehog sounds: SEGA
-- Golden: kiwiquest
-- Twisted: Nayumre
-- Losing Results: Nintendo
-- 
+- I deleted the placeholder songs because I felt bad.
 
 
 # YUP DEVLOG
 ## PART TWO - ADDING CONTENT
+- 02/16/24: Added more things to the tutorial. I don't think I'm adding a plot to this game because the cutscenes are too boring to make. 
 - 02/15/24: Tutorial is (mostly) complete.
 - 02/07/24: When completing a level, the levelcomplete screen is VERY finished. 
 - 01/31/24: Enemies and bosses drop COINS instead of points now. There are issues relating to the screen being too cluttered, which will be worked on soon. 
@@ -89,7 +84,18 @@
 - 04/17/23: Conceptualization begins
 
 # TO DO / THOUGHT DUMP
-
+## WEEK ROADMAPS
+- Try to finish just ONE of these a day. No overworking
+- [ ] Implement a shop system to upgrade your items
+- [ ] Finish the angel boss
+- [ ] Final world BG and sprites
+- [ ] Final world boss
+- [ ] Flesh out the Events. Make them easier to use and make. 
+- [ ] Tutorial End Cutscene
+- [ ] World End Cutscene
+- [ ] Change UFO death animation
+- [ ] Fix CRT and Crustacean animations
+- [ ] Change Home BG, Crt BG, Crustacean BG, Ocean BG
 ## extra
 ### TUTORIAL
 - Entrance info: displays text asking if you want a tutorial. Shoot yes or no.

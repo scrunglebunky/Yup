@@ -11,7 +11,7 @@ class Emblem(pygame.sprite.Sprite):
     animation_killonloop:bool=False,
     pattern:str=None,
     force_surf:pygame.Surface=None,
-    resize=None,current_anim="idle", **kwargs
+    resize=None,current_anim="idle",hide:bool=False, **kwargs
     ):
         pygame.sprite.Sprite.__init__(self)
         
@@ -35,6 +35,7 @@ class Emblem(pygame.sprite.Sprite):
         self.rect = self.image.get_rect() #finally setting rect
         self.rect.topleft = self.coord
         self.dead = False
+        self.hide = hide
 
 
         if isCenter:

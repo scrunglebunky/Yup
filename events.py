@@ -4,6 +4,7 @@ from emblems import Emblem as Em
 class Event():
     sprites = pygame.sprite.Group()
     def __init__(self,kwargs:dict):
+        Event.sprites.empty()
         self.playing = True
         self.event = 0
         self.duration = 0 
@@ -18,7 +19,6 @@ class NewLevelEvent(Event):
     #HARD CODED - what happens when a new level occurs
     def __init__(self,**kwargs):
         Event.__init__(self,kwargs=kwargs)
-        Event.sprites.empty()
         self.level_em = Em( im=None,coord=(100,100),isCenter=True,force_surf = text.load_text(text=('LEVEL ' + str(kwargs['level']) + "!!!"),size=30,add_to_loaded=False) )
         self.window = kwargs['window']
         Event.sprites.add(self.level_em)
@@ -34,7 +34,4 @@ class NewLevelEvent(Event):
     
         Event.sprites.draw(self.window)
     
-        
-
-
 

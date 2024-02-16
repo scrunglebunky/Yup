@@ -224,7 +224,8 @@ class Player(pygame.sprite.Sprite):
             self.health -= amount
             self.invincibility_counter = 60
             audio.play_sound("ouch.mp3" if self.health > 0 else "scream.mp3")
-            if self.health <= 0: self.kill()
+            if self.health <= 0: 
+                self.kill()
 
 
 
@@ -241,10 +242,10 @@ class Player(pygame.sprite.Sprite):
     def reset_movement(self):
         self.movement_old = self.movement[:]
         self.movement = [
-            0, #frames in up jumping movement, 30 frame limit
-            0, #frames in down jumping movement, 30 frame limit
+            self.movement[0], #y velocity
             False, #moving left
             False, #moving right
+            self.movement[3], #jumping
             False, #crouching
             False, #focusing
         ]
@@ -256,7 +257,7 @@ class Player(pygame.sprite.Sprite):
 
 
     def shoot(self):
-        bullet=bullets.Bullet(self.pos,sprites=self.sprite_groups)
+        bullet=bullets.Bullet(self.pos,sprites=self.sprite_groups,max_bullets=self.bullet_max)
         if not bullet.kill_on_spawn: 
             self.sprite_groups[1].add(bullet)
             self.aimg.change_anim("shoot")

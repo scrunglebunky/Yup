@@ -10,6 +10,7 @@ from bullets import emptyBulletMax as eBM
 from bullets import BulletParticle as BP
 from math import sin
 from player import PlayerDummy as PD
+from levels import worlds 
 
 winrect = pygame.display.rect
 height,width = winrect.height,winrect.width
@@ -67,6 +68,8 @@ class Play(Template):
                  is_demo:bool=False, #a way to check if the player is simulated or not
                  ):
 
+        self.sprites = Play.sprites if not is_demo else Play.demo_sprites
+
         self.next_state = None #Needed to determine if a state is complete
         self.fullwindow = window
 
@@ -75,7 +78,7 @@ class Play(Template):
 
 
         #resetting the sprite groups
-        for group in (Play.sprites if not self.is_demo else Play.demo_sprites).values():
+        for group in self.sprites.values():
             group.empty()
 
         #06/23/2023 - SETTING THE GAMEPLAY WINDOW
@@ -93,8 +96,8 @@ class Play(Template):
             1, #gravity. 
             )
             
-        self.player = player.Player(bar=self.bar,sprite_groups=(self.sprites if not self.is_demo else self.demo_sprites),demo=self.is_demo)
-        (self.sprites if not self.is_demo else self.demo_sprites)[1].add(self.player)
+        self.player = player.Player(bar=self.bar,sprite_groups=self.sprites,demo=self.is_demo)
+        self.sprites[1].add(self.player)
 
         #06/01/2023 - Loading in level data
         self.campaign = campaign
@@ -119,7 +122,7 @@ class Play(Template):
             world_data = self.world_data,
             level=self.level,
             level_in_world=self.level_in_world, 
-            sprites=(self.sprites if not self.is_demo else self.demo_sprites),
+            sprites=self.sprites,
             window=self.window,
             is_demo = self.is_demo)
 
@@ -141,7 +144,7 @@ class Play(Template):
     def on_start(self,**kwargs):#__init__ v2, pretty much.
         #06/24/2023 - Playing the song
         audio.play_song(self.world_data["song"])
-        self.player.sprite_groups = (self.sprites if not self.is_demo else self.demo_sprites)
+        self.player.sprite_groups = self.sprites
         eBM()
 
 
@@ -167,13 +170,12 @@ class Play(Template):
 
 
         #updating all individual sprites, with the fourth group having special priority.
-        (self.sprites if not self.is_demo else self.demo_sprites)[0].update()
-        (self.sprites if not self.is_demo else self.demo_sprites)[1].update()
-        (self.sprites if not self.is_demo else self.demo_sprites)[2].update()
-        (self.sprites if not self.is_demo else self.demo_sprites)[0].draw(self.window)
-        (self.sprites if not self.is_demo else self.demo_sprites)[1].draw(self.window)
-        (self.sprites if not self.is_demo else self.demo_sprites)[2].draw(self.window)
-        # (self.sprites if not self.is_demo else self.demo_sprites)[4].draw(self.window)
+        self.sprites[0].update()
+        self.sprites[1].update()
+        self.sprites[2].update()
+        self.sprites[0].draw(self.window)
+        self.sprites[1].draw(self.window)
+        self.sprites[2].draw(self.window)
 
         #ending function early if event playing
         if self.event is not None and self.event.playing:
@@ -221,7 +223,7 @@ class Play(Template):
                 world_data = self.world_data,
                 level=self.level,
                 level_in_world=self.level_in_world, 
-                sprites=(self.sprites if not self.is_demo else self.demo_sprites),
+                sprites=self.sprites,
                 player=self.player,window=self.window,
                 is_demo = self.is_demo)
 
@@ -243,7 +245,7 @@ class Play(Template):
 
     def collision(self):
         #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide((self.sprites if not self.is_demo else self.demo_sprites)[1],(self.sprites if not self.is_demo else self.demo_sprites)[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist=pygame.sprite.groupcollide(self.sprites[1],self.sprites[2],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             for item in value:
                 key.on_collide(2,item)
@@ -269,28 +271,6 @@ class Play(Template):
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "pause"
             if tools.debug: 
-                # if event.key == pygame.K_b:
-                #     # (self.sprites if not self.is_demo else self.demo_sprites)[0].add(
-                #     #     Em(
-                #     #         im=None,
-                #     #         coord=(random.randint(0,pygame.display.dimensions[0]),random.randint(0,pygame.display.dimensions[1])),
-                #     #         isCenter=True,animated=True,animation_resize=(random.randint(10,500),random.randint(10,500)),animation_killonloop=True
-                #     # ))
-                #     ...
-                # if event.key == pygame.K_4:
-                #     # self.debug[0].pop(len(self.debug[0])-1)
-                #     # self.debug[1].pop(len(self.debug[1])-1)
-                #     ...
-                # if event.key == pygame.K_5:
-                #     # print("@@@@@@@@@@@")
-                #     # for item in self.formation.spawned_list:
-                #     #     print(item.info['state'])
-                #     # print("@@@@@@@@@@@")\
-                #     ...
-                # if event.key == pygame.K_6:
-                #     # self.formation.empty()
-                #     # self.formation.finished = True
-                #     ...
                 ...
         if event.type == pygame.MOUSEBUTTONDOWN and tools.debug:
             pos = tuple(pygame.mouse.get_pos())
@@ -309,6 +289,7 @@ class Title(Template):
     emblems = {}
     emblems_perm = {}
     sprites=pygame.sprite.Group()
+    em_continue = Em(im='continue')
 
     def __init__(self,window:pygame.Surface,border): #Remember init is run only once, ever.
         self.window=window
@@ -316,7 +297,7 @@ class Title(Template):
         self.next_state = None
         
 
-        self.demo_state = Play(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True) #this is different from the tools.demo value, as this is just to simulate a player
+        self.demo_state = Play(window = self.window, world = 1, level = random.randint(0,50), is_demo = True) #this is different from the tools.demo value, as this is just to simulate a player
         self.hiscoresheet = score.generate_scoreboard()
 
         #basic events that will occur during the title
@@ -326,40 +307,48 @@ class Title(Template):
         ]
         self.event = 0
         self.timer = 0
-        self.image_placements = {
-            "welcome":(pygame.display.rect.width*0.01,pygame.display.rect.height*0.01),
-            "else":(pygame.display.rect.width*0.01 + img["demo.png"].get_width() + pygame.display.rect.width*0.01 ,
-                    pygame.display.rect.height*0.01),
-        }
+        self.resize = [(winrect.width * 0.4) , 800 * ((winrect.width*0.4)/600)]
+        if self.resize[0] > 600:
+            self.resize = [600,800]
+        self.image_placements = {}
+            # "welcome":(pygame.display.rect.width*0.01,pygame.display.rect.height*0.01),
+        self.image_placements["demo"] = (pygame.display.rect.width*0.01,pygame.display.rect.height*0.1)
+        self.image_placements["score"] = (pygame.display.rect.width*0.99 - self.resize[0] ,pygame.display.rect.height*0.1)
+        Title.em_continue.change_pos((winrect.centerx,winrect.centery),isCenter=True)
+
+        self.hiscoresheet = pygame.transform.scale(self.hiscoresheet,self.resize)
+        
     
     
     def on_start(self):
         self.event = self.id = 0
-        self.demo_state.__init__(window = self.window, world = random.randint(0,6), level = random.randint(0,50), is_demo = True)
+        self.demo_state.__init__(window = self.window, world = 1, level = random.randint(0,50), is_demo = True)
+        self.border.emblems['logo'].add_tween_pos(cur_pos = self.border.emblems['logo'].rect.center , target_pos = (winrect.centerx,winrect.height*0.25),speed=5,started=True,isCenter=True)
+        self.border.change_vis(lives=True,score=True,debug=True,weapon=True)
 
-    def on_end(self):...
+    def on_end(self):
+        self.border.emblems['logo'].add_tween_pos(cur_pos = self.border.emblems['logo'].rect.topleft , target_pos = self.border.emblems['logo'].orig_coord  ,speed=5,started=True,isCenter=False)
+        self.border.change_vis(lives=False,score=False,debug=False,weapon=False)
 
 
     def update(self):
         
         #drawing
-        self.window.blit(img['demo.png'],self.image_placements['welcome'])
+        # self.window.blit(img['demo.png'],self.image_placements['welcome'])
         
         #demo
-        if self.events[self.event] == 'demo':
-            #updating and drawing
-            self.demo_state.update(draw=False)
-            self.window.blit(pygame.transform.scale(self.demo_state.window,(450,600)),self.image_placements['else'])
-            #demo player controls
-            event = pygame.event.Event(random.choice([pygame.KEYDOWN,pygame.KEYUP]), key = random.choice([pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_z,pygame.K_x])) #create the event        
-            #stopping constant movement
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
-                self.demo_state.player.move(dir=event.key == pygame.K_RIGHT,release=True)
-            else: self.demo_state.player.controls(event)
-    
-        #high score
-        elif self.events[self.event] == 'hiscore':
-            self.window.blit(self.hiscoresheet,self.image_placements['else'])
+        #updating and drawing
+        Title.em_continue.update()
+        self.window.blit(Title.em_continue.image,Title.em_continue.rect)
+        self.demo_state.update(draw=False)
+        self.window.blit(pygame.transform.scale(self.demo_state.window,self.resize),self.image_placements['demo'])
+        self.window.blit(self.hiscoresheet,self.image_placements['score'])
+         ###### demo player controls
+        # event = pygame.event.Event(random.choice([pygame.KEYDOWN,pygame.KEYUP]), key = random.choice([pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT,pygame.K_z,pygame.K_x])) #create the event        
+        # #stopping constant movement
+        # if event.type == pygame.KEYDOWN and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
+        #     self.demo_state.player.move(dir=event.key == pygame.K_RIGHT,release=True)
+        # else: self.demo_state.player.controls(event)
 
         #timer updating
         self.timer += 1
@@ -375,7 +364,7 @@ class Title(Template):
 
     def event_handler(self,event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
+            if event.key == pygame.K_z:
                 self.next_state = "tutorial"
             if event.key == pygame.K_ESCAPE:
                 self.next_state = "quit"
@@ -857,7 +846,7 @@ class Advance(Template):
         if done:
             self.counter1 = 0
             self.phase = 3
-            self.sprites.add(self.em_nextlevel,self.em_movingto,self.em_nextleveltext)
+            self.sprites.add(self.em_nextlevel,self.em_movingto,self.em_nextleveltext,self.em_enemylog)
 
 
 
@@ -953,6 +942,8 @@ class Advance(Template):
         self.em_nextlevel = Em(im=self.play_state.world_data['bg'],resize=(225,300),pattern="sine",coord=(winrect.width*0.75,winrect.centery),isCenter=True)
         self.em_movingto = Em(im="a_movingto.png",pattern="jagged",coord=(self.em_nextlevel.rect.centerx,self.em_nextlevel.rect.top-25),isCenter=True)
         self.em_nextleveltext = Em(force_surf = text.load_text(str(self.play_state.world_data['world_name']),50),pattern="jagged",coord=(self.em_nextlevel.rect.centerx,self.em_nextlevel.rect.bottom+25),isCenter=True)
+        self.em_enemylog = Em(force_surf = anim.generate_enemy_log(world_data=self.play_state.world_data), pattern = 'sine', 
+                coord = (self.em_nextleveltext.rect.centerx,self.em_nextleveltext.rect.bottom), isCenter=True)
         # self.sprites.add(self.bg)
         
         #state 1 values -> emblems
@@ -1138,29 +1129,33 @@ class Boss(Template):
 
 
 class Tutorial(Template):
-    sprites = { #sprites are now state-specific hahaha
+    demosprites = { #sprites are now state-specific hahaha
             0:pygame.sprite.Group(), #ALL SPRITES
             1:pygame.sprite.Group(), #PLAYER SPRITE, INCLUDING BULLETS ; this is because the player interacts with enemies the same way as bullets
             2:pygame.sprite.Group(), #ENEMY SPRITES
             # 4:pygame.sprite.Group(), #UI SPRITES
         }
+    sprites = pygame.sprite.Group()
     
     #tutorial player object
-    bar=("h",winrect.height*0.7,(winrect.centerx*0.5,winrect.right*0.95),1)
-    player = PD(bar=bar,sprite_groups=sprites)
+    subwindow = pygame.Surface((600,800),pygame.SRCALPHA).convert_alpha()
+    subwindowrect = subwindow.get_rect()
+    bar=("h",subwindowrect.height*0.8,(10,subwindowrect.width-10),1)
+    player = PD(bar=bar,sprite_groups=demosprites)
     #emblmes
     t_title = Em("tutorial",current_anim="tutorial")
     t_yes = Em("tutorial",current_anim="yes")
     t_no = Em("tutorial",current_anim="no")
     t_great = Em("g_great.png",coord=(winrect.width*0.8,winrect.height*0.5),isCenter=True,pattern="sine")
     t_continue = Em("continue",current_anim="idle",coord=(0,0))
-    t_sandwich = enemies.BasicEventItem(im="home_D",coord=(winrect.width*.75,bar[1]),isCenter=True)
+    t_sandwich = enemies.BasicEventItem(im="home_D",coord=(subwindowrect.width*.75,bar[1]),isCenter=True)
+    t_enemylog = Em(None,force_surf = anim.generate_enemy_log(world_data = levels.fetch_level_info(("main_story.order",random.randint(0,10)))))
     #keeping a consistent image for the continue button
     t_continue.orig_coord = (winrect.width-t_continue.rect.width,winrect.height-t_continue.rect.height)
 
     #text emblem -- displays specific text at a given time -- no emblem for text yet so this one's modified
     cur_text=Em()
-    text = text.AutoNum("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z/X TO CONFIRM.",host=cur_text,make_host_rect=True)
+    text = text.AutoNum("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z TO CONFIRM.",host=cur_text,make_host_rect=True)
     cur_text.aimg = text
     
     #tutorial graphic information
@@ -1203,7 +1198,7 @@ class Tutorial(Template):
     def start(self,start=False):
         if start:
             #creating emblems for this purpose
-            Tutorial.sprites[0].add(Tutorial.t_title,Tutorial.t_yes,Tutorial.t_no,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.sprites.add(Tutorial.t_title,Tutorial.t_yes,Tutorial.t_no,Tutorial.cur_text,Tutorial.t_continue)
             Tutorial.t_title.add_tween_pos((winrect.centerx,-100),(winrect.centerx,50),speed=2.0,started=True,isCenter=True)
             Tutorial.t_no.add_tween_pos((-100,winrect.centery/2),(winrect.width*0.4,winrect.centery/2),speed=2.0,started=True,isCenter=True)
             Tutorial.t_yes.add_tween_pos((winrect.width+100,winrect.centery/2),(winrect.width*0.6,winrect.centery/2),speed=2.0,started=True,isCenter=True)
@@ -1232,7 +1227,7 @@ class Tutorial(Template):
             self.subphase=0
             #deleting old graphics, adding new ones, changing text graphic
             Tutorial.t_yes.kill();Tutorial.t_no.kill();Tutorial.t_continue.kill()
-            Tutorial.sprites[0].add(Tutorial.t_tutorial)
+            Tutorial.sprites.add(Tutorial.t_tutorial)
             Tutorial.cur_text.aimg.update_text(Tutorial.tutorial_text[self.subphase])
             #changing the background
             self.bg.aimg.__init__(host=self.bg,name="tutorial_bg.png",resize=winrect.size)
@@ -1241,7 +1236,7 @@ class Tutorial(Template):
             Tutorial.t_tutorial.add_tween_pos((-100,winrect.centery/2),(winrect.centerx/2,winrect.centery/2),speed=5,started=True,isCenter=True)
             Tutorial.t_tutorial.pattern = "sine"
             #adding the player
-            Tutorial.sprites[1].add(Tutorial.player)
+            Tutorial.demosprites[1].add(Tutorial.player)
             Tutorial.player.reset()
             return
 
@@ -1270,12 +1265,12 @@ class Tutorial(Template):
             Tutorial.t_great.kill()
         elif self.checker1 and self.intermission == 0:
             self.intermission += 1
-            self.sprites[0].add(Tutorial.t_great)
-            self.kaboom(group=Tutorial.sprites[0],coord=Tutorial.t_great.rect.center,animation_resize=(225,120))
+            Tutorial.sprites.add(Tutorial.t_great)
+            self.kaboom(group=Tutorial.sprites,coord=Tutorial.t_great.rect.center,animation_resize=(225,120))
         #intermission code
         elif self.checker1:
             self.intermission += 1
-            Tutorial.sprites[0].add(BP(pos=(Tutorial.t_great.rect.centerx,Tutorial.t_great.rect.centery+50),texture="greenblock"))
+            Tutorial.sprites.add(BP(pos=(Tutorial.t_great.rect.centerx,Tutorial.t_great.rect.centery+50),texture="greenblock"))
             self.bg.speed=[5*sin(self.counter1/5),10*sin(self.counter1/2)]
 
 
@@ -1285,12 +1280,12 @@ class Tutorial(Template):
 
         if start:
             self.counter1 = 0 
-            self.sprites[0].empty()
-            self.sprites[0].add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.sprites.empty()
+            Tutorial.sprites.add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
             Tutorial.t_tutorial.aimg.change_anim('premise')
             Tutorial.cur_text.add_tween_pos((0,winrect.height+100),(0,winrect.height*0.8),speed=5,started=True)
             Tutorial.cur_text.aimg.update_text("ITEMS WITH A RED SHADOW WILL DAMAGE YOU.\nITEMS WITH A GREEN SHADOW ARE SAFE TO TOUCH.")
-            Tutorial.player.rect.centerx = winrect.centerx
+            Tutorial.player.pos[0] = Tutorial.subwindowrect.centerx
             Tutorial.player.reset_movement()
             Tutorial.player.autoshoot=False
             Tutorial.t_continue.add_tween_pos((Tutorial.t_continue.orig_coord[0],winrect.width+100),Tutorial.t_continue.orig_coord,speed=2.0,started=True)
@@ -1305,7 +1300,7 @@ class Tutorial(Template):
 
         #Adding example elements
         if self.counter1 % 80 == 0:
-            Tutorial.sprites[2].add(enemies.HurtHeal(self.player,type=self.obj_type))
+            Tutorial.demosprites[2].add(enemies.HurtHeal(self.player,type=self.obj_type))
             self.obj_type = not self.obj_type
 
 
@@ -1314,8 +1309,8 @@ class Tutorial(Template):
             self.counter1 = 0 
             self.subphase = 0 
             self.checker1 = False
-            self.sprites[0].empty()
-            self.sprites[0].add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
+            Tutorial.sprites.empty()
+            Tutorial.sprites.add(Tutorial.t_tutorial,Tutorial.t_title,Tutorial.cur_text,Tutorial.t_continue)
             Tutorial.t_tutorial.aimg.change_anim('enemies')
             Tutorial.cur_text.aimg.update_text(Tutorial.enemies_text[self.subphase])
             
@@ -1325,17 +1320,33 @@ class Tutorial(Template):
             Tutorial.player.movement[0],Tutorial.player.movement[3] = Tutorial.player.movement_old[0],Tutorial.player.movement_old[3]
             Tutorial.player.autoshoot=False
 
+
+        self.counter1 += 1
         self.bg.update()
         self.bg.draw(self.window)
         self.bg.speed=[1,0.5]
         self.update_sprites()
+
+        if self.subphase == 3:
+            if self.counter1 % 60 == 0:
+                Tutorial.t_enemylog.aimg.image = anim.generate_enemy_log(world_data = levels.fetch_level_info(("main_story.order",random.randint(0,10))))
+
+
 
         if self.checker1:
             self.checker1 = False
             self.subphase += 1
             if self.subphase >= len(Tutorial.enemies_text):
                 self.update_phase()
+                Tutorial.t_enemylog.kill()
             else:
+                if self.subphase == 1:
+                    Tutorial.sprites.add(Tutorial.t_enemylog)
+                    Tutorial.t_enemylog.aimg.image = anim.all_loaded_images['enemylog_hint.png']
+                    Tutorial.t_enemylog.add_tween_pos((winrect.centerx,-100),winrect.center,speed=5,started=True,isCenter=True)
+                if self.subphase == 3:
+                    Tutorial.t_enemylog.aimg.image = anim.generate_enemy_log(world_data = levels.fetch_level_info(("main_story.order",random.randint(0,10))))
+
                 Tutorial.cur_text.aimg.update_text(Tutorial.enemies_text[self.subphase])
 
 
@@ -1344,7 +1355,7 @@ class Tutorial(Template):
         if start:
             #initializing values yet again
             self.counter1 = self.subphase = 0 
-            self.sprites[2].add(Tutorial.t_sandwich)
+            Tutorial.demosprites[2].add(Tutorial.t_sandwich)
             Tutorial.t_tutorial.aimg.change_anim('enemies')
             Tutorial.cur_text.aimg.update_text(Tutorial.end_text[self.subphase])
             Tutorial.cur_text.pattern='sine'
@@ -1354,6 +1365,7 @@ class Tutorial(Template):
             Tutorial.t_tutorial.add_tween_pos(Tutorial.t_tutorial.rect.center,(0,-999),isCenter=True,speed=5.0,started=True)
             Tutorial.player.rect.centerx = winrect.centerx
             Tutorial.player.autoshoot=False
+
         else:
             self.counter1 += 1
             
@@ -1387,13 +1399,13 @@ class Tutorial(Template):
                     self.counter1 = 0 
                     Tutorial.t_sandwich.kill()
                     Tutorial.player.kill()
-                    self.kaboom(self.sprites[0],Tutorial.player.rect.center,Tutorial.player.rect.size)
+                    self.kaboom(Tutorial.demosprites[0],Tutorial.player.rect.center,Tutorial.player.rect.size)
 
                 elif self.subphase == 2:
                     self.bg.aimg.__init__(host=self.bg,name="NONE")
                     self.counter1 = 0 
                 elif self.subphase == 3:
-                    self.kaboom(self.sprites[0],winrect.center,(winrect.size[0]*2,winrect.size[1]*2))
+                    self.kaboom(Tutorial.sprites,winrect.center,(winrect.size[0]*2,winrect.size[1]*2))
                     self.counter1 = 0
 
 
@@ -1421,9 +1433,14 @@ class Tutorial(Template):
 
     def update_sprites(self):
         #sprites
-        for v in Tutorial.sprites.values():
+        Tutorial.subwindow.fill(pygame.Color(0,0,0,0))
+        Tutorial.subwindow.fill(pygame.Color(128,128,255,128))
+        for v in Tutorial.demosprites.values():
             v.update()
-            v.draw(self.window)
+            v.draw(Tutorial.subwindow)
+        Tutorial.sprites.update()
+        Tutorial.sprites.draw(self.window)
+        self.window.blit(pygame.transform.scale(Tutorial.subwindow,pygame.display.play_dimensions_resize),(winrect.width-pygame.display.play_dimensions_resize[0],0))
 
 
 
@@ -1435,7 +1452,7 @@ class Tutorial(Template):
         self.bg.pos = [pygame.display.dimensions[0]/-2,pygame.display.dimensions[0]/-2]
         
         #emblem info
-        Tutorial.cur_text.aimg.update_text("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z/X TO CONFIRM.")
+        Tutorial.cur_text.aimg.update_text("DO YOU NEED A TUTORIAL?\nARROW KEYS TO SELECT, Z TO CONFIRM.")
 
         #other info
         self.next_state = None
@@ -1495,7 +1512,7 @@ class Tutorial(Template):
 
     def collision(self):
         #Detecting collision between players and enemies 
-        collidelist=pygame.sprite.groupcollide(Tutorial.sprites[1],Tutorial.sprites[2],False,False,collided=pygame.sprite.collide_mask)
+        collidelist=pygame.sprite.groupcollide(Tutorial.demosprites[1],Tutorial.demosprites[2],False,False,collided=pygame.sprite.collide_mask)
         for key,value in collidelist.items():
             for item in value:
                 key.on_collide(2,item)
