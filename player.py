@@ -55,8 +55,8 @@ class Player(pygame.sprite.Sprite):
         self.autoshoottimer = 0 
 
         #UPGRADE VALUES -- UNFINISHED
-        self.bullet_max = 3 #how many bullets can be on screen at one given time
-        self.bullet_time = 12 #shoots once every x frames
+        self.bullet_max = 4 #how many bullets can be on screen at one given time
+        self.bullet_time = 6 #shoots once every x frames
         self.current_bullet = "def" #the current bullet being shot at the moment
         self.bullet_lock = False #stop shooting 
 

@@ -1434,7 +1434,7 @@ class Tutorial(Template):
     def update_sprites(self):
         #sprites
         Tutorial.subwindow.fill(pygame.Color(0,0,0,0))
-        Tutorial.subwindow.fill(pygame.Color(128,128,255,128))
+        # Tutorial.subwindow.fill(pygame.Color(128,128,255,128))
         for v in Tutorial.demosprites.values():
             v.update()
             v.draw(Tutorial.subwindow)

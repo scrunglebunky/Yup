@@ -1,3 +1,24 @@
+# SCRAPPED!
+- Yeah it's a bit sad but after working on this game for so long I think it's time to let go.
+- Yup, as a concept, started around 5 years ago, as an inside joke in middle school.
+- The game started development in python around 3-4 years ago.
+- After all this time, I sit here looking at my creation and honestly think I'm just tired of it.
+## IN HONOR OF THE PREVIOUS REVISIONS
+- Rev A: A scratch game, where the same enemy would come down at you over and over until eventually one boss came. That was the end of it. 
+- Rev B: The first python revision. Had an assortment of different enemies come at set times, like a bad roguelike.
+- Rev C: The second python revision. One playable world with no boss, and a small variety of enemies that were the same per world.
+- Rev D: This one! Read everything about it here. There was so much done. So many new sprites, new enemies, worlds, bosses, and stories.
+## THE FUTURE?
+- I'll make more games. Hell, I may figure out a way to make this one again.
+- This game is just a good example to lead from as to how to make an overengineered mess.
+- If this game comes back, it will start with a simple basis unlike what this was.
+- This is my last pygame project. Everything else posted to my github came before it, even though it was just posted recently.
+- Thank you, anyone who watched. 
+
+
+
+
+
 # WELCOME TO YUP
 ## WHAT IS YUP?
 - Yup is a small shoot-em-up game that takes heavy referencing off of games like Galaga, Astro Warrior, and some other classics.
