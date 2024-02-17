@@ -2,8 +2,9 @@
     "world_name":"HOME PLANET",
     "ui_type":"default",
     "bg":"home.bmp",
+    "bg_speed":[2,2],
 
-    "levels":3,
+
 
     "skins":{
         "A":"home_A",
@@ -33,8 +34,7 @@
             "AACCCCCCCCCCCAA",
             "AAAAAAAAAAAAAAA",
             "BBBBBBBBBBBBBBB",
-            "AAAAABBBBBAAAAA",
-            "DDDDDDDDDDDDDDD"
+            "AAAAABBBBBAAAAA"
         ]
     ],"manual_order":[0,1,2,3],
 
